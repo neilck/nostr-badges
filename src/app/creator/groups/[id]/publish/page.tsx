@@ -10,11 +10,10 @@ import {
   loadBadgeEvent,
   toNostrEvent,
 } from "@/data/eventLib";
-import { Badge, getEmptyBadge } from "@/data/badgeLib";
-
+import { Group, getEmptyGroup } from "@/data/groupLib";
 import { useAccountContext } from "@/context/AccountContext";
 import { useNostrContext } from "@/context/NostrContext";
-import { useBadgeContext } from "@/context/BadgeContext";
+import { useGroupContext } from "@/context/GroupContext";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -23,15 +22,15 @@ import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { BadgeStatus } from "@/app/components/BadgeStatus";
 import { BadgeTestLinks } from "@/app/components/BadgeTestLinks";
 
-export default function PublishPage({ params }: { params: { id: string } }) {
+export default function PublishGroup({ params }: { params: { id: string } }) {
   const { id } = params;
-  const badgeContext = useBadgeContext();
+  const groupContext = useGroupContext();
   const accountContext = useAccountContext();
   const nostrContext = useNostrContext();
 
   const [relays, setRelays] = useState<string[]>([]);
   const [filter, setFilter] = useState<NDKFilter | undefined>(undefined);
-  const [badge, setBadge] = useState<Badge>(getEmptyBadge());
+  const [group, setGroup] = useState<Group>(getEmptyGroup());
   const [event, setEvent] = useState<Event>(getEmptyEvent());
   const [nostrEvent, setNostrEvent] = useState<NostrEvent>(
     getEmptyNostrEvent()
@@ -51,11 +50,11 @@ export default function PublishPage({ params }: { params: { id: string } }) {
   }, [accountContext.state.account]);
 
   const load = async () => {
-    const badge = await badgeContext.loadBadge(id);
-    if (badge) {
-      setBadge(badge);
+    const group = await groupContext.loadGroup(id);
+    if (group) {
+      setGroup(group);
 
-      const event = await loadBadgeEvent(badge.event);
+      const event = await loadBadgeEvent(group.event);
       if (event) {
         setEvent(event);
 
@@ -65,7 +64,7 @@ export default function PublishPage({ params }: { params: { id: string } }) {
         const filter: NDKFilter = {
           authors: [event.pubkey],
           kinds: [30009],
-          "#d": [badge.identifier],
+          "#d": [id],
         };
 
         setFilter(filter);
@@ -76,17 +75,17 @@ export default function PublishPage({ params }: { params: { id: string } }) {
   const onSaveClick = async () => {
     const relays = accountContext.getRelays();
     nostrContext.publish(nostrEvent, relays);
-    return { success: true, mesg: "Badge sent to relays" };
+    return { success: true, mesg: "Group's badge sent to relays" };
   };
 
   return (
     <EditCardFrame
-      instructions="Re-publish badge to your configured relays.."
+      instructions="Re-publish group badge to your configured relays.."
       docLink="hosted-badges/badge-publish"
     >
       <Stack direction="column" pl={2} pr={2} maxWidth={600} spacing={2}>
         <Box>
-          <h3>Badge {badge.name}</h3>
+          <h3>Group {group.name}</h3>
         </Box>
 
         <Typography textAlign="left" fontWeight={600} variant="body1">

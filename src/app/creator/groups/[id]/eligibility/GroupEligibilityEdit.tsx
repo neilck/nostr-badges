@@ -16,6 +16,8 @@ import { BadgeRowSmallEdit } from "@/app/components/BadgeRowSmallEdit";
 import { loadBadge } from "@/data/badgeLib";
 import { RequiredBadge } from "@/context/RequiredBadge";
 import { Group } from "@/data/groupLib";
+import { CardHeading } from "@/app/components/items/CardHeadings";
+import { TextField } from "@mui/material";
 
 export const GroupEligibilityEdit = (props: { groupId: string }) => {
   const accountContext = useAccountContext();
@@ -142,6 +144,18 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
     setGroup(updated);
   };
 
+  const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!group) return;
+
+    const updated = { ...group };
+    switch (event.currentTarget.id) {
+      case "redirect":
+        updated.redirect = event.currentTarget.value;
+        break;
+    }
+    setGroup(updated);
+  };
+
   return (
     <Stack
       direction="column"
@@ -184,6 +198,27 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
             <AddOutline name="+ badge" onClick={addOnClickHandler} />
           </Box>
         </Stack>
+      )}
+      {group && (
+        <Box id="redirectURL">
+          <CardHeading>Redirect URL</CardHeading>
+          <Box sx={{ width: "100%" }}>
+            <Typography textAlign="left" variant="body1">
+              Optional redirect URL on approval
+            </Typography>
+            <Box pt={1.5}>
+              <TextField
+                id="redirect"
+                label="Redirect URL"
+                helperText="include [pubkey] to insert pubkey into URL"
+                value={group?.redirect}
+                onChange={onChangeHandler}
+                size="small"
+                fullWidth
+              />
+            </Box>
+          </Box>
+        </Box>
       )}
       <Box
         sx={{
