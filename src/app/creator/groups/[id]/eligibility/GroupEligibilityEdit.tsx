@@ -13,7 +13,7 @@ import { AddOutline } from "@/app/components/items/AddOutline";
 import { BadgeSelectDialog } from "@/app/components/BadgeSelectDialog";
 import { BadgeRowSmallEdit } from "@/app/components/BadgeRowSmallEdit";
 
-import { loadBadge, BadgeParamsList } from "@/data/badgeLib";
+import { loadBadge } from "@/data/badgeLib";
 import { RequiredBadge } from "@/context/RequiredBadge";
 import { Group } from "@/data/groupLib";
 
@@ -59,8 +59,7 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
   const updateRequiredBadges = async (group: Group) => {
     const badges: RequiredBadge[] = [];
     for (let i = 0; i < group.requiredBadges.length; i++) {
-      const badgeId = group.requiredBadges[i].badgeId;
-      const configParams = group.requiredBadges[i].configParams;
+      const badgeId = group.requiredBadges[i];
       let badge = null;
       if (requiredBadges) {
         for (let x = 0; x < requiredBadges.length; x++) {
@@ -75,7 +74,6 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
       badges.push({
         badgeId: badgeId,
         badge: badge,
-        configParams: configParams,
       });
     }
     setRequiredBadges(badges);
@@ -118,24 +116,24 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
 
     // skip if exists
     for (let i = 0; i < group.requiredBadges.length; i++) {
-      if (group.requiredBadges[i].badgeId == badgeId) {
+      if (group.requiredBadges[i] == badgeId) {
         return;
       }
     }
 
     const updated = { ...group };
-    updated.requiredBadges.push({ badgeId: badgeId, configParams: [] });
+    updated.requiredBadges.push(badgeId);
     setGroup(updated);
   };
 
   const deleteClickEventHandler = (badgeId: string) => {
     if (!group || badgeId == "") return;
 
-    const newList: BadgeParamsList = [];
+    const newList = [];
 
     // skip if match found
     for (let i = 0; i < group.requiredBadges.length; i++) {
-      if (group.requiredBadges[i].badgeId != badgeId) {
+      if (group.requiredBadges[i] != badgeId) {
         newList.push(group.requiredBadges[i]);
       }
     }

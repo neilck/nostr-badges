@@ -8,7 +8,6 @@ import {
   deleteItem,
   addItem,
 } from "./firestoreLib";
-import { BadgeParamsList } from "./badgeLib";
 
 const origin = process.env.NEXT_PUBLIC_APP_ORIGIN;
 
@@ -19,7 +18,7 @@ export type Group = {
   description: string;
   badges: string[];
   event: string;
-  requiredBadges: BadgeParamsList;
+  requiredBadges: string[];
 };
 
 const emptyGroup: Group = {

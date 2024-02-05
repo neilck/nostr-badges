@@ -17,10 +17,6 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore/lite";
 // name of parameter, value
 export type DataField = { name: string; label?: string; description?: string };
 
-// used by Group
-export type BadgeParams = { badgeId: string; configParams: ConfigParams };
-export type BadgeParamsList = BadgeParams[];
-
 export type Badge = {
   uid: string;
   created_at: number;
