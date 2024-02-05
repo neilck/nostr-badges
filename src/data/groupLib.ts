@@ -18,7 +18,6 @@ export type Group = {
   description: string;
   badges: string[];
   event: string;
-  requiredBadges: string[];
 };
 
 const emptyGroup: Group = {
@@ -28,7 +27,6 @@ const emptyGroup: Group = {
   description: "",
   event: "",
   badges: [],
-  requiredBadges: [],
 };
 
 export const getEmptyGroup = (): Group => {

@@ -131,8 +131,8 @@ function GroupProvider(props: GroupProviderProps) {
 
   const loadRequiredBadges = async (group: Group) => {
     const badges: RequiredBadge[] = [];
-    for (let i = 0; i < group.requiredBadges.length; i++) {
-      const badgeId = group.requiredBadges[i];
+    for (let i = 0; i < group.badges.length; i++) {
+      const badgeId = group.badges[i];
       const badge = await loadBadge(badgeId, "badges");
       badges.push({
         badgeId: badgeId,

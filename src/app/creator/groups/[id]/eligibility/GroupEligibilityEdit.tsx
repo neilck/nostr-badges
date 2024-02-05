@@ -58,8 +58,8 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
   // update context in-memory required badges from offer with loaded badges
   const updateRequiredBadges = async (group: Group) => {
     const badges: RequiredBadge[] = [];
-    for (let i = 0; i < group.requiredBadges.length; i++) {
-      const badgeId = group.requiredBadges[i];
+    for (let i = 0; i < group.badges.length; i++) {
+      const badgeId = group.badges[i];
       let badge = null;
       if (requiredBadges) {
         for (let x = 0; x < requiredBadges.length; x++) {
@@ -115,14 +115,14 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
     if (!group || badgeId == "") return;
 
     // skip if exists
-    for (let i = 0; i < group.requiredBadges.length; i++) {
-      if (group.requiredBadges[i] == badgeId) {
+    for (let i = 0; i < group.badges.length; i++) {
+      if (group.badges[i] == badgeId) {
         return;
       }
     }
 
     const updated = { ...group };
-    updated.requiredBadges.push(badgeId);
+    updated.badges.push(badgeId);
     setGroup(updated);
   };
 
@@ -132,9 +132,9 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
     const newList = [];
 
     // skip if match found
-    for (let i = 0; i < group.requiredBadges.length; i++) {
-      if (group.requiredBadges[i] != badgeId) {
-        newList.push(group.requiredBadges[i]);
+    for (let i = 0; i < group.badges.length; i++) {
+      if (group.badges[i] != badgeId) {
+        newList.push(group.badges[i]);
       }
     }
 
