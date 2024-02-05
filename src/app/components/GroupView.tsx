@@ -8,30 +8,22 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
 import { Group } from "@/data/groupLib";
-import { GroupOffer, loadGroupOffers } from "@/data/groupOfferLib";
 import { Badge, loadBadge } from "@/data/badgeLib";
 
 import { CardHeading } from "./items/CardHeadings";
 import { ItemRowSmall } from "./ItemRowSmall";
-import { OffersList } from "./OffersList";
 import { BadgesList } from "./BadgesList";
 
 export const GroupView = (props: { groupId: string; group: Group }) => {
   const { group } = props;
   const groupId = props.groupId;
   const uid = group.uid;
-  const [offers, setOffers] = useState<Record<string, GroupOffer>>({});
   const [badges, setBadges] = useState<Record<string, Badge>>({});
   const { image, name, description } = group;
 
   const router = useRouter();
 
   useEffect(() => {
-    const loadOffers = async (uid: string, groupId: string, limit?: number) => {
-      const offers = await loadGroupOffers(uid, groupId, limit);
-      setOffers(offers);
-    };
-
     const loadBadges = async (uid: string) => {
       if (!uid) return;
 
@@ -46,13 +38,8 @@ export const GroupView = (props: { groupId: string; group: Group }) => {
       setBadges(requiredBadges);
     };
 
-    loadOffers(uid, groupId, 3);
     loadBadges(uid);
   }, [uid, groupId, group]);
-
-  const onOfferClicked = (docId: string) => {
-    router.push(`/creator/groups/${groupId}/offers?id=${docId}`);
-  };
 
   return (
     <Box
@@ -93,8 +80,6 @@ export const GroupView = (props: { groupId: string; group: Group }) => {
       >
         <CardHeading sx={{ pb: 0.5 }}>Required badges to join</CardHeading>
         <BadgesList records={badges} />
-        <CardHeading sx={{ pt: 2 }}>Latest exclusives</CardHeading>
-        <OffersList offers={offers} onClick={onOfferClicked} />
       </Stack>
     </Box>
   );

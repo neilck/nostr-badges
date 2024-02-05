@@ -81,6 +81,7 @@ export const deleteBadgeEvent = async (uid: string, badgeId: string) => {
   return deleteEvent(uid, badgeId, "badges");
 };
 
+/*
 export const createOfferEvent = async (offerId: string) => {
   const functions = getFunctions();
   const createOfferEvent = httpsCallable(functions, "createOfferEvent");
@@ -95,6 +96,7 @@ export const createOfferEvent = async (offerId: string) => {
 export const deleteOfferEvent = async (uid: string, offerId: string) => {
   return deleteEvent(uid, offerId, "offers");
 };
+*/
 
 export const createGroupEvent = async (groupId: string) => {
   const functions = getFunctions();

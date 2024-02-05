@@ -110,7 +110,7 @@ function GroupProvider(props: GroupProviderProps) {
         await deleteGroupEvent(group.uid, groupId);
         const event = await createGroupEvent(groupId);
         if (event) {
-          // reload offer from db to pickup .event field
+          // reload group from db to pickup .event field
           loadGroup(groupId, true);
           const nostrEvent = toNostrEvent(event);
           const account = accountContext.state.account;

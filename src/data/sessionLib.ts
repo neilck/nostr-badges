@@ -1,5 +1,3 @@
-import { GroupOffer } from "./groupOfferLib";
-
 // <---------- SESSION ---------->
 
 export type SessionBadge = {
@@ -18,8 +16,6 @@ export type SessionBadge = {
 
 export type Session = {
   uid: string;
-  offer?: GroupOffer;
-  isOfferEligible?: boolean;
   group?: SessionBadge;
   isGroupMember?: boolean;
   badge?: SessionBadge;

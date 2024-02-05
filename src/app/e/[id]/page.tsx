@@ -3,9 +3,7 @@ import { Event, toNostrEvent } from "@/data/eventLib";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 
 import { ViewBadgeEvent } from "@/app/components/Events/ViewBadgeEvent";
-import { ViewOfferEvent } from "@/app/components/Events//ViewOfferEvent";
 import { SessionFrameDialog } from "@/app/components/FrameDialog/SessionFrameDialog";
-import { SessionDisplay } from "./SessionDisplay";
 import { StartSessionButton } from "./StartSessionButton";
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;

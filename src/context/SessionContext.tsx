@@ -107,8 +107,7 @@ function SessionProvider(props: SessionProviderProps) {
     if (session == null) return null;
 
     // only auto open if single required badge, not awarded,  and nothing else to display
-    if (!session || session.offer || session.group || session.badge)
-      return null;
+    if (!session || session.group || session.badge) return null;
     if (!session.requiredBadges || session.requiredBadges.length != 1)
       return null;
     const firstBadge = session.requiredBadges[0];
