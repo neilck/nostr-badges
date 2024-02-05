@@ -1,0 +1,1 @@
+Code copied from nostr-tools to avoid large bundle size

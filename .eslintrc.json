@@ -1,0 +1,8 @@
+{
+  "extends": "next/core-web-vitals",
+  "globals": {
+    "window": true,
+    "sessionStorage": true,
+    "document": true
+  }
+}
