@@ -1,6 +1,6 @@
 import Stack from "@mui/material/Stack";
 
-import { BadgeViewSmall } from "@/app/components/BadgeViewSmall";
+import { BadgeAwardedRow } from "@/app/components/BadgeAwardedRow";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { parseEventTags } from "../../utils/parseEvent";
 
@@ -29,7 +29,7 @@ export const ViewBadgeEventSmall = (props: { id: string; e: NostrEvent }) => {
       pr={2}
       pb={3}
     >
-      <BadgeViewSmall
+      <BadgeAwardedRow
         name={name}
         description={description}
         image={thumb != "" ? thumb : image}

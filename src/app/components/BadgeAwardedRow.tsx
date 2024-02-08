@@ -5,15 +5,16 @@ import Typography from "@mui/material/Typography";
 
 import Image from "next/image";
 import ChecBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import { shortenDesc } from "@/app/utils/utils";
 
-export const BadgeViewSmall = (props: {
+export const BadgeAwardedRow = (props: {
   name: string;
   description: string;
   image: string;
   awarded?: boolean;
 }) => {
-  const { name, description, image } = props;
+  const { name, description, image, awarded } = props;
   const shortDesc = shortenDesc(description, 50);
 
   const hasSVGExt = (name: string) => {
@@ -69,16 +70,30 @@ export const BadgeViewSmall = (props: {
           alignItems="flex-start"
           width="48px"
         >
-          <ChecBoxIcon
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "4px",
-              boxSizing: "content-box",
-              color: "white",
-              backgroundColor: "green",
-            }}
-          />
+          {awarded && (
+            <ChecBoxIcon
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "4px",
+                boxSizing: "content-box",
+                color: "white",
+                backgroundColor: "green",
+              }}
+            />
+          )}
+          {!awarded && (
+            <CheckBoxOutlineBlankIcon
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "4px",
+                boxSizing: "content-box",
+                color: "black",
+                backgroundColor: "white",
+              }}
+            />
+          )}
         </Box>
       </Box>
     </Card>

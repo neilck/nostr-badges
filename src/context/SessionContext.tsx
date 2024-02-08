@@ -117,7 +117,6 @@ function SessionProvider(props: SessionProviderProps) {
       }
 
       const badge = await loadBadge(id);
-      console.log(badge);
       let awardtoken = "";
       // single badge
       if (state.session.type == "BADGE" && state.session.targetId == id) {
@@ -148,7 +147,6 @@ function SessionProvider(props: SessionProviderProps) {
       }
     };
 
-    console.log("setting current: " + state.currentId);
     updateCurrent(state.currentId);
   }, [state.currentId, state.session]);
 

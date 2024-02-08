@@ -2,7 +2,7 @@ import Stack from "@mui/material/Stack";
 import { Event, toNostrEvent } from "@/data/eventLib";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 
-import { ViewBadgeEvent } from "@/app/components/Events/ViewBadgeEvent";
+import { ViewBadgeEventSession } from "@/app/components/Events/ViewBadgeEventSession";
 import { SessionFrameDialog } from "@/app/components/FrameDialog/SessionFrameDialog";
 import { StartSessionButton } from "./StartSessionButton";
 const BadgeDefinitionKind = 30009;
@@ -67,9 +67,14 @@ export default async function ViewEventPage({
   return (
     <>
       {isBadge && (
-        <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!} isGroup={isGroup}>
+        <ViewBadgeEventSession
+          id={id}
+          naddr={naddr}
+          e={nostrEvent!}
+          isGroup={isGroup}
+        >
           <StartSessionButton badgeId={id} naddr={naddr} isGroup={isGroup} />
-        </ViewBadgeEvent>
+        </ViewBadgeEventSession>
       )}
       {!isBadge && !isOffer && (
         <Stack direction="column">
