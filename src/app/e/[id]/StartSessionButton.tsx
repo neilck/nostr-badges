@@ -143,7 +143,6 @@ export const StartSessionButton = (props: {
     const sessionId = sessionContext.state.sessionId;
     const clientToken = sessionContext.state.clientToken;
 
-    console.log(`redirectToApply ${sessionId} ${clientToken}`);
     if (sessionId && clientToken) {
       sessionStorage.setItem(
         "pendingAward",
@@ -169,7 +168,6 @@ export const StartSessionButton = (props: {
       }
     } else {
       // open dialog
-      console.log(`StartSessionButton updateCurrentBadgeById(${badgeId})`);
       sessionContext.dispatch({ type: "setCurrentId", currentId: badgeId });
     }
   };

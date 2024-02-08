@@ -44,17 +44,9 @@ export const BadgeStatus = (props: {
   }, [relays, filter]);
 
   const startSub = (filter: NDKFilter, relays: string[]) => {
-    console.log("starting sub");
-    console.log(filter);
-    console.log(relays);
     const onEventListener = async (event: NDKEvent, relay: NDKRelay) => {
       for (let entry of statuses.entries()) {
         if (entry[0] == relay.url) {
-          console.log("DB Badge: " + JSON.stringify(badgeEvent));
-          console.log(
-            relay.url + " Badge: " + JSON.stringify(event.rawEvent())
-          );
-
           if (event.created_at) {
             let status = "---";
             if (event.created_at == badgeEvent.created_at) {
@@ -102,7 +94,6 @@ export const BadgeStatus = (props: {
 
   const cleanup = () => {
     if (sub) {
-      console.log("stopping sub");
       sub.stop();
     }
   };

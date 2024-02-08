@@ -26,15 +26,12 @@ export const MenuLoginButton = (props: {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("onAuthStateChanged");
       if (user == null || user.isAnonymous) {
         setLoggedIn(false);
         setLoading(false);
-        console.log(`not logged in, isAnonymous? ${user?.isAnonymous}`);
       } else {
         setLoggedIn(true);
         setLoading(false);
-        console.log(`logged in: ${user.uid}`);
       }
     });
     return () => unsubscribe();
