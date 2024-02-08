@@ -86,39 +86,44 @@ async function getData(id: string) {
 export default async function Njump({ params }: { params: { id: string } }) {
   const naddr = params.id;
 
-  /*
-  const decoded = nip19.decode(params.id);
-  let addressPointer: nip19.AddressPointer | undefined = undefined;
-  if (decoded.type == "naddr") {
-    addressPointer = decoded.data as nip19.AddressPointer;
-  }
-  */
-
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
   let id: string = "";
+  let type: string = "";
   let data = await getData(params.id);
   if (data != null) {
     event = data.event as Event;
     nostrEvent = toNostrEvent(event);
     id = data.id;
+    for (let i = 0; i < event.tags.length; i++) {
+      const tag = event.tags[i];
+      if (tag.name == "type" && tag.values.length > 0) {
+        type = tag.values[0];
+      }
+    }
   }
 
   let isBadge = false;
+  let isGroup = false;
   let isOffer = false;
 
   if (nostrEvent != undefined) {
     isBadge = nostrEvent.kind == BadgeDefinitionKind;
+    isGroup = isBadge && type == "GROUP";
     isOffer = nostrEvent.kind == ClassifiedListingKind;
   }
 
   return (
     <>
       {isBadge && (
-        <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!}>
-          <GetBadgeButton buttonLabel="Get Badge" url={`/e/${naddr}`} />
+        <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!} isGroup={isGroup}>
+          <GetBadgeButton
+            buttonLabel={isGroup ? "Apply" : "Get Badge"}
+            url={`/e/${naddr}`}
+          />
         </ViewBadgeEvent>
       )}
+
       {!isBadge && !isOffer && (
         <Box p={6}>
           <Typography variant="h6">event not found</Typography>

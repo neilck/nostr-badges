@@ -12,8 +12,9 @@ export const ViewBadgeEvent = async (props: {
   naddr: string;
   e: NostrEvent;
   children: ReactNode;
+  isGroup?: boolean;
 }) => {
-  const { id, e, naddr, children } = props;
+  const { id, e, naddr, isGroup, children } = props;
 
   let name = "";
   let description = "";
@@ -77,7 +78,7 @@ export const ViewBadgeEvent = async (props: {
       pr={2}
       pb={3}
     >
-      <Typography variant="h5">BADGE</Typography>
+      <Typography variant="h5">{isGroup ? "GROUP" : "BADGE"}</Typography>
       <BadgeView name={name} description={description} image={image} />
       <BadgesList records={badges} />
       {children}

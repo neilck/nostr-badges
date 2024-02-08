@@ -39,8 +39,7 @@ export default async function ViewEventPage({
   let nostrEvent: NostrEvent | undefined = undefined;
   let applyURL: string | undefined = undefined;
   let id: string = "";
-  let isBadge = false;
-  let isOffer = false;
+  let type = "";
 
   let data = await getData(params.id);
   if (data != null) {
@@ -48,18 +47,29 @@ export default async function ViewEventPage({
     nostrEvent = toNostrEvent(event);
     id = data.id;
     applyURL = data.applyURL;
-    if (event) {
-      isBadge = event.kind == BadgeDefinitionKind;
-      isOffer = event.kind == ClassifiedListingKind;
+    for (let i = 0; i < event.tags.length; i++) {
+      const tag = event.tags[i];
+      if (tag.name == "type" && tag.values.length > 0) {
+        type = tag.values[0];
+      }
     }
+  }
+
+  let isBadge = false;
+  let isGroup = false;
+  let isOffer = false;
+
+  if (event) {
+    isBadge = event.kind == BadgeDefinitionKind;
+    isGroup = isBadge && type == "GROUP";
+    isOffer = event.kind == ClassifiedListingKind;
   }
 
   return (
     <>
-      {/* <SessionDisplay /> */}
       {isBadge && (
-        <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!}>
-          <StartSessionButton badgeId={id} naddr={naddr} />
+        <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!} isGroup={isGroup}>
+          <StartSessionButton badgeId={id} naddr={naddr} isGroup={isGroup} />
         </ViewBadgeEvent>
       )}
       {/* isOffer && <ViewOfferEvent e={event!} applyURL={applyURL} /> */}

@@ -1,23 +1,29 @@
-// <---------- SESSION ---------->
+import { FieldValue } from "firebase/firestore/lite";
 
-export type SessionBadge = {
-  id: string;
-  identifier: string;
-  publisherUid: string;
-  eventId: string;
-  applyURL: string;
-  name: string;
-  description: string;
-  image: string;
-  thumbnail: string;
+// <---------- SESSION ---------->
+export type SessionState = {
   awardtoken: string;
   isAwarded: boolean;
+  awardData?: object;
+};
+
+export type SessionBadge = {
+  badgeId: string;
+  state: SessionState;
+};
+
+export type SessionGroup = {
+  groupId: string;
+  state: SessionState;
 };
 
 export type Session = {
+  type: "BADGE" | "GROUP" | "OFFER";
+  targetId: string;
+  state: SessionState;
   uid: string;
-  group?: SessionBadge;
-  isGroupMember?: boolean;
-  badge?: SessionBadge;
+  clientToken: string;
+  requiredGroups?: SessionGroup[];
   requiredBadges?: SessionBadge[];
+  lastUpdated: FieldValue;
 };

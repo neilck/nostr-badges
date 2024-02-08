@@ -14,30 +14,34 @@ import { useSessionContext } from "@/context/SessionContext";
 export const StartSessionButton = (props: {
   badgeId: string;
   naddr: string;
+  isGroup?: boolean;
 }) => {
-  const { badgeId, naddr } = props; // naddr...
+  const { badgeId, naddr, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
   const session = sessionContext.state.session;
   const sessionId = sessionContext.state.sessionId;
   const clientToken = sessionContext.state.clientToken;
-  const currentBadge = sessionContext.state.currentBadge;
+  const current = sessionContext.state.current;
 
   const router = useRouter();
   const pathName = usePathname();
 
+  const defaultLabel = isGroup ? "Apply" : "Get Badge";
+  const awardedLabel = isGroup ? "Approved" : "Badge Awarded";
+
   const [uid, setUid] = useState("");
-  const [buttonLabel, setButtonLabel] = useState("Get Badge");
+  const [buttonLabel, setButtonLabel] = useState(defaultLabel);
   const [hasSession, setHasSession] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const showGetBadge = () => {
-    setButtonLabel("Get Badge");
+    setButtonLabel(defaultLabel);
     setDisabled(false);
   };
 
   const showAwarded = () => {
-    setButtonLabel("Badge Awarded");
+    setButtonLabel(awardedLabel);
     setDisabled(true);
   };
 
@@ -95,7 +99,7 @@ export const StartSessionButton = (props: {
     }
 
     // if dialog is open
-    if (currentBadge != null) {
+    if (current != null) {
       showWaiting();
       return;
     }
@@ -105,12 +109,28 @@ export const StartSessionButton = (props: {
     showGetBadge();
     return;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, currentBadge]);
+  }, [session, current]);
 
   const startSession = async () => {
+    if (!isGroup) return startBadgeSession();
+    else return startGroupSession();
+  };
+
+  const startBadgeSession = async () => {
     const functions = getFunctions();
     const createBadgeSession = httpsCallable(functions, "createBadgeSession");
     const result = await createBadgeSession({ badgeId: badgeId });
+    // @ts-ignore
+    const newSession: { sessionId; awardToken; clientToken } = result.data;
+    if (newSession.sessionId && newSession.clientToken) {
+      sessionContext.loadSession(newSession.sessionId, newSession.clientToken);
+    }
+  };
+
+  const startGroupSession = async () => {
+    const functions = getFunctions();
+    const createGroupSession = httpsCallable(functions, "createGroupSession");
+    const result = await createGroupSession({ groupId: badgeId });
     // @ts-ignore
     const newSession: { sessionId; awardToken; clientToken } = result.data;
     if (newSession.sessionId && newSession.clientToken) {
@@ -150,7 +170,7 @@ export const StartSessionButton = (props: {
     } else {
       // open dialog
       console.log(`StartSessionButton updateCurrentBadgeById(${badgeId})`);
-      sessionContext.updateCurrentBadgeById(badgeId);
+      sessionContext.dispatch({ type: "setCurrentId", currentId: badgeId });
     }
   };
 

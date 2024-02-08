@@ -1,37 +1,36 @@
 "use client";
 
 import { FrameDialog } from "./FrameDialog";
+import { Badge } from "@/data/badgeLib";
 import { useSessionContext } from "@/context/SessionContext";
+import { useEffect } from "react";
 
 export const SessionFrameDialog = () => {
   const sessionContext = useSessionContext();
 
-  const badge = sessionContext.state.currentBadge;
+  const current = sessionContext.state.current;
   const sessionId = sessionContext.state.sessionId
     ? sessionContext.state.sessionId
     : "";
-  const updateCurrentBadgeById = sessionContext.updateCurrentBadgeById;
-  const reload = sessionContext.reload;
 
   const onClose = () => {
     // frameDialog closes when no currentbadge detected
-    if (updateCurrentBadgeById) updateCurrentBadgeById("");
-    // refresh sesison from DB in case iframe app has awarded badge
-    if (reload) reload();
+    sessionContext.dispatch({ type: "setCurrentId", currentId: "" });
+    sessionContext.reload();
   };
 
-  if (badge) {
+  if (current) {
     return (
       <FrameDialog
-        identifier={badge.identifier}
-        title={badge.name}
-        description={badge.description}
-        image={badge.image}
-        applyURL={badge.applyURL}
-        sessionId={sessionId}
-        awardtoken={badge.awardtoken}
+        identifier={current.identifier}
+        title={current.title}
+        description={current.description}
+        image={current.image}
+        applyURL={current.applyURL}
+        sessionId={current.sessionId}
+        awardtoken={current.awardtoken}
         onClose={onClose}
-        show={badge != null}
+        show={current != null}
       />
     );
   } else {
