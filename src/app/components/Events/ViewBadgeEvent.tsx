@@ -1,5 +1,6 @@
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { Event, toNostrEvent } from "@/data/eventLib";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { BadgeView } from "@/app/components/BadgeView";
 import { parseEventTags } from "../../utils/parseEvent";
@@ -31,11 +32,11 @@ export const ViewBadgeEvent = async (props: {
   if (recordTags["image"]) image = recordTags["image"][0];
   if (recordTags["thumb"]) thumb = recordTags["thumb"][0];
 
-  // e.tags.forEach((tag) => {
-  //   if (tag.length > 1 && tag[0] == "a") {
-  //     badgeTags.push(tag);
-  //   }
-  // });
+  e.tags.forEach((tag) => {
+    if (tag.length > 1 && tag[0] == "a") {
+      badgeTags.push(tag);
+    }
+  });
 
   badgeTags.forEach((tag) => {
     if (tag.length > 1) {
@@ -43,9 +44,8 @@ export const ViewBadgeEvent = async (props: {
         getBadgeByAddressPointer(tag[1])
           .then((data) => {
             const badgeEvent = data.event;
-            const applyURL = data.applyURL;
-            const configURL = data.configURL;
-            const recordTags = parseEventTags(badgeEvent);
+            const nostrEvent = toNostrEvent(badgeEvent);
+            const recordTags = parseEventTags(nostrEvent);
 
             const name = "name" in recordTags ? recordTags["name"][0] : "";
             const image = "image" in recordTags ? recordTags["image"][0] : "";
@@ -55,7 +55,6 @@ export const ViewBadgeEvent = async (props: {
               name: name,
               image: image,
               thumbnail: thumb,
-              applyURL: applyURL,
             };
           })
           .catch((error) => {
@@ -66,6 +65,8 @@ export const ViewBadgeEvent = async (props: {
   });
 
   await Promise.all(promises);
+  console.log(`badgeTags: ${JSON.stringify(badgeTags)}`);
+  console.log(`badges: ${JSON.stringify(badges)}`);
 
   return (
     <Stack

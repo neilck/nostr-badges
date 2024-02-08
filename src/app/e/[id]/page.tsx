@@ -46,7 +46,6 @@ export default async function ViewEventPage({
     event = data.event as Event;
     nostrEvent = toNostrEvent(event);
     id = data.id;
-    applyURL = data.applyURL;
     for (let i = 0; i < event.tags.length; i++) {
       const tag = event.tags[i];
       if (tag.name == "type" && tag.values.length > 0) {
@@ -72,7 +71,6 @@ export default async function ViewEventPage({
           <StartSessionButton badgeId={id} naddr={naddr} isGroup={isGroup} />
         </ViewBadgeEvent>
       )}
-      {/* isOffer && <ViewOfferEvent e={event!} applyURL={applyURL} /> */}
       {!isBadge && !isOffer && (
         <Stack direction="column">
           <h1>Event</h1>

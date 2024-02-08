@@ -6,7 +6,6 @@ export type RecordItem = {
   name: string;
   image: string;
   thumbnail?: string;
-  applyURL?: string;
 };
 
 export const BadgesList = (props: { records: Record<string, RecordItem> }) => {
