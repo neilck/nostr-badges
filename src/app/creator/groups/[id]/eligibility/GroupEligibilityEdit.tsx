@@ -140,7 +140,7 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
       }
     }
 
-    const updated = { ...group, requiredBadges: newList };
+    const updated = { ...group, badges: newList };
     setGroup(updated);
   };
 

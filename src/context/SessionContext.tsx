@@ -239,6 +239,9 @@ function SessionProvider(props: SessionProviderProps) {
 
   // returns true is all required badges are awarded.
   const allBadgesAwarded = () => {
+    console.log(
+      `allBadgesAwarded ${JSON.stringify(state.session?.requiredBadges)}`
+    );
     const session = state.session;
     if (!session) {
       return false;

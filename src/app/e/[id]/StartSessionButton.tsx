@@ -26,34 +26,16 @@ export const StartSessionButton = (props: {
   const router = useRouter();
   const pathName = usePathname();
 
-  const defaultLabel = isGroup ? "Apply" : "Get Badge";
-  const awardedLabel = isGroup ? "Approved" : "Badge Awarded";
+  const defaultLabel = isGroup ? "Join Group" : "Get Badge";
+  const awardedLabel = isGroup ? "Join Group" : "Badge Awarded";
 
   const [uid, setUid] = useState("");
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
   const [hasSession, setHasSession] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const showGetBadge = () => {
-    setButtonLabel(defaultLabel);
-    setDisabled(false);
-  };
-
-  const showAwarded = () => {
-    setButtonLabel(awardedLabel);
-    setDisabled(true);
-  };
-
-  const showWaiting = () => {
-    setButtonLabel("Waiting...");
-    setDisabled(true);
-  };
-
-  const showLoading = () => {
-    setButtonLabel("please wait...");
-    setDisabled(true);
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const [allAwarded, setAllAwarded] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const effectRan = useRef(false);
   useEffect(() => {
@@ -83,37 +65,54 @@ export const StartSessionButton = (props: {
 
   // update button based on session state
   useEffect(() => {
-    // if no session, display Get Badge
-    if (session == null) {
-      setHasSession(false);
-      showGetBadge();
-      return;
-    } else {
-      setHasSession(true);
-    }
-
-    // if all badges awarded, show awarded
-    if (sessionContext.allBadgesAwarded()) {
-      showAwarded();
-      return redirectToApply();
-    }
-
-    // if dialog is open
-    if (current != null) {
-      showWaiting();
-      return;
-    }
-
-    // session exists, not all awarded, dialog closed
-
-    showGetBadge();
-    return;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    console.log(`useEffect [session, current]`);
+    // has Session
+    setHasSession(session != null);
+    // all badges awarded
+    setAllAwarded(sessionContext.allBadgesAwarded());
+    console.log(`allBadgesAwarded ${sessionContext.allBadgesAwarded()}`);
+    // dialog open
+    setDialogOpen(current != null);
   }, [session, current]);
 
+  useEffect(() => {
+    const updateButton = () => {
+      console.log(`allAwarded ${allAwarded}`);
+      if (isGroup) {
+        setButtonLabel("Join Group");
+        setDisabled(!allAwarded);
+        return;
+      } else {
+        if (isLoading) {
+          setButtonLabel("loading...");
+          setDisabled(true);
+          return;
+        }
+        if (!hasSession) {
+          setButtonLabel(defaultLabel);
+          setDisabled(false);
+          return;
+        }
+        if (allAwarded) {
+          setButtonLabel(awardedLabel);
+          setDisabled(true);
+          redirectToApply();
+          return;
+        }
+        if (dialogOpen) {
+          setButtonLabel("waiting...");
+          setDisabled(true);
+        }
+      }
+    };
+
+    updateButton();
+  }, [isLoading, hasSession, dialogOpen, allAwarded]);
+
   const startSession = async () => {
-    if (!isGroup) return startBadgeSession();
-    else return startGroupSession();
+    if (!isGroup) await startBadgeSession();
+    else await startGroupSession();
+    setIsLoading(false);
   };
 
   const startBadgeSession = async () => {
@@ -167,8 +166,14 @@ export const StartSessionButton = (props: {
         setDisabled(false);
       }
     } else {
-      // open dialog
-      sessionContext.dispatch({ type: "setCurrentId", currentId: badgeId });
+      if (isGroup) {
+        // button only enabled after all badges awarded
+        // manual click to advance
+        redirectToApply();
+      } else {
+        // single baddge, so open dialog
+        sessionContext.dispatch({ type: "setCurrentId", currentId: badgeId });
+      }
     }
   };
 
