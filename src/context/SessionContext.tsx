@@ -9,7 +9,7 @@ import {
   useState,
   useEffect,
 } from "react";
-import { Session, SessionState } from "@/data/sessionLib";
+import { Session } from "@/data/sessionLib";
 import { getSession } from "@/data/serverActions";
 import { Badge, loadBadge as fsLoadBadge } from "@/data/badgeLib";
 import { loadGroup as fsLoadGroup } from "@/data/groupLib";
@@ -120,13 +120,13 @@ function SessionProvider(props: SessionProviderProps) {
       let awardtoken = "";
       // single badge
       if (state.session.type == "BADGE" && state.session.targetId == id) {
-        awardtoken = state.session.state.awardtoken;
+        awardtoken = state.session.itemState.awardtoken;
       } else {
         // from required badges
         if (state.session.requiredBadges) {
           for (let i = 0; i < state.session.requiredBadges.length; i++) {
             if (state.session.requiredBadges[i].badgeId == id) {
-              awardtoken = state.session.requiredBadges[i].state.awardtoken;
+              awardtoken = state.session.requiredBadges[i].itemState.awardtoken;
               break;
             }
           }
@@ -232,7 +232,7 @@ function SessionProvider(props: SessionProviderProps) {
     if (session == null) return null;
 
     // only auto open if single required badge, not awarded,  and nothing else to display
-    if (session.type == "BADGE" && !session.state.isAwarded)
+    if (session.type == "BADGE" && !session.itemState.isAwarded)
       return session.targetId;
     else return null;
   };
@@ -248,13 +248,13 @@ function SessionProvider(props: SessionProviderProps) {
     }
     let finished = true;
 
-    if (session.type == "BADGE" && !session.state.isAwarded) {
+    if (session.type == "BADGE" && !session.itemState.isAwarded) {
       return false;
     }
 
     if (session.requiredBadges) {
       session.requiredBadges.forEach((badge) => {
-        if (!badge.state.isAwarded) {
+        if (!badge.itemState.isAwarded) {
           finished = false;
         }
       });

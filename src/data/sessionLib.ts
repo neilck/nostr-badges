@@ -1,7 +1,7 @@
 import { FieldValue } from "firebase/firestore/lite";
 
 // <---------- SESSION ---------->
-export type SessionState = {
+export type ItemState = {
   awardtoken: string;
   isAwarded: boolean;
   awardData?: object;
@@ -9,19 +9,19 @@ export type SessionState = {
 
 export type SessionBadge = {
   badgeId: string;
-  state: SessionState;
+  itemState: ItemState;
 };
 
 export type SessionGroup = {
   groupId: string;
-  state: SessionState;
+  itemState: ItemState;
 };
 
 export type Session = {
   type: "BADGE" | "GROUP" | "OFFER";
   targetId: string;
-  state: SessionState;
-  stateToken: string;
+  itemState: ItemState;
+  state: string;
   pubkey: string;
   uid: string;
   clientToken: string;
