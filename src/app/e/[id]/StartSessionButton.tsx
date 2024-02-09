@@ -63,7 +63,6 @@ export const StartSessionButton = (props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // update button based on session state
   useEffect(() => {
     console.log(`useEffect [session, current]`);
     // has Session
@@ -102,6 +101,11 @@ export const StartSessionButton = (props: {
         if (dialogOpen) {
           setButtonLabel("waiting...");
           setDisabled(true);
+          return;
+        } else {
+          setButtonLabel(defaultLabel);
+          setDisabled(false);
+          return;
         }
       }
     };

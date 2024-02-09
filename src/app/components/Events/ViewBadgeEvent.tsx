@@ -79,10 +79,13 @@ export const ViewBadgeEvent = async (props: {
     >
       <Typography variant="h5">{isGroup ? "GROUP" : "BADGE"}</Typography>
       <BadgeView name={name} description={description} image={image} />
-      <Typography variant="body1" fontWeight={600}>
-        Eligibility requirements
-      </Typography>
+      {isGroup && (
+        <Typography variant="body1" fontWeight={600}>
+          Eligibility requirements
+        </Typography>
+      )}
       <BadgesList records={badges} />
+
       {children}
     </Stack>
   );
