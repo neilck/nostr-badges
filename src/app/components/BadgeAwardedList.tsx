@@ -5,7 +5,7 @@ import CardActionArea from "@mui/material/CardActionArea";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-
+import { CircularProgress } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { BadgeAwardedRow } from "./BadgeAwardedRow";
 import { ItemRowSmall } from "./ItemRowSmall";
@@ -42,6 +42,7 @@ export function renderBadge(item: Item, handler: OnBadgeSelectedHandler) {
 }
 
 export const BadgeAwardedList = (props: {}) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<Item[]>([]);
   const sessionContext = useSessionContext();
   const session = sessionContext.state.session;
@@ -62,6 +63,7 @@ export const BadgeAwardedList = (props: {}) => {
           }
         }
         setItems(newItems);
+        setIsLoading(false);
       }
     };
 
@@ -74,9 +76,11 @@ export const BadgeAwardedList = (props: {}) => {
 
   return (
     <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-      {items.map((item) => (
-        <div key={item.docId}>{renderBadge(item, handleClick)}</div>
-      ))}
+      {isLoading && <CircularProgress />}
+      {!isLoading &&
+        items.map((item) => (
+          <div key={item.docId}>{renderBadge(item, handleClick)}</div>
+        ))}
     </Stack>
   );
 };
