@@ -15,9 +15,10 @@ export const StartSessionButton = (props: {
   badgeId: string;
   naddr: string;
   state?: string;
+  pubkey?: string;
   isGroup?: boolean;
 }) => {
-  const { badgeId, naddr, state, isGroup } = props; // naddr...
+  const { badgeId, naddr, state, pubkey, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
   const session = sessionContext.state.session;
   const sessionId = sessionContext.state.sessionId;
@@ -126,6 +127,7 @@ export const StartSessionButton = (props: {
     const result = await createBadgeSession({
       badgeId: badgeId,
       state: state ? state : "",
+      pubkey: pubkey ? pubkey : "",
     });
     // @ts-ignore
     const newSession: { sessionId; awardToken; clientToken } = result.data;
@@ -140,6 +142,7 @@ export const StartSessionButton = (props: {
     const result = await createGroupSession({
       groupId: badgeId,
       state: state ? state : "",
+      pubkey: pubkey ? pubkey : "",
     });
     // @ts-ignore
     const newSession: { sessionId; awardToken; clientToken } = result.data;

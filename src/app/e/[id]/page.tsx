@@ -14,10 +14,10 @@ export default async function ViewEventPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { state?: string };
+  searchParams: { state?: string; pubkey?: string };
 }) {
   const naddr = params.id;
-  const state = searchParams.state;
+  const { state, pubkey } = searchParams;
 
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
@@ -25,17 +25,21 @@ export default async function ViewEventPage({
   let id: string = "";
   let type = "";
 
-  let data = await getEvent(params.id);
-  if (data != null) {
-    event = data.event as Event;
-    nostrEvent = toNostrEvent(event);
-    id = data.id;
-    for (let i = 0; i < event.tags.length; i++) {
-      const tag = event.tags[i];
-      if (tag.name == "type" && tag.values.length > 0) {
-        type = tag.values[0];
+  try {
+    let data = await getEvent(params.id);
+    if (data != null) {
+      event = data.event as Event;
+      nostrEvent = toNostrEvent(event);
+      id = data.id;
+      for (let i = 0; i < event.tags.length; i++) {
+        const tag = event.tags[i];
+        if (tag.name == "type" && tag.values.length > 0) {
+          type = tag.values[0];
+        }
       }
     }
+  } catch {
+    return <>{`event ${params.id} not found`}</>;
   }
 
   let isBadge = false;
@@ -61,6 +65,7 @@ export default async function ViewEventPage({
             badgeId={id}
             naddr={naddr}
             state={state}
+            pubkey={pubkey}
             isGroup={isGroup}
           />
         </ViewBadgeEventSession>

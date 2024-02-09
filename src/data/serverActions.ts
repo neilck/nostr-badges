@@ -18,7 +18,7 @@ export const getEvent = async (
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
+    throw new Error("Failed to fetch data: " + naddr);
   }
   return res.json();
 };
@@ -37,7 +37,7 @@ export const getEventByAddress = async (
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
+    throw new Error("Failed to fetch data " + address);
   }
 
   return res.json();

@@ -22,6 +22,7 @@ export type Session = {
   targetId: string;
   state: SessionState;
   stateToken: string;
+  pubkey: string;
   uid: string;
   clientToken: string;
   requiredGroups?: SessionGroup[];

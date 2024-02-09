@@ -21,46 +21,51 @@ export async function generateMetadata(
   const id = params.id;
 
   // fetch data
-  const data = await getEvent(params.id);
-  const event = data.event as Event;
-  if (event == null) {
+  try {
+    const data = await getEvent(params.id);
+
+    const event = data.event as Event;
+    if (event == null) {
+      return {};
+    }
+
+    const nostrEvent = toNostrEvent(event);
+    let name,
+      description,
+      image,
+      thumb = "";
+
+    const recordTags = parseEventTags(nostrEvent);
+    if (recordTags["name"]) name = recordTags["name"][0];
+    if (recordTags["description"]) description = recordTags["description"][0];
+    if (recordTags["image"]) image = recordTags["image"][0];
+    if (recordTags["thumb"]) thumb = recordTags["thumb"][0];
+
+    let metadata: Metadata = {
+      metadataBase: new URL("https://akaprofiles.com"),
+
+      title: name,
+      description: description,
+      applicationName: "AKA Profiles",
+      // authors:
+      keywords: ["nostr", "badge"],
+      openGraph: {
+        title: name,
+        description: description,
+        images: image,
+      },
+      twitter: {
+        title: name,
+        card: "summary",
+        site: "@nostrprotocol",
+        images: image,
+        description: description,
+      },
+    };
+    return metadata;
+  } catch {
     return {};
   }
-
-  const nostrEvent = toNostrEvent(event);
-  let name,
-    description,
-    image,
-    thumb = "";
-
-  const recordTags = parseEventTags(nostrEvent);
-  if (recordTags["name"]) name = recordTags["name"][0];
-  if (recordTags["description"]) description = recordTags["description"][0];
-  if (recordTags["image"]) image = recordTags["image"][0];
-  if (recordTags["thumb"]) thumb = recordTags["thumb"][0];
-
-  let metadata: Metadata = {
-    metadataBase: new URL("https://akaprofiles.com"),
-
-    title: name,
-    description: description,
-    applicationName: "AKA Profiles",
-    // authors:
-    keywords: ["nostr", "badge"],
-    openGraph: {
-      title: name,
-      description: description,
-      images: image,
-    },
-    twitter: {
-      title: name,
-      card: "summary",
-      site: "@nostrprotocol",
-      images: image,
-      description: description,
-    },
-  };
-  return metadata;
 }
 
 const BadgeDefinitionKind = 30009;
@@ -71,30 +76,41 @@ export default async function Njump({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { state?: string };
+  searchParams: { state?: string; pubkey?: string };
 }) {
   const naddr = params.id;
-  const state = searchParams.state;
+  const { state, pubkey } = searchParams;
   let url = `/e/${naddr}`;
+  let addedParam = false;
   if (state && state != "") {
     url = url + `?state=${state}`;
+    addedParam = true;
+  }
+  if (pubkey && pubkey != "") {
+    if (!addedParam) url = url + `?pubkey=${pubkey}`;
+    else url = url + `&pubkey=${pubkey}`;
   }
 
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
   let id: string = "";
   let type: string = "";
-  let data = await getEvent(params.id);
-  if (data != null) {
-    event = data.event as Event;
-    nostrEvent = toNostrEvent(event);
-    id = data.id;
-    for (let i = 0; i < event.tags.length; i++) {
-      const tag = event.tags[i];
-      if (tag.name == "type" && tag.values.length > 0) {
-        type = tag.values[0];
+
+  try {
+    let data = await getEvent(params.id);
+    if (data != null) {
+      event = data.event as Event;
+      nostrEvent = toNostrEvent(event);
+      id = data.id;
+      for (let i = 0; i < event.tags.length; i++) {
+        const tag = event.tags[i];
+        if (tag.name == "type" && tag.values.length > 0) {
+          type = tag.values[0];
+        }
       }
     }
+  } catch {
+    return <>{`event ${params.id} not found`}</>;
   }
 
   let isBadge = false;
