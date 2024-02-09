@@ -4,7 +4,7 @@ import { useSessionContext } from "@/context/SessionContext";
 export const SessionDisplay = () => {
   const sessionContext = useSessionContext();
   const session = sessionContext.state.sessionId;
-  const currentBadge = sessionContext.state.currentBadge?.id;
+  const currentBadge = sessionContext.state.currentId;
   const clientToken = sessionContext.state.clientToken;
 
   const isDev = process.env.NODE_ENV == "development";

@@ -1,28 +1,11 @@
 import Box from "@mui/material/Box";
 
 import { Event, toNostrEvent } from "@/data/eventLib";
+import { getEvent } from "@/data/serverActions";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import * as nip19 from "@/nostr-tools/nip19";
 import { Login } from "@/app/components/Login/Login";
 import { ViewBadgeEventSmall } from "@/app/components/Events/ViewBadgeEventSmall";
-
-// returns { id: string; event: object; applyURL?: string }
-async function getData(id: string) {
-  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
-
-  const url = `https://getevent-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getEvent?id=${id}`;
-  const res = await fetch(url, {
-    headers: { authorization },
-    next: { tags: [id] },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
-  }
-  return res.json();
-}
 
 export default async function LoginPage({
   params,
@@ -37,7 +20,7 @@ export default async function LoginPage({
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
   let id: string = "";
-  let data = await getData(params.id);
+  let data = await getEvent(params.id);
   if (data != null) {
     event = data.event as Event;
     nostrEvent = toNostrEvent(event);

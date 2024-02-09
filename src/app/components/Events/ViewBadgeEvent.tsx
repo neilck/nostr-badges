@@ -5,7 +5,7 @@ import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { BadgeView } from "@/app/components/BadgeView";
 import { parseEventTags } from "../../utils/parseEvent";
 import { BadgesList, RecordItem } from "@/app/components/BadgesList";
-import { getBadgeByAddressPointer } from "../../utils/parseEvent";
+import { getEventByAddress } from "@/data/serverActions";
 import { ReactNode } from "react";
 
 export const ViewBadgeEvent = async (props: {
@@ -41,7 +41,7 @@ export const ViewBadgeEvent = async (props: {
   badgeTags.forEach((tag) => {
     if (tag.length > 1) {
       promises.push(
-        getBadgeByAddressPointer(tag[1])
+        getEventByAddress(tag[1])
           .then((data) => {
             const badgeEvent = data.event;
             const nostrEvent = toNostrEvent(badgeEvent);

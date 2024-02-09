@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
 import { Event, toNostrEvent } from "@/data/eventLib";
+import { getEvent } from "@/data/serverActions";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -20,7 +21,7 @@ export async function generateMetadata(
   const id = params.id;
 
   // fetch data
-  const data = await getData(params.id);
+  const data = await getEvent(params.id);
   const event = data.event as Event;
   if (event == null) {
     return {};
@@ -65,24 +66,6 @@ export async function generateMetadata(
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;
 
-// returns { id: string; event: object; applyURL?: string }
-async function getData(id: string) {
-  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
-
-  const url = `https://getevent-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getEvent?id=${id}`;
-  const res = await fetch(url, {
-    headers: { authorization },
-    next: { tags: [id] },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    return null;
-  }
-  return res.json();
-}
-
 export default async function Njump({ params }: { params: { id: string } }) {
   const naddr = params.id;
 
@@ -90,7 +73,7 @@ export default async function Njump({ params }: { params: { id: string } }) {
   let nostrEvent: NostrEvent | undefined = undefined;
   let id: string = "";
   let type: string = "";
-  let data = await getData(params.id);
+  let data = await getEvent(params.id);
   if (data != null) {
     event = data.event as Event;
     nostrEvent = toNostrEvent(event);

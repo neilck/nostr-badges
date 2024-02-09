@@ -10,7 +10,7 @@ import {
   useEffect,
 } from "react";
 import { Session, SessionState } from "@/data/sessionLib";
-import { getSession } from "./getSessionAction";
+import { getSession } from "@/data/serverActions";
 import { Badge, loadBadge as fsLoadBadge } from "@/data/badgeLib";
 import { loadGroup as fsLoadGroup } from "@/data/groupLib";
 

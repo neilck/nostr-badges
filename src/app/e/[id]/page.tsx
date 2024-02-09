@@ -1,4 +1,5 @@
 import Stack from "@mui/material/Stack";
+import { getEvent } from "@/data/serverActions";
 import { Event, toNostrEvent } from "@/data/eventLib";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 
@@ -7,24 +8,6 @@ import { SessionFrameDialog } from "@/app/components/FrameDialog/SessionFrameDia
 import { StartSessionButton } from "./StartSessionButton";
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;
-
-// returns { id: string; event: object; applyURL?: string }
-async function getData(id: string) {
-  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
-
-  const url = `https://getevent-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getEvent?id=${id}`;
-  const res = await fetch(url, {
-    headers: { authorization },
-    next: { tags: [id] },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
-  }
-  return res.json();
-}
 
 export default async function ViewEventPage({
   params,
@@ -41,7 +24,7 @@ export default async function ViewEventPage({
   let id: string = "";
   let type = "";
 
-  let data = await getData(params.id);
+  let data = await getEvent(params.id);
   if (data != null) {
     event = data.event as Event;
     nostrEvent = toNostrEvent(event);
