@@ -14,9 +14,10 @@ export default async function ViewEventPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { session: string };
+  searchParams: { state?: string };
 }) {
   const naddr = params.id;
+  const state = searchParams.state;
 
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
@@ -56,7 +57,12 @@ export default async function ViewEventPage({
           e={nostrEvent!}
           isGroup={isGroup}
         >
-          <StartSessionButton badgeId={id} naddr={naddr} isGroup={isGroup} />
+          <StartSessionButton
+            badgeId={id}
+            naddr={naddr}
+            state={state}
+            isGroup={isGroup}
+          />
         </ViewBadgeEventSession>
       )}
       {!isBadge && !isOffer && (

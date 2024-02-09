@@ -66,8 +66,19 @@ export async function generateMetadata(
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;
 
-export default async function Njump({ params }: { params: { id: string } }) {
+export default async function Njump({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { state?: string };
+}) {
   const naddr = params.id;
+  const state = searchParams.state;
+  let url = `/e/${naddr}`;
+  if (state && state != "") {
+    url = url + `?state=${state}`;
+  }
 
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
@@ -102,7 +113,7 @@ export default async function Njump({ params }: { params: { id: string } }) {
         <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!} isGroup={isGroup}>
           <GetBadgeButton
             buttonLabel={isGroup ? "Apply" : "Get Badge"}
-            url={`/e/${naddr}`}
+            url={url}
           />
         </ViewBadgeEvent>
       )}

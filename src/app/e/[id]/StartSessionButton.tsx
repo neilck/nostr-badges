@@ -14,9 +14,10 @@ import { useSessionContext } from "@/context/SessionContext";
 export const StartSessionButton = (props: {
   badgeId: string;
   naddr: string;
+  state?: string;
   isGroup?: boolean;
 }) => {
-  const { badgeId, naddr, isGroup } = props; // naddr...
+  const { badgeId, naddr, state, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
   const session = sessionContext.state.session;
   const sessionId = sessionContext.state.sessionId;
@@ -122,7 +123,10 @@ export const StartSessionButton = (props: {
   const startBadgeSession = async () => {
     const functions = getFunctions();
     const createBadgeSession = httpsCallable(functions, "createBadgeSession");
-    const result = await createBadgeSession({ badgeId: badgeId });
+    const result = await createBadgeSession({
+      badgeId: badgeId,
+      state: state ? state : "",
+    });
     // @ts-ignore
     const newSession: { sessionId; awardToken; clientToken } = result.data;
     if (newSession.sessionId && newSession.clientToken) {
@@ -133,7 +137,10 @@ export const StartSessionButton = (props: {
   const startGroupSession = async () => {
     const functions = getFunctions();
     const createGroupSession = httpsCallable(functions, "createGroupSession");
-    const result = await createGroupSession({ groupId: badgeId });
+    const result = await createGroupSession({
+      groupId: badgeId,
+      state: state ? state : "",
+    });
     // @ts-ignore
     const newSession: { sessionId; awardToken; clientToken } = result.data;
     if (newSession.sessionId && newSession.clientToken) {

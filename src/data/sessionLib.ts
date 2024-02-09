@@ -21,6 +21,7 @@ export type Session = {
   type: "BADGE" | "GROUP" | "OFFER";
   targetId: string;
   state: SessionState;
+  stateToken: string;
   uid: string;
   clientToken: string;
   requiredGroups?: SessionGroup[];
