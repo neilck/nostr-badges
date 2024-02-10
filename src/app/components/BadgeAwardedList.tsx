@@ -71,7 +71,7 @@ export const BadgeAwardedList = (props: {}) => {
   }, [session]);
 
   const handleClick: OnBadgeSelectedHandler = (docId: string, badge: Badge) => {
-    sessionContext.dispatch({ type: "setCurrentId", currentId: docId });
+    sessionContext.setCurrentBadge(docId);
   };
 
   return (

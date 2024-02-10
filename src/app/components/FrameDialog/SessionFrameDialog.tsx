@@ -15,7 +15,7 @@ export const SessionFrameDialog = () => {
 
   const onClose = () => {
     // frameDialog closes when no currentbadge detected
-    sessionContext.dispatch({ type: "setCurrentId", currentId: "" });
+    sessionContext.setCurrentBadge("");
     sessionContext.reload();
   };
 

@@ -6,6 +6,8 @@ import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { ViewBadgeEventSession } from "@/app/components/Events/ViewBadgeEventSession";
 import { SessionFrameDialog } from "@/app/components/FrameDialog/SessionFrameDialog";
 import { StartSessionButton } from "./StartSessionButton";
+import { SessionDisplay } from "./SessionDisplay";
+import { SessionController } from "./SessionController";
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;
 
@@ -61,13 +63,7 @@ export default async function ViewEventPage({
           e={nostrEvent!}
           isGroup={isGroup}
         >
-          <StartSessionButton
-            badgeId={id}
-            naddr={naddr}
-            state={state}
-            pubkey={pubkey}
-            isGroup={isGroup}
-          />
+          <StartSessionButton badgeId={id} isGroup={isGroup} />
         </ViewBadgeEventSession>
       )}
       {!isBadge && !isOffer && (
@@ -77,6 +73,14 @@ export default async function ViewEventPage({
           <p>{event && JSON.stringify(event.tags)}</p>
         </Stack>
       )}
+      {/* <SessionDisplay /> */}
+      <SessionController
+        badgeId={id}
+        naddr={naddr}
+        state={state}
+        pubkey={pubkey}
+        isGroup={isGroup}
+      />
       <SessionFrameDialog />
     </>
   );

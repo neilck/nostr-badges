@@ -1,20 +1,26 @@
 "use client";
 
 import debug from "debug";
+import { useContext, useReducer, createContext } from "react";
+import { useRouter } from "next/navigation";
 import {
-  useContext,
-  useReducer,
-  createContext,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
-import { Session } from "@/data/sessionLib";
+  Session,
+  createSession,
+  CreateSessionParams,
+  CreateSessionResult,
+} from "@/data/sessionLib";
 import { getSession } from "@/data/serverActions";
 import { Badge, loadBadge as fsLoadBadge } from "@/data/badgeLib";
 import { loadGroup as fsLoadGroup } from "@/data/groupLib";
 
 const contextDebug = debug("aka:sessionContext");
+
+export enum SessionState {
+  Initial = "Initial",
+  InProgress = "InProgress",
+  DialogOpen = "DialogOpen",
+  ReadyToAward = "ReadyToAward",
+}
 
 export type Display = {
   title: string;
@@ -36,17 +42,21 @@ export type Current = {
 type Action =
   | { type: "setSessionId"; sessionId: string | null }
   | { type: "setSession"; session: Session | null }
+  | { type: "setNAddr"; naddr: string | null }
   | { type: "setClientToken"; clientToken: string | null }
   | { type: "setCurrentId"; currentId: string | null }
   | { type: "setCurrent"; current: Current | null }
   | { type: "setDisplay"; display: Display | null }
-  | { type: "setBadges"; badges: Record<string, Badge> | null };
+  | { type: "setBadges"; badges: Record<string, Badge> | null }
+  | { type: "setSessionState"; sessionState: SessionState };
 
 type Dispatch = (action: Action) => void;
 
 type State = {
   sessionId: string | null;
+  naddr: string | null;
   session: Session | null;
+  sessionState: SessionState;
   clientToken: string | null;
   currentId: string | null;
   current: Current | null;
@@ -62,10 +72,15 @@ const SessionContext = createContext<
   | {
       state: State;
       dispatch: Dispatch;
+      getSessionState: () => SessionState;
+      startSession: (
+        params: CreateSessionParams
+      ) => Promise<CreateSessionResult>;
       loadSession: (sessionId: string, clientToken: string) => void;
+      setCurrentBadge: (badgeId: string) => void;
+      redirectToLogin: () => void;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
       reload: () => void;
-      allBadgesAwarded: () => boolean;
     }
   | undefined
 >(undefined);
@@ -77,6 +92,9 @@ function reducer(state: State, action: Action) {
     }
     case "setSession": {
       return { ...state, session: action.session };
+    }
+    case "setNAddr": {
+      return { ...state, naddr: action.naddr };
     }
     case "setClientToken": {
       return { ...state, clientToken: action.clientToken };
@@ -93,6 +111,12 @@ function reducer(state: State, action: Action) {
     case "setBadges": {
       return { ...state, badges: action.badges };
     }
+    case "setSessionState": {
+      contextDebug(
+        `SessionState change ${state.sessionState} => ${action.sessionState}`
+      );
+      return { ...state, sessionState: action.sessionState };
+    }
   }
 }
 
@@ -102,6 +126,8 @@ function SessionProvider(props: SessionProviderProps) {
   const [state, dispatch] = useReducer(reducer, {
     sessionId: null,
     session: null,
+    naddr: null,
+    sessionState: SessionState.Initial,
     clientToken: null,
     currentId: null,
     current: null,
@@ -109,55 +135,98 @@ function SessionProvider(props: SessionProviderProps) {
     badges: null,
   });
 
-  useEffect(() => {
-    const updateCurrent = async (id: string | null) => {
-      if (id == null || id == "" || !state.session) {
-        dispatch({ type: "setCurrent", current: null });
-        return;
-      }
+  const router = useRouter();
 
-      const badge = await loadBadge(id);
-      let awardtoken = "";
-      // single badge
-      if (state.session.type == "BADGE" && state.session.targetId == id) {
-        awardtoken = state.session.itemState.awardtoken;
-      } else {
-        // from required badges
-        if (state.session.requiredBadges) {
-          for (let i = 0; i < state.session.requiredBadges.length; i++) {
-            if (state.session.requiredBadges[i].badgeId == id) {
-              awardtoken = state.session.requiredBadges[i].itemState.awardtoken;
-              break;
-            }
-          }
+  // returns true is all required badges are awarded.
+  const readyToAward = (session: Session) => {
+    if (!session) {
+      return false;
+    }
+
+    if (!session.itemState.isAwarded) {
+      return false;
+    }
+
+    if (session.requiredBadges) {
+      session.requiredBadges.forEach((badge) => {
+        if (!badge.itemState.isAwarded) {
+          return false;
         }
-      }
+      });
+    }
 
-      if (badge) {
-        const current: Current = {
-          identifier: badge.identifier,
-          title: badge.name,
-          description: badge.description,
-          image: badge.thumbnail != "" ? badge.thumbnail : badge.image,
-          applyURL: badge.applyURL,
-          sessionId: state.sessionId ? state.sessionId : "",
-          awardtoken: awardtoken,
-        };
-        dispatch({ type: "setCurrent", current: current });
-      }
-    };
+    if (session.requiredGroups) {
+      session.requiredGroups.forEach((group) => {
+        if (!group.itemState.isAwarded) {
+          return false;
+        }
+      });
+    }
 
-    updateCurrent(state.currentId);
-  }, [state.currentId, state.session]);
+    return true;
+  };
 
-  // load session from DB
-  const hasLoaded = useRef(false);
-  const loadSession = async (sessionId: string, clientToken: string) => {
+  // set SessionState based on loaded session
+  const updateSessionState = (
+    session: Session | undefined,
+    currentId: string | null
+  ) => {
+    if (!session) {
+      dispatch({ type: "setSessionState", sessionState: SessionState.Initial });
+      return;
+    }
+
+    // if ready for award
+    if (readyToAward(session)) {
+      dispatch({
+        type: "setSessionState",
+        sessionState: SessionState.ReadyToAward,
+      });
+      return;
+    }
+
+    // if in progress
+    if (currentId && currentId != "") {
+      dispatch({
+        type: "setSessionState",
+        sessionState: SessionState.DialogOpen,
+      });
+      return;
+    } else {
+      dispatch({
+        type: "setSessionState",
+        sessionState: SessionState.InProgress,
+      });
+      return;
+    }
+  };
+
+  const getSessionState = () => {
+    return state.sessionState;
+  };
+
+  const startSession = async (params: CreateSessionParams) => {
+    contextDebug(`startSession called ${JSON.stringify(params)}`);
+    dispatch({ type: "setNAddr", naddr: params.naddr });
+    const result = await createSession(params);
+    if (result)
+      loadSession(result.sessionId, result.session.clientToken, result.session);
+    return result;
+  };
+
+  const loadSession = async (
+    sessionId: string,
+    clientToken: string,
+    session?: Session
+  ) => {
     contextDebug(
       `loadSession called sessionId: ${sessionId} clientToken: ${clientToken}`
     );
+
     if (sessionId && clientToken) {
-      const session = await getSession(sessionId, clientToken);
+      if (!session) {
+        session = await getSession(sessionId, clientToken);
+      }
 
       contextDebug(
         `loadingSession: ${sessionId} => ${JSON.stringify(session)}`
@@ -167,9 +236,9 @@ function SessionProvider(props: SessionProviderProps) {
         dispatch({ type: "setClientToken", clientToken: clientToken });
         dispatch({ type: "setSession", session: session });
 
-        const badgeId = getAutoOpenBadge(session);
-        if (badgeId && !hasLoaded.current) {
-          dispatch({ type: "setCurrentId", currentId: badgeId });
+        const currentId = getAutoOpenBadge(session);
+        if (currentId) {
+          await setCurrentBadge(currentId);
         }
 
         // load badge or group for display
@@ -193,13 +262,85 @@ function SessionProvider(props: SessionProviderProps) {
         }
 
         dispatch({ type: "setDisplay", display: display });
-        hasLoaded.current = true;
+
+        updateSessionState(session, currentId);
+
         return session;
       }
     }
 
     contextDebug(`loadingSession(${sessionId} => no action`);
     return undefined;
+  };
+
+  const setCurrentBadge = async (badgeId: string) => {
+    if (!state.session) {
+      return;
+    }
+
+    dispatch({ type: "setCurrentId", currentId: badgeId });
+
+    // update current
+    if (badgeId == null || badgeId == "") {
+      dispatch({ type: "setCurrent", current: null });
+      dispatch({
+        type: "setSessionState",
+        sessionState: SessionState.InProgress,
+      });
+    } else {
+      const badge = await loadBadge(badgeId);
+      let awardtoken = "";
+
+      // single badge
+      if (state.session.type == "BADGE" && state.session.targetId == badgeId) {
+        awardtoken = state.session.itemState.awardtoken;
+      } else {
+        // from required badges
+        if (state.session.requiredBadges) {
+          for (let i = 0; i < state.session.requiredBadges.length; i++) {
+            if (state.session.requiredBadges[i].badgeId == badgeId) {
+              awardtoken = state.session.requiredBadges[i].itemState.awardtoken;
+              break;
+            }
+          }
+        }
+      }
+
+      if (badge) {
+        const current: Current = {
+          identifier: badge.identifier,
+          title: badge.name,
+          description: badge.description,
+          image: badge.thumbnail != "" ? badge.thumbnail : badge.image,
+          applyURL: badge.applyURL,
+          sessionId: state.sessionId ? state.sessionId : "",
+          awardtoken: awardtoken,
+        };
+        dispatch({ type: "setCurrent", current: current });
+        dispatch({
+          type: "setSessionState",
+          sessionState: SessionState.DialogOpen,
+        });
+      }
+    }
+  };
+
+  const redirectToLogin = () => {
+    // save sessionId and clientToken to sessionStorage before redirect
+    if (!state.sessionId) return;
+
+    sessionStorage.setItem(
+      "pendingAward",
+      JSON.stringify({
+        sessionId: state.sessionId,
+        clientToken: state.clientToken,
+      })
+    );
+
+    const searchParams = new URLSearchParams();
+    searchParams.set("session", state.sessionId);
+    const updatedURL = `/e/${state.naddr}/login?${searchParams.toString()}`;
+    router.push(updatedURL);
   };
 
   const loadBadge = async (badgeId: string) => {
@@ -221,6 +362,7 @@ function SessionProvider(props: SessionProviderProps) {
   };
 
   // reload sesison from db
+  // call when isAwarded changed via server call
   const reload = async () => {
     if (state.sessionId && state.clientToken) {
       return loadSession(state.sessionId, state.clientToken);
@@ -237,37 +379,15 @@ function SessionProvider(props: SessionProviderProps) {
     else return null;
   };
 
-  // returns true is all required badges are awarded.
-  const allBadgesAwarded = () => {
-    console.log(
-      `allBadgesAwarded ${JSON.stringify(state.session?.requiredBadges)}`
-    );
-    const session = state.session;
-    if (!session) {
-      return false;
-    }
-    let finished = true;
-
-    if (session.type == "BADGE" && !session.itemState.isAwarded) {
-      return false;
-    }
-
-    if (session.requiredBadges) {
-      session.requiredBadges.forEach((badge) => {
-        if (!badge.itemState.isAwarded) {
-          finished = false;
-        }
-      });
-    }
-    return finished;
-  };
-
   const contextValue = {
     state,
     dispatch,
+    getSessionState: getSessionState,
+    startSession: startSession,
     loadSession: loadSession,
+    setCurrentBadge: setCurrentBadge,
+    redirectToLogin: redirectToLogin,
     reload: reload,
-    allBadgesAwarded: allBadgesAwarded,
     loadBadge: loadBadge,
   };
 

@@ -1,193 +1,68 @@
 "use client";
 
 import theme from "@/app/components/ThemeRegistry/theme";
-import { useState, useEffect, useRef } from "react";
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { useRouter, usePathname } from "next/navigation";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import { auth } from "@/firebase-config";
+import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
-import { useSessionContext } from "@/context/SessionContext";
+import { SessionState, useSessionContext } from "@/context/SessionContext";
 
 export const StartSessionButton = (props: {
   badgeId: string;
-  naddr: string;
-  state?: string;
-  pubkey?: string;
   isGroup?: boolean;
 }) => {
-  const { badgeId, naddr, state, pubkey, isGroup } = props; // naddr...
+  const { badgeId, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
-  const session = sessionContext.state.session;
-  const sessionId = sessionContext.state.sessionId;
-  const clientToken = sessionContext.state.clientToken;
-  const current = sessionContext.state.current;
-
-  const router = useRouter();
-  const pathName = usePathname();
 
   const defaultLabel = isGroup ? "Join Group" : "Get Badge";
   const awardedLabel = isGroup ? "Join Group" : "Badge Awarded";
 
-  const [uid, setUid] = useState("");
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
-  const [hasSession, setHasSession] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [allAwarded, setAllAwarded] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const effectRan = useRef(false);
-  useEffect(() => {
-    // prevent 2nd session creation due to Next.js React.Strict in dev mode
-    if (
-      !effectRan.current ||
-      (effectRan.current && process.env.NODE_ENV !== "development")
-    ) {
-      if (session == null) {
-        startSession();
-      }
-
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user == null) {
-          signInAnonymously(auth);
-        } else {
-          setUid(user.uid);
-        }
-      });
-      return () => {
-        effectRan.current = true;
-        unsubscribe();
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
-    console.log(`useEffect [session, current]`);
-    // has Session
-    setHasSession(session != null);
-    // all badges awarded
-    setAllAwarded(sessionContext.allBadgesAwarded());
-    console.log(`allBadgesAwarded ${sessionContext.allBadgesAwarded()}`);
-    // dialog open
-    setDialogOpen(current != null);
-  }, [session, current]);
+    const sessionState = sessionContext.state.sessionState;
+    console.log(`StartSessionButton useEffect ${sessionState} ${isGroup}`);
 
-  useEffect(() => {
-    const updateButton = () => {
-      console.log(`allAwarded ${allAwarded}`);
-      if (isGroup) {
-        setButtonLabel("Join Group");
-        setDisabled(!allAwarded);
-        return;
-      } else {
-        if (isLoading) {
-          setButtonLabel("loading...");
+    switch (sessionState) {
+      case SessionState.Initial:
+        setButtonLabel(defaultLabel);
+        setDisabled(false);
+        break;
+      case SessionState.InProgress:
+        if (isGroup) {
+          setButtonLabel(defaultLabel);
           setDisabled(true);
-          return;
-        }
-        if (!hasSession) {
+        } else {
           setButtonLabel(defaultLabel);
           setDisabled(false);
-          return;
         }
-        if (allAwarded) {
+        break;
+      case SessionState.DialogOpen:
+        setButtonLabel("waiting...");
+        setDisabled(true);
+        break;
+      case SessionState.ReadyToAward:
+        if (isGroup) {
+          setButtonLabel("Join Group");
+          setDisabled(false);
+        } else {
           setButtonLabel(awardedLabel);
           setDisabled(true);
-          redirectToApply();
+          sessionContext.redirectToLogin();
           return;
         }
-        if (dialogOpen) {
-          setButtonLabel("waiting...");
-          setDisabled(true);
-          return;
-        } else {
-          setButtonLabel(defaultLabel);
-          setDisabled(false);
-          return;
-        }
-      }
-    };
-
-    updateButton();
-  }, [isLoading, hasSession, dialogOpen, allAwarded]);
-
-  const startSession = async () => {
-    if (!isGroup) await startBadgeSession();
-    else await startGroupSession();
-    setIsLoading(false);
-  };
-
-  const startBadgeSession = async () => {
-    const functions = getFunctions();
-    const createBadgeSession = httpsCallable(functions, "createBadgeSession");
-    const result = await createBadgeSession({
-      badgeId: badgeId,
-      state: state ? state : "",
-      pubkey: pubkey ? pubkey : "",
-    });
-    // @ts-ignore
-    const newSession: { sessionId; awardToken; clientToken } = result.data;
-    if (newSession.sessionId && newSession.clientToken) {
-      sessionContext.loadSession(newSession.sessionId, newSession.clientToken);
     }
-  };
-
-  const startGroupSession = async () => {
-    const functions = getFunctions();
-    const createGroupSession = httpsCallable(functions, "createGroupSession");
-    const result = await createGroupSession({
-      groupId: badgeId,
-      state: state ? state : "",
-      pubkey: pubkey ? pubkey : "",
-    });
-    // @ts-ignore
-    const newSession: { sessionId; awardToken; clientToken } = result.data;
-    if (newSession.sessionId && newSession.clientToken) {
-      sessionContext.loadSession(newSession.sessionId, newSession.clientToken);
-    }
-  };
-
-  const redirectToApply = () => {
-    // save sessionId and clientToken to sessionStorage before redirect
-    const sessionId = sessionContext.state.sessionId;
-    const clientToken = sessionContext.state.clientToken;
-
-    if (sessionId && clientToken) {
-      sessionStorage.setItem(
-        "pendingAward",
-        JSON.stringify({ sessionId: sessionId, clientToken: clientToken })
-      );
-
-      const searchParams = new URLSearchParams();
-      searchParams.set("session", sessionId);
-      const updatedURL = `/e/${naddr}/login?${searchParams.toString()}`;
-      router.push(updatedURL);
-    }
-  };
+  }, [sessionContext.state.sessionState]);
 
   const onClick = async () => {
-    if (!hasSession) {
-      // create new session
-      if (uid != "") {
-        setIsLoading(true);
-        setDisabled(true);
-        await startSession();
-        setIsLoading(false);
-        setDisabled(false);
-      }
+    if (isGroup) {
+      // button only enabled after all badges awarded
+      // manual click to advance
+      sessionContext.redirectToLogin();
     } else {
-      if (isGroup) {
-        // button only enabled after all badges awarded
-        // manual click to advance
-        redirectToApply();
-      } else {
-        // single baddge, so open dialog
-        sessionContext.dispatch({ type: "setCurrentId", currentId: badgeId });
-      }
+      // single baddge, so open dialog
+      sessionContext.setCurrentBadge(badgeId);
     }
   };
 

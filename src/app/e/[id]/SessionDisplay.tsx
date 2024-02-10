@@ -3,9 +3,11 @@ import { useSessionContext } from "@/context/SessionContext";
 
 export const SessionDisplay = () => {
   const sessionContext = useSessionContext();
-  const session = sessionContext.state.sessionId;
+  const sessionId = sessionContext.state.sessionId;
+  const state = sessionContext.getSessionState();
   const currentBadge = sessionContext.state.currentId;
   const clientToken = sessionContext.state.clientToken;
+  const session = JSON.stringify(sessionContext.state.session);
 
   const isDev = process.env.NODE_ENV == "development";
 
@@ -13,11 +15,12 @@ export const SessionDisplay = () => {
     <>
       {isDev && (
         <>
-          <p>Server Session</p>
+          <p>Session</p>
+          <p>{`SessionId: ${session}`}</p>
+          <p>{`State: ${state}`}</p>
           <p>{`CurrentBadge: ${currentBadge}`}</p>
-          <p>{`Session: ${session}`}</p>
           <p>{`ClientToken: ${clientToken}`}</p>
-          <p>{`All Awarded: ${sessionContext.allBadgesAwarded()}`}</p>
+          <p>{`Session: ${session}`}</p>
         </>
       )}
     </>
