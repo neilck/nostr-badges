@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import Stack from "@mui/material/Stack";
 import { getEvent } from "@/data/serverActions";
 import { Event, toNostrEvent } from "@/data/eventLib";
@@ -41,7 +42,7 @@ export default async function ViewEventPage({
       }
     }
   } catch {
-    return <>{`event ${params.id} not found`}</>;
+    return notFound();
   }
 
   let isBadge = false;

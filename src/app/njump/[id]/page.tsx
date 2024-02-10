@@ -1,4 +1,5 @@
 import * as React from "react";
+import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { Event, toNostrEvent } from "@/data/eventLib";
 import { getEvent } from "@/data/serverActions";
@@ -110,7 +111,7 @@ export default async function Njump({
       }
     }
   } catch {
-    return <>{`event ${params.id} not found`}</>;
+    return notFound();
   }
 
   let isBadge = false;
