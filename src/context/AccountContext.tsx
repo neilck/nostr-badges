@@ -17,7 +17,9 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { useRouter, usePathname } from "next/navigation";
 
 import { useNostrContext } from "./NostrContext";
-import { defaultRelays } from "@/data/accountLib";
+import { getDefaultRelays } from "@/data/relays";
+
+const defaultRelays = getDefaultRelays();
 
 // <---------- REDUCER ---------->
 type Action =

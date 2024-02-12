@@ -15,7 +15,8 @@ import { CardHeading } from "@/app/components/items/CardHeadings";
 import { ChangeEvent } from "react";
 import { useAccountContext } from "@/context/AccountContext";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
-import { defaultRelays, loadAccount, saveAccount } from "@/data/accountLib";
+import { getDefaultRelays } from "@/data/relays";
+import { loadAccount, saveAccount } from "@/data/accountLib";
 
 export default function Relays() {
   const accountContext = useAccountContext();
@@ -25,6 +26,7 @@ export default function Relays() {
   const [relayValue, setRelayValue] = useState("");
   const [relays, setRelays] = useState<string[]>([]);
   const [useDefaults, setUseDefaults] = useState(true);
+  const defaultRelays = getDefaultRelays();
 
   useEffect(() => {
     if (account != null) {

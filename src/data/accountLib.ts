@@ -1,15 +1,6 @@
 import debug from "debug";
 import { getFirestore } from "firebase/firestore/lite";
 import { loadItem, saveItem } from "./firestoreLib";
-import allRelays from "./relays.json";
-
-const relaysRecord: Record<string, { isPaid?: boolean; isDefault?: boolean }> =
-  allRelays;
-export const defaultRelays: string[] = [];
-Object.keys(relaysRecord).forEach((name) => {
-  const data = relaysRecord[name];
-  if (data.isDefault) defaultRelays.push(name);
-});
 
 // <---------- Account ---------->
 export const CURRENT_VERSION = 1.1;
