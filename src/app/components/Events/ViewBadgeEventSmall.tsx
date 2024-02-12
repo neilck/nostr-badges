@@ -33,6 +33,7 @@ export const ViewBadgeEventSmall = (props: { id: string; e: NostrEvent }) => {
         name={name}
         description={description}
         image={thumb != "" ? thumb : image}
+        awarded={true}
       />
     </Stack>
   );
