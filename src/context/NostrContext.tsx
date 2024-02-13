@@ -10,7 +10,9 @@ import NDK, {
   NDKRelay,
   NDKPrivateKeySigner,
 } from "@nostr-dev-kit/ndk";
-import { defaultRelays } from "@/data/accountLib";
+import { getDefaultRelays } from "@/data/relays";
+
+const defaultRelays = getDefaultRelays();
 
 // global ndk instances
 const _signer = NDKPrivateKeySigner.generate();
