@@ -101,9 +101,10 @@ export default function Profile() {
             New Group Memberships
           </Typography>
         )}
-        {groups.map((group) => {
+        {groups.map((group, index) => {
           return (
             <BadgeAwardedRow
+              key={`${group.name}-${index.toString()}`}
               name={group.name}
               description={group.description}
               image={group.image}
@@ -116,9 +117,10 @@ export default function Profile() {
             New Badges
           </Typography>
         )}
-        {badges.map((badge) => {
+        {badges.map((badge, index) => {
           return (
             <BadgeAwardedRow
+              key={`${badge.name}-${index.toString()}`}
               name={badge.name}
               description={badge.description}
               image={badge.image}
