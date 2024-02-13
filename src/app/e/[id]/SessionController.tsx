@@ -1,17 +1,24 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSessionContext } from "@/context/SessionContext";
 
 export const SessionController = (props: {
   badgeId: string;
   naddr: string;
+  sessionId?: string;
   state?: string;
   pubkey?: string;
   isGroup?: boolean;
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const sessionContext = useSessionContext();
-  const { badgeId, naddr, state, pubkey, isGroup } = props;
+
+  const { badgeId, naddr, sessionId, state, pubkey, isGroup } = props;
   const session = sessionContext.state.session;
 
   const effectRan = useRef(false);
@@ -21,7 +28,24 @@ export const SessionController = (props: {
       !effectRan.current ||
       (effectRan.current && process.env.NODE_ENV !== "development")
     ) {
-      load();
+      if (sessionId) {
+        console.log("loading sessionId: " + sessionId);
+        try {
+          const clientToken = sessionStorage.getItem(sessionId);
+          if (clientToken) {
+            sessionContext.loadSession(sessionId, clientToken);
+          } else {
+            start();
+          }
+        } catch {
+          console.log(
+            "Error loading session from session storage, starting new session"
+          );
+          start();
+        }
+      } else {
+        start();
+      }
 
       return () => {
         effectRan.current = true;
@@ -30,16 +54,23 @@ export const SessionController = (props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const load = async () => {
+  const start = async () => {
     if (session == null) {
       console.log("starting session");
-      await sessionContext.startSession({
+      const result = await sessionContext.startSession({
         type: isGroup ? "GROUP" : "BADGE",
         docId: badgeId,
         naddr: naddr,
         state: state,
         pubkey: pubkey,
       });
+      // add sessionId to URL
+      if (result?.sessionId) {
+        const current = new URLSearchParams(Array.from(searchParams.entries()));
+        current.set("session", result?.sessionId);
+        const search = `?${current.toString()}`;
+        router.replace(`${pathname}${search}`);
+      }
     }
   };
 

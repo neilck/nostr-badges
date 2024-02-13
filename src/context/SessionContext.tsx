@@ -209,8 +209,11 @@ function SessionProvider(props: SessionProviderProps) {
     contextDebug(`startSession called ${JSON.stringify(params)}`);
     dispatch({ type: "setNAddr", naddr: params.naddr });
     const result = await createSession(params);
-    if (result)
+    if (result) {
+      // save client token to storage
+      sessionStorage.setItem(result.sessionId, result.session.clientToken);
       loadSession(result.sessionId, result.session.clientToken, result.session);
+    }
     return result;
   };
 

@@ -17,10 +17,10 @@ export default async function ViewEventPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { state?: string; pubkey?: string };
+  searchParams: { session?: string; state?: string; pubkey?: string };
 }) {
   const naddr = params.id;
-  const { state, pubkey } = searchParams;
+  const { session, state, pubkey } = searchParams;
 
   let event: Event | undefined = undefined;
   let nostrEvent: NostrEvent | undefined = undefined;
@@ -78,6 +78,7 @@ export default async function ViewEventPage({
       <SessionController
         badgeId={id}
         naddr={naddr}
+        sessionId={session}
         state={state}
         pubkey={pubkey}
         isGroup={isGroup}
