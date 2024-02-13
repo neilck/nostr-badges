@@ -5,6 +5,7 @@ import { getEvent } from "@/data/serverActions";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import * as nip19 from "@/nostr-tools/nip19";
 import { Login } from "@/app/components/Login/Login";
+import { Accept } from "./Accept";
 import { ViewBadgeEventSmall } from "@/app/components/Events/ViewBadgeEventSmall";
 
 export default async function LoginPage({
@@ -28,7 +29,14 @@ export default async function LoginPage({
   }
 
   return (
-    <Box minHeight={320} maxWidth={360}>
+    <Box
+      minHeight={320}
+      maxWidth={360}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+    >
+      <Accept />
       <Login
         title="Badge earned!"
         instructions="To save your badge, please sign in."
