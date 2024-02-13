@@ -25,7 +25,6 @@ export type Session = {
   state: string;
   pubkey: string;
   uid: string;
-  clientToken: string;
   requiredGroups?: SessionGroup[];
   requiredBadges?: SessionBadge[];
   lastUpdated: FieldValue;
@@ -34,7 +33,6 @@ export type Session = {
 export type CreateSessionParams = {
   type: "BADGE" | "GROUP" | "OFFER";
   docId: string;
-  naddr: string;
   state?: string;
   pubkey?: string;
 };

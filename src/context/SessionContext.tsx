@@ -1,6 +1,10 @@
 /***
  * Handles state during user applicaton for group / badge
+ * Id written to sessionStorage to persist over refreshes
+ *
  * state.session corresponds to session record stored in database
+ * (all other fields used by client UI)
+ * database session is updated 3rd party badge apply pages, requiring reload when iframe dialog closed
  *
  */
 "use client";
@@ -47,8 +51,6 @@ export type Current = {
 type Action =
   | { type: "setSessionId"; sessionId: string | null }
   | { type: "setSession"; session: Session | null }
-  | { type: "setNAddr"; naddr: string | null }
-  | { type: "setClientToken"; clientToken: string | null }
   | { type: "setCurrentId"; currentId: string | null }
   | { type: "setCurrent"; current: Current | null }
   | { type: "setDisplay"; display: Display | null }
@@ -59,7 +61,6 @@ type Dispatch = (action: Action) => void;
 
 type State = {
   sessionId: string | null;
-  naddr: string | null;
   session: Session | null;
   sessionState: SessionState;
   currentId: string | null;
@@ -80,9 +81,9 @@ const SessionContext = createContext<
       startSession: (
         params: CreateSessionParams
       ) => Promise<CreateSessionResult>;
-      loadSession: (sessionId: string, clientToken: string) => void;
+      resumeSession: () => Promise<boolean>;
       setCurrentBadge: (badgeId: string) => void;
-      redirectToLogin: () => void;
+      redirectToLogin: (naddr: string) => void;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
       reload: () => void;
     }
@@ -96,12 +97,6 @@ function reducer(state: State, action: Action) {
     }
     case "setSession": {
       return { ...state, session: action.session };
-    }
-    case "setNAddr": {
-      return { ...state, naddr: action.naddr };
-    }
-    case "setClientToken": {
-      return { ...state, clientToken: action.clientToken };
     }
     case "setCurrentId": {
       return { ...state, currentId: action.currentId };
@@ -130,9 +125,7 @@ function SessionProvider(props: SessionProviderProps) {
   const [state, dispatch] = useReducer(reducer, {
     sessionId: null,
     session: null,
-    naddr: null,
     sessionState: SessionState.Initial,
-    clientToken: null,
     currentId: null,
     current: null,
     display: null,
@@ -211,73 +204,69 @@ function SessionProvider(props: SessionProviderProps) {
 
   const startSession = async (params: CreateSessionParams) => {
     contextDebug(`startSession called ${JSON.stringify(params)}`);
-    dispatch({ type: "setNAddr", naddr: params.naddr });
+    // createSession creates session in DB
     const result = await createSession(params);
     if (result) {
-      // save client token to storage
-      sessionStorage.setItem(result.sessionId, result.session.clientToken);
-      loadSession(result.sessionId, result.session.clientToken, result.session);
+      // update context with new session
+      dispatch({ type: "setSessionId", sessionId: result.sessionId });
+      dispatch({ type: "setSession", session: result.session });
+      updateFromSession(result.session);
+
+      // save session Id to sessionStorage
+      sessionStorage.setItem("session", result.sessionId);
     }
     return result;
   };
 
-  const loadSession = async (
-    sessionId: string,
-    clientToken: string,
-    session?: Session
-  ) => {
-    contextDebug(
-      `loadSession called sessionId: ${sessionId} clientToken: ${clientToken}`
-    );
+  const resumeSession = async () => {
+    const sessionId = sessionStorage.getItem("session");
+    contextDebug(`resumeSession called, sessionId ${sessionId}`);
 
-    if (sessionId && clientToken) {
-      if (!session) {
-        session = await getSession(sessionId, clientToken);
-      }
-
-      contextDebug(
-        `loadingSession: ${sessionId} => ${JSON.stringify(session)}`
-      );
+    if (sessionId) {
+      const session = await getSession(sessionId);
       if (session) {
         dispatch({ type: "setSessionId", sessionId: sessionId });
-        dispatch({ type: "setClientToken", clientToken: clientToken });
         dispatch({ type: "setSession", session: session });
-
-        const currentId = getAutoOpenBadge(session);
-        if (currentId) {
-          await setCurrentBadge(currentId);
-        }
-
-        // load badge or group for display
-        const display: Display = { title: "", description: "", image: "" };
-        if (session.type == "BADGE") {
-          const badge = await loadBadge(session.targetId);
-          if (badge) {
-            display.title = badge.name;
-            display.description = badge.description;
-            display.image =
-              badge.thumbnail != "" ? badge.thumbnail : badge.image;
-          }
-        }
-        if (session.type == "GROUP") {
-          const group = await fsLoadGroup(session.targetId, "groups");
-          if (group) {
-            display.title = group.name;
-            display.description = group.description;
-            display.image = group.image;
-          }
-        }
-
-        dispatch({ type: "setDisplay", display: display });
-
-        updateSessionState(session, currentId);
-
-        return session;
+        updateFromSession(session);
+        return true;
       }
     }
 
-    contextDebug(`loadingSession(${sessionId} => no action`);
-    return undefined;
+    return false;
+  };
+
+  /***
+   * update client session properies when loaded from database
+   */
+  const updateFromSession = async (session: Session) => {
+    const currentId = getAutoOpenBadge(session);
+    if (currentId) {
+      await setCurrentBadge(currentId);
+    }
+
+    // load badge or group for display
+    const display: Display = { title: "", description: "", image: "" };
+    if (session.type == "BADGE") {
+      const badge = await loadBadge(session.targetId);
+      if (badge) {
+        display.title = badge.name;
+        display.description = badge.description;
+        display.image = badge.thumbnail != "" ? badge.thumbnail : badge.image;
+      }
+    }
+
+    if (session.type == "GROUP") {
+      const group = await fsLoadGroup(session.targetId, "groups");
+      if (group) {
+        display.title = group.name;
+        display.description = group.description;
+        display.image = group.image;
+      }
+    }
+
+    dispatch({ type: "setDisplay", display: display });
+
+    updateSessionState(session, currentId);
   };
 
   const setCurrentBadge = async (badgeId: string) => {
@@ -332,22 +321,13 @@ function SessionProvider(props: SessionProviderProps) {
     }
   };
 
-  const redirectToLogin = () => {
-    // save sessionId and clientToken to sessionStorage before redirect
-    if (!state.sessionId) return;
-
-    sessionStorage.setItem(
-      "pendingAward",
-      JSON.stringify({
-        sessionId: state.sessionId,
-        clientToken: state.session?.clientToken,
-      })
-    );
-
-    const searchParams = new URLSearchParams();
-    searchParams.set("session", state.sessionId);
-    const updatedURL = `/e/${state.naddr}/accept?${searchParams.toString()}`;
-    router.push(updatedURL);
+  const redirectToLogin = (naddr: string) => {
+    if (state.sessionId) {
+      const searchParams = new URLSearchParams();
+      searchParams.set("session", state.sessionId);
+      const updatedURL = `/e/${naddr}/accept?${searchParams.toString()}`;
+      router.push(updatedURL);
+    }
   };
 
   const loadBadge = async (badgeId: string) => {
@@ -371,8 +351,15 @@ function SessionProvider(props: SessionProviderProps) {
   // reload sesison from db
   // call when isAwarded changed via server call
   const reload = async () => {
-    if (state.sessionId && state.session?.clientToken) {
-      return loadSession(state.sessionId, state.session?.clientToken);
+    const sessionId = state.sessionId;
+    if (sessionId) {
+      const session = await getSession(sessionId);
+      if (session) {
+        dispatch({ type: "setSessionId", sessionId: sessionId });
+        dispatch({ type: "setSession", session: session });
+        updateFromSession(session);
+        return true;
+      }
     }
   };
 
@@ -391,7 +378,7 @@ function SessionProvider(props: SessionProviderProps) {
     dispatch,
     getSessionState: getSessionState,
     startSession: startSession,
-    loadSession: loadSession,
+    resumeSession: resumeSession,
     setCurrentBadge: setCurrentBadge,
     redirectToLogin: redirectToLogin,
     reload: reload,

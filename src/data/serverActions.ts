@@ -43,13 +43,10 @@ export const getEventByAddress = async (
   return res.json();
 };
 
-export async function getSession(
-  id: string,
-  clientToken: string
-): Promise<Session> {
+export async function getSession(id: string): Promise<Session> {
   const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
 
-  const url = `https://getsession-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getSession?id=${id}&token=${clientToken}`;
+  const url = `https://getsession-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getSession?id=${id}`;
   const res = await fetch(url, {
     headers: { authorization },
     cache: "no-store",

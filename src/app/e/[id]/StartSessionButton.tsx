@@ -9,9 +9,10 @@ import { SessionState, useSessionContext } from "@/context/SessionContext";
 
 export const StartSessionButton = (props: {
   badgeId: string;
+  naddr: string;
   isGroup?: boolean;
 }) => {
-  const { badgeId, isGroup } = props; // naddr...
+  const { badgeId, naddr, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
 
   const defaultLabel = isGroup ? "Join Group" : "Get Badge";
@@ -49,7 +50,7 @@ export const StartSessionButton = (props: {
         } else {
           setButtonLabel(awardedLabel);
           setDisabled(true);
-          sessionContext.redirectToLogin();
+          sessionContext.redirectToLogin(naddr);
           return;
         }
     }
@@ -59,7 +60,7 @@ export const StartSessionButton = (props: {
     if (isGroup) {
       // button only enabled after all badges awarded
       // manual click to advance
-      sessionContext.redirectToLogin();
+      sessionContext.redirectToLogin(naddr);
     } else {
       // single baddge, so open dialog
       sessionContext.setCurrentBadge(badgeId);

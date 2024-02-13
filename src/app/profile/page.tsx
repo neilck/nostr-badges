@@ -27,10 +27,7 @@ export default function Profile() {
   useEffect(() => {
     const load = async () => {
       if (pendingAward) {
-        const session = await getSession(
-          pendingAward.sessionId,
-          pendingAward.clientToken
-        );
+        const session = await getSession(pendingAward);
         if (session) {
           const updatedBadges = [];
           const updatedGroups = [];

@@ -1,15 +1,14 @@
 import Box from "@mui/material/Box";
-
+import { Session } from "@/data/sessionLib";
 import { Event, toNostrEvent } from "@/data/eventLib";
-import { getEvent } from "@/data/serverActions";
+import { getEvent, getSession } from "@/data/serverActions";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import * as nip19 from "@/nostr-tools/nip19";
-import { ApplySessionController } from "./ApplySessionController";
 import { Login } from "@/app/components/Login/Login";
 import { Accept } from "./Accept";
 import { ViewBadgeEventSmall } from "@/app/components/Events/ViewBadgeEventSmall";
 
-export default async function LoginPage({
+export default async function AcceptPage({
   params,
   searchParams,
 }: {
@@ -17,6 +16,14 @@ export default async function LoginPage({
   searchParams: { session?: string };
 }) {
   const sessionId = searchParams.session;
+  let session: Session | undefined = undefined;
+  if (sessionId) {
+    try {
+      session = await getSession(sessionId);
+    } catch {
+      console.log(`Session ${sessionId} not found.`);
+    }
+  }
 
   const decoded = nip19.decode(params.id);
   let addressPointer: nip19.AddressPointer | undefined = undefined;
@@ -41,6 +48,7 @@ export default async function LoginPage({
       flexDirection="column"
       justifyContent="center"
     >
+      {session && <>{JSON.stringify(session)}</>}
       <Accept />
       <Login
         title="Badge earned!"
@@ -48,7 +56,6 @@ export default async function LoginPage({
       >
         <ViewBadgeEventSmall id={id} e={nostrEvent!} />
       </Login>
-      <ApplySessionController sessionId={sessionId} />
     </Box>
   );
 }

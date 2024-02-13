@@ -27,21 +27,16 @@ type Action =
   | { type: "setAccount"; account: Account | null }
   | { type: "setCurrentProfile"; currentProfile: Profile | null }
   | { type: "setCreatorMode"; creatorMode: boolean }
-  | { type: "setPendingAward"; pendingAward: PendingAward | null };
+  | { type: "setPendingAward"; pendingAward: string | null };
 
 type Dispatch = (action: Action) => void;
-
-export type PendingAward = {
-  sessionId: string;
-  clientToken: string;
-};
 
 type State = {
   loading: boolean;
   account: Account | null;
   profiles: Profile[];
   currentProfile: Profile | null;
-  pendingAward: PendingAward | null;
+  pendingAward: string | null;
   creatorMode: boolean;
 };
 
