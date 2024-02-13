@@ -62,7 +62,6 @@ type State = {
   naddr: string | null;
   session: Session | null;
   sessionState: SessionState;
-  clientToken: string | null;
   currentId: string | null;
   current: Current | null;
   display: Display | null;
@@ -341,7 +340,7 @@ function SessionProvider(props: SessionProviderProps) {
       "pendingAward",
       JSON.stringify({
         sessionId: state.sessionId,
-        clientToken: state.clientToken,
+        clientToken: state.session?.clientToken,
       })
     );
 
@@ -372,8 +371,8 @@ function SessionProvider(props: SessionProviderProps) {
   // reload sesison from db
   // call when isAwarded changed via server call
   const reload = async () => {
-    if (state.sessionId && state.clientToken) {
-      return loadSession(state.sessionId, state.clientToken);
+    if (state.sessionId && state.session?.clientToken) {
+      return loadSession(state.sessionId, state.session?.clientToken);
     }
   };
 

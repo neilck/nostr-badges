@@ -6,7 +6,9 @@ export const SessionDisplay = () => {
   const sessionId = sessionContext.state.sessionId;
   const state = sessionContext.getSessionState();
   const currentBadge = sessionContext.state.currentId;
-  const clientToken = sessionContext.state.clientToken;
+  const clientToken = sessionContext.state.session
+    ? sessionContext.state.session.clientToken
+    : "";
   const session = JSON.stringify(sessionContext.state.session);
 
   const isDev = process.env.NODE_ENV == "development";
