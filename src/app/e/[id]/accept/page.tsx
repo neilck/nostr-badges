@@ -4,15 +4,20 @@ import { Event, toNostrEvent } from "@/data/eventLib";
 import { getEvent } from "@/data/serverActions";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import * as nip19 from "@/nostr-tools/nip19";
+import { ApplySessionController } from "./ApplySessionController";
 import { Login } from "@/app/components/Login/Login";
 import { Accept } from "./Accept";
 import { ViewBadgeEventSmall } from "@/app/components/Events/ViewBadgeEventSmall";
 
 export default async function LoginPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams: { session?: string };
 }) {
+  const sessionId = searchParams.session;
+
   const decoded = nip19.decode(params.id);
   let addressPointer: nip19.AddressPointer | undefined = undefined;
   if (decoded.type == "naddr") {
@@ -43,6 +48,7 @@ export default async function LoginPage({
       >
         <ViewBadgeEventSmall id={id} e={nostrEvent!} />
       </Login>
+      <ApplySessionController sessionId={sessionId} />
     </Box>
   );
 }

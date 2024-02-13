@@ -1,3 +1,8 @@
+/***
+ * Handles state during user applicaton for group / badge
+ * state.session corresponds to session record stored in database
+ *
+ */
 "use client";
 
 import debug from "debug";
@@ -342,7 +347,7 @@ function SessionProvider(props: SessionProviderProps) {
 
     const searchParams = new URLSearchParams();
     searchParams.set("session", state.sessionId);
-    const updatedURL = `/e/${state.naddr}/login?${searchParams.toString()}`;
+    const updatedURL = `/e/${state.naddr}/accept?${searchParams.toString()}`;
     router.push(updatedURL);
   };
 
