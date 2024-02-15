@@ -3,7 +3,7 @@
 import debug from "debug";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { auth } from "@/firebase-config";
-import { signInWithCustomToken } from "firebase/auth";
+import { UserCredential, signInWithCustomToken } from "firebase/auth";
 
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -12,7 +12,11 @@ import { useAccountContext } from "@/context/AccountContext";
 
 const loginDebug = debug("aka:Login");
 
-export const NostrButton = () => {
+export const NostrButton = (props: {
+  redirect?: boolean;
+  onSignIn?: (userCredential: void | UserCredential) => void;
+}) => {
+  const { redirect, onSignIn } = props;
   const accountContext = useAccountContext();
   const { loading } = accountContext.state;
   const dispatch = accountContext.dispatch;
@@ -44,6 +48,7 @@ export const NostrButton = () => {
     // @ts-ignore Error in NDK global interface declaration
     const signedEvent = await window.nostr?.signEvent(event).catch((error) => {
       loginDebug("Sign event error: %o", error);
+      dispatch({ type: "setLoading", loading: false });
       return;
     });
 
@@ -65,13 +70,20 @@ export const NostrButton = () => {
     // @ts-ignore
     const token = result.data.token;
 
-    signInWithCustomToken(auth, token).catch((error) => {
-      loginDebug("Custom token signin error: %o", error);
-    });
+    signInWithCustomToken(auth, token)
+      .then((result) => {
+        if (onSignIn) onSignIn(result);
+      })
+      .catch((error) => {
+        loginDebug("Custom token signin error: %o", error);
+      })
+      .finally(() => {
+        dispatch({ type: "setLoading", loading: false });
+      });
   };
 
   const clickHandler = () => {
-    accountContext.signOut();
+    accountContext.signOut(redirect);
     dispatch({ type: "setLoading", loading: true });
     onNostrClick().catch((error) => {
       console.log(error);

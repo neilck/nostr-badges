@@ -1,5 +1,6 @@
 "use server";
 
+import { Badge } from "./badgeLib";
 import { Event } from "./eventLib";
 import { Session } from "./sessionLib";
 
@@ -47,6 +48,22 @@ export async function getSession(id: string): Promise<Session> {
   const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
 
   const url = `https://getsession-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getSession?id=${id}`;
+  const res = await fetch(url, {
+    headers: { authorization },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+  return res.json();
+}
+
+export async function getBadge(id: string): Promise<Badge> {
+  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+
+  const url = `https://getbadge-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getBadge?id=${id}`;
   const res = await fetch(url, {
     headers: { authorization },
     cache: "no-store",

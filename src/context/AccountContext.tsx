@@ -46,7 +46,7 @@ const AccountContext = createContext<
   | {
       state: State;
       dispatch: Dispatch;
-      signOut: () => {};
+      signOut: (redirect?: boolean) => {};
       clearPending: () => void;
       getRelays: () => string[];
     }
@@ -89,13 +89,13 @@ export const AccountProvider = (props: AccountProviderProps) => {
     pendingAward: null,
   });
 
-  const signOut = async () => {
+  const signOut = async (redirect = true) => {
     dispatch({ type: "setAccount", account: null });
     // dispatch({ type: "setCreatorMode", creatorMode: false });
     setCurrentProfileFromAccount(null);
     await auth.signOut();
     contextDebug("signed out");
-    router.push("/");
+    if (redirect) router.push("/");
   };
 
   // clears pending award from context and session storage
@@ -121,13 +121,19 @@ export const AccountProvider = (props: AccountProviderProps) => {
   const setCurrentProfileFromAccount = async (account: Account | null) => {
     contextDebug("loading current profile for " + account?.uid);
     let current = null;
-    if (account == null) return null;
+    if (account == null) {
+      dispatch({ type: "setCurrentProfile", currentProfile: null });
+      return null;
+    }
 
     const profiles = await loadProfiles(account?.uid).catch((error) => {
       contextDebug(`error loadProfiles(${account?.uid})`);
     });
 
-    if (!profiles || Object.keys(profiles).length == 0) return null;
+    if (!profiles || Object.keys(profiles).length == 0) {
+      contextDebug(`no profile found for (${account?.uid})`);
+      return null;
+    }
 
     const key = Object.keys(profiles)[0];
     current = profiles[key];

@@ -27,7 +27,7 @@ export type Session = {
   uid: string;
   requiredGroups?: SessionGroup[];
   requiredBadges?: SessionBadge[];
-  lastUpdated: FieldValue;
+  lastUpdated?: FieldValue;
 };
 
 export type CreateSessionParams = {
@@ -35,6 +35,17 @@ export type CreateSessionParams = {
   docId: string;
   state?: string;
   pubkey?: string;
+};
+
+export const getEmptySession = (): Session => {
+  return {
+    type: "BADGE",
+    targetId: "",
+    itemState: { awardtoken: "", isAwarded: false, awardData: undefined },
+    state: "",
+    pubkey: "",
+    uid: "",
+  };
 };
 
 export type CreateSessionResult =

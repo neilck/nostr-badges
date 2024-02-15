@@ -5,7 +5,11 @@ import ButtonBase from "@mui/material/ButtonBase";
 import debug from "debug";
 import Image from "next/image";
 import { useAccountContext } from "@/context/AccountContext";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  UserCredential,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "@/firebase-config";
 
 const loginDebug = debug("aka:Login");
@@ -13,9 +17,12 @@ const provider = new GoogleAuthProvider();
 
 export interface GoogleButtonProps {
   disabled: boolean;
+  redirect?: boolean;
+  onSignIn?: (userCredential: void | UserCredential) => void;
 }
 
 export const GoogleButton = (props: GoogleButtonProps) => {
+  const { onSignIn, disabled, redirect } = props;
   const accountContext = useAccountContext();
   const [isHovered, setIsHovered] = useState(false);
 
@@ -28,13 +35,17 @@ export const GoogleButton = (props: GoogleButtonProps) => {
   };
 
   const clickHandler = () => {
-    accountContext.signOut();
+    accountContext.signOut(redirect);
     provider.setCustomParameters({
       prompt: "select_account",
     });
-    signInWithPopup(auth, provider).catch((error) => {
-      loginDebug("signInWithPopup error: %o", error);
-    });
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        if (onSignIn) onSignIn(result);
+      })
+      .catch((error) => {
+        loginDebug("signInWithPopup error: %o", error);
+      });
   };
 
   return (
@@ -42,7 +53,7 @@ export const GoogleButton = (props: GoogleButtonProps) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={clickHandler}
-      disabled={props.disabled}
+      disabled={disabled}
       color="primary"
       sx={{
         width: "191px",

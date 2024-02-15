@@ -1,35 +1,100 @@
-"use client";
+import Box from "@mui/material/Box";
+import { parseEventTags } from "@/app/utils/parseEvent";
 
-import { useSessionContext } from "@/context/SessionContext";
+import { BadgeAwardedRow } from "@/app/components/BadgeAwardedRow";
+import { BadgeRowSmall } from "@/app/components/BadgeRowSmall";
 import { CardTitle } from "@/app/components/items/CardHeadings";
-import { useEffect, useState } from "react";
+import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { Badge } from "@/data/badgeLib";
+import { Stack, Typography } from "@mui/material";
+import { Sign } from "./Sign";
+import { useState } from "react";
 
-export const Accept = () => {
-  const sessionContext = useSessionContext();
-  const [type, setType] = useState<string>("");
-  const [title, setTitle] = useState<string>("");
+export const Accept = (props: {
+  id: string;
+  type: string;
+  nostrEvent: NostrEvent;
+  badges: Badge[];
+}) => {
+  const { id, type, nostrEvent, badges } = props;
+  const recordTags = parseEventTags(nostrEvent);
 
-  useEffect(() => {
-    console.log(sessionContext.state);
-    if (sessionContext.state.session) {
-      const type = sessionContext.state.session.type;
-      setType(type);
-      switch (type) {
-        case "BADGE":
-          setTitle("Badge earned!");
-          break;
-        case "GROUP":
-          setTitle("Membership approved!");
-          break;
-        default:
-          setTitle("Approved");
-      }
+  let name = "";
+  let description = "";
+  let image = "";
+  let thumb = "";
+
+  if (recordTags["name"]) name = recordTags["name"][0];
+  if (recordTags["description"]) description = recordTags["description"][0];
+  if (recordTags["image"]) image = recordTags["image"][0];
+  if (recordTags["thumb"]) thumb = recordTags["thumb"][0];
+
+  const getTitle = (type: string) => {
+    switch (type) {
+      case "BADGE":
+        return "Badge earned!";
+      case "GROUP":
+        return "Membership approved!";
+      default:
+        return "Approved";
     }
-  }, [sessionContext.state]);
+  };
+
+  const getInstructions = (type: string) => {
+    switch (type) {
+      case "BADGE":
+        return "To save your badge, please sign in.";
+      case "GROUP":
+        return "To save your group membership, please sign in.";
+      default:
+        return "Approved";
+    }
+  };
+
+  const title = getTitle(type);
+  const instructions = getInstructions(type);
 
   return (
-    <>
-      <CardTitle>{title}</CardTitle>
-    </>
+    <Box display="flex" flexDirection="column" alignItems="center">
+      <Box>
+        <CardTitle>{title}</CardTitle>
+      </Box>
+
+      <Box
+        width="100%"
+        sx={{
+          mt: 2,
+          p: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "stretch",
+          border: 1,
+          borderColor: "grey.400",
+        }}
+      >
+        <Box width="auto" pt={1} pb={1}>
+          <BadgeAwardedRow
+            name={name}
+            description={description}
+            image={thumb != "" ? thumb : image}
+            awarded={true}
+          />
+        </Box>
+        {badges.length > 0 && (
+          <Stack pt={1} width="100%" spacing={1}>
+            {badges.map((badge) => (
+              <BadgeRowSmall
+                name={badge.name}
+                image={badge.thumbnail != "" ? badge.thumbnail : badge.image}
+              />
+            ))}
+          </Stack>
+        )}
+      </Box>
+
+      <Box pt={2} pb={3} width="100%">
+        <Sign instructions={instructions} />
+      </Box>
+    </Box>
   );
 };

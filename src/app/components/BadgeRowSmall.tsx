@@ -36,7 +36,7 @@ export const BadgeRowSmall = (props: { name: string; image: string }) => {
           >
             <Typography
               variant="body1"
-              fontWeight={400}
+              fontWeight={500}
               sx={{ minWidth: 0, pt: 0.5 }}
             >
               {name}
