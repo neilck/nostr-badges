@@ -84,6 +84,7 @@ export const Accept = (props: {
           <Stack pt={1} width="100%" spacing={1}>
             {badges.map((badge) => (
               <BadgeRowSmall
+                key={badge.uid + "-" + badge.identifier}
                 name={badge.name}
                 image={badge.thumbnail != "" ? badge.thumbnail : badge.image}
               />
