@@ -1,5 +1,6 @@
 "use server";
 
+import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { Badge } from "./badgeLib";
 import { Event } from "./eventLib";
 import { Session } from "./sessionLib";
@@ -74,4 +75,32 @@ export async function getBadge(id: string): Promise<Badge> {
     throw new Error("Failed to fetch data");
   }
   return res.json();
+}
+
+export async function sessionCreateBadgeAwards(
+  sessionId: string,
+  pubkey: string
+) {
+  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+
+  const url = `https://getsessionbadgeawards-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getSessionBadgeAwards?session=${sessionId}&publickey=${pubkey}`;
+
+  const postData = {
+    session: sessionId,
+    publickey: pubkey,
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { authorization },
+    body: JSON.stringify(postData),
+    cache: "no-cache",
+  });
+
+  if (!response.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return true;
 }

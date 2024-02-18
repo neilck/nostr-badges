@@ -5,6 +5,7 @@ import { FieldValue } from "firebase/firestore/lite";
 export type ItemState = {
   awardtoken: string;
   isAwarded: boolean;
+  event?: string;
   awardData?: object;
 };
 

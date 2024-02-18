@@ -10,6 +10,7 @@ import { Box, Button, Card, Divider, Stack, Typography } from "@mui/material";
 import { ProfileSmall } from "./ProfileSmall";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { NostrButton } from "@/app/components/Login/NostrButton";
+import { sessionCreateBadgeAwards } from "@/data/serverActions";
 
 const shortNpub = (pubkey: string) => {
   const long = nip19.npubEncode(pubkey);
