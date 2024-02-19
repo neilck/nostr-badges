@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 import { Event, toNostrEvent } from "@/data/eventLib";
 
 import theme from "@/app/components/ThemeRegistry/theme";

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Stack from "@mui/material/Stack";
 import { getEvent } from "@/data/serverActions";
 import { Event, toNostrEvent } from "@/data/eventLib";
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 
 import { ViewBadgeEventSession } from "@/app/components/Events/ViewBadgeEventSession";
 import { SessionFrameDialog } from "@/app/components/FrameDialog/SessionFrameDialog";

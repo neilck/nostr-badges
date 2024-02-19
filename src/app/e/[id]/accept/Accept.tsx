@@ -1,12 +1,13 @@
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+
 import { parseEventTags } from "@/app/utils/parseEvent";
 
 import { BadgeAwardedRow } from "@/app/components/BadgeAwardedRow";
 import { BadgeRowSmall } from "@/app/components/BadgeRowSmall";
 import { CardTitle } from "@/app/components/items/CardHeadings";
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 import { Badge } from "@/data/badgeLib";
-import { Stack, Typography } from "@mui/material";
 import { Sign } from "./Sign";
 import { useState } from "react";
 

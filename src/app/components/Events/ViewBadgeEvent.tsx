@@ -1,7 +1,7 @@
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Event, toNostrEvent } from "@/data/eventLib";
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 import { BadgeView } from "@/app/components/BadgeView";
 import { parseEventTags } from "../../utils/parseEvent";
 import { BadgesList, RecordItem } from "@/app/components/BadgesList";

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { Event, toNostrEvent } from "@/data/eventLib";
 import { getEvent } from "@/data/serverActions";
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ViewBadgeEvent } from "@/app/components/Events/ViewBadgeEvent";

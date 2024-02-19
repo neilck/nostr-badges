@@ -1,7 +1,7 @@
 import Stack from "@mui/material/Stack";
 
 import { BadgeAwardedRow } from "@/app/components/BadgeAwardedRow";
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 import { parseEventTags } from "../../utils/parseEvent";
 
 export const ViewBadgeEventSmall = (props: { id: string; e: NostrEvent }) => {

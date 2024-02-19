@@ -1,6 +1,6 @@
 "use server";
 
-import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { NostrEvent } from "@/data/ndk-lite";
 import { Badge } from "./badgeLib";
 import { Event } from "./eventLib";
 import { Session } from "./sessionLib";
