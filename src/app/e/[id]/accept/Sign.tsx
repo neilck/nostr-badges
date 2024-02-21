@@ -4,6 +4,7 @@ import * as nip19 from "@/nostr-tools/nip19";
 import { Profile } from "@/data/profileLib";
 import { useAccountContext } from "@/context/AccountContext";
 import { useSessionContext } from "@/context/SessionContext";
+import { useNostrContext } from "@/context/NostrContext";
 import GoogleButton from "@/app/components/Login/GoogleButton";
 import { UserCredential } from "firebase/auth";
 import { useEffect, useState } from "react";
@@ -12,6 +13,9 @@ import { ProfileSmall } from "./ProfileSmall";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { NostrButton } from "@/app/components/Login/NostrButton";
 import { SessionState } from "@/context/SessionContext";
+import { getDefaultRelays } from "@/data/relays";
+import { getRelays } from "@/data/serverActions";
+
 const shortNpub = (pubkey: string) => {
   const long = nip19.npubEncode(pubkey);
   return long.substring(0, 10) + "...";
@@ -21,6 +25,8 @@ export const Sign = (props: { instructions: string }) => {
   const instructions = props.instructions;
   const accountContext = useAccountContext();
   const sessionContext = useSessionContext();
+  const nostrContext = useNostrContext();
+
   const [readyToSign, setReadyToSign] = useState(false);
   const [saveDisahbled, setSaveDisabled] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -61,12 +67,10 @@ export const Sign = (props: { instructions: string }) => {
     updateReadyToSign();
   }, [profile]);
 
-  const onSignIn = (userCredential: UserCredential | void) => {
-    console.log(`signIn result: ${JSON.stringify(userCredential)}`);
-  };
+  const onSignIn = (userCredential: UserCredential | void) => {};
 
   const onSaveClick = async () => {
-    if (!profile) return { success: false };
+    if (!profile || !sessionContext.state.session) return { success: false };
 
     const state = sessionContext.getSessionState();
     console.log(state);
@@ -81,12 +85,23 @@ export const Sign = (props: { instructions: string }) => {
     }
 
     const events = await sessionContext.getSignedEvents();
-    console.log(events);
-    if (profile.hasPrivateKey) {
-      // generate all events and publish
-    } else {
-      // get profile badges events to sign
+
+    // get relays associated with badge / group owner
+    const result = await getRelays(
+      sessionContext.state.session.itemState.owner
+    );
+    let relays = result.relays;
+
+    if (result.defaultRelays) {
+      relays = relays.concat(getDefaultRelays());
     }
+
+    const promises: Promise<any>[] = [];
+    for (let i = 0; i < events.length; i++) {
+      promises.push(nostrContext.publish(events[i], relays));
+    }
+
+    await Promise.all(promises);
 
     return { success: true };
   };

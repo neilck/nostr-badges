@@ -3,6 +3,7 @@ import { FieldValue } from "firebase/firestore/lite";
 
 // <---------- SESSION ---------->
 export type ItemState = {
+  owner: string;
   awardtoken: string;
   isAwarded: boolean;
   event?: string;
@@ -42,7 +43,12 @@ export const getEmptySession = (): Session => {
   return {
     type: "BADGE",
     targetId: "",
-    itemState: { awardtoken: "", isAwarded: false, awardData: undefined },
+    itemState: {
+      awardtoken: "",
+      owner: "",
+      isAwarded: false,
+      awardData: undefined,
+    },
     state: "",
     pubkey: "",
     uid: "",

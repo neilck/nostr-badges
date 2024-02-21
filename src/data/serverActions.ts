@@ -115,3 +115,21 @@ export async function sessionCreateBadgeAwards(
 
   return true;
 }
+
+export async function getRelays(
+  uid: string
+): Promise<{ relays: string[]; defaultRelays: boolean }> {
+  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+
+  const url = `https://getrelays-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getRelays?uid=${uid}`;
+  const res = await fetch(url, {
+    headers: { authorization },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+  return res.json();
+}
