@@ -4,8 +4,22 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-export const BadgeRowSmall = (props: { name: string; image: string }) => {
-  const { name, image } = props;
+export const BadgeRowSmall = (props: {
+  name: string;
+  image: string;
+  data?: { [key: string]: string };
+}) => {
+  const { name, image, data } = props;
+
+  function formatObjectToString(obj: { [key: string]: string }): string {
+    const keyValuePairs = Object.entries(obj).map(
+      ([key, value]) => `${key}: ${value}`
+    );
+
+    return keyValuePairs.join(", ");
+  }
+
+  const displayData = data ? formatObjectToString(data) : "";
 
   return (
     <Card variant="outlined">
@@ -41,6 +55,25 @@ export const BadgeRowSmall = (props: { name: string; image: string }) => {
             >
               {name}
             </Typography>
+            {displayData != "" && (
+              <Box
+                id="data"
+                sx={{
+                  whiteSpace: "pre-wrap",
+                  width: "100%",
+                  wordBreak: "break-word",
+                }}
+              >
+                <Typography
+                  noWrap={false}
+                  variant="subtitle2"
+                  width="100%"
+                  sx={{ minWidth: 0 }}
+                >
+                  {displayData}
+                </Typography>
+              </Box>
+            )}
           </Stack>
         </Box>
       </Box>

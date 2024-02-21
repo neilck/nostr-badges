@@ -19,6 +19,7 @@ export type BadgeAward = {
   badge: string; // badge id
   awardedTo: string; // awardee uid
   type: BadgeAwardType;
+  event: string;
 };
 
 // loads badge awards by publisher

@@ -3,6 +3,7 @@ import { Badge } from "@/data/badgeLib";
 import { toNostrEvent } from "@/data/eventLib";
 import { getBadge, getEvent, getSession } from "@/data/serverActions";
 import { Accept } from "./Accept";
+import { SessionController } from "./SessionController";
 
 export default async function AcceptPage({
   params,
@@ -22,13 +23,17 @@ export default async function AcceptPage({
   const id = eventResult.id;
 
   let badges: Badge[] = [];
+  let badgeItems: { badge: Badge; awardData?: object }[] = [];
   if (session.requiredBadges) {
     const promises: Promise<Badge>[] = [];
     for (let i = 0; i < session.requiredBadges.length; i++) {
-      const badgePromise = getBadge(session.requiredBadges[i].badgeId);
-      promises.push(badgePromise);
+      const badge = await getBadge(session.requiredBadges[i].badgeId);
+      const badgeItem: { badge: Badge; awardData?: object } = { badge: badge };
+      if (session.requiredBadges[i].itemState.awardData) {
+        badgeItem.awardData = session.requiredBadges[i].itemState.awardData;
+      }
+      badgeItems.push(badgeItem);
     }
-    badges = await Promise.all(promises);
   }
 
   return (
@@ -47,10 +52,11 @@ export default async function AcceptPage({
             id={id}
             type={session.type}
             nostrEvent={nostrEvent}
-            badges={badges}
+            badgeItems={badgeItems}
           />
         )}
       </Box>
+      <SessionController />
     </Box>
   );
 }

@@ -9,15 +9,14 @@ import { CardTitle } from "@/app/components/items/CardHeadings";
 import { NostrEvent } from "@/data/ndk-lite";
 import { Badge } from "@/data/badgeLib";
 import { Sign } from "./Sign";
-import { useState } from "react";
 
 export const Accept = (props: {
   id: string;
   type: string;
   nostrEvent: NostrEvent;
-  badges: Badge[];
+  badgeItems: { badge: Badge; awardData?: object }[];
 }) => {
-  const { id, type, nostrEvent, badges } = props;
+  const { id, type, nostrEvent, badgeItems } = props;
   const recordTags = parseEventTags(nostrEvent);
 
   let name = "";
@@ -81,13 +80,18 @@ export const Accept = (props: {
             awarded={true}
           />
         </Box>
-        {badges.length > 0 && (
+        {badgeItems.length > 0 && (
           <Stack pt={1} width="100%" spacing={1}>
-            {badges.map((badge) => (
+            {badgeItems.map((badgeItem) => (
               <BadgeRowSmall
-                key={badge.uid + "-" + badge.identifier}
-                name={badge.name}
-                image={badge.thumbnail != "" ? badge.thumbnail : badge.image}
+                key={badgeItem.badge.uid + "-" + badgeItem.badge.identifier}
+                name={badgeItem.badge.name}
+                image={
+                  badgeItem.badge.thumbnail != ""
+                    ? badgeItem.badge.thumbnail
+                    : badgeItem.badge.image
+                }
+                data={badgeItem.awardData}
               />
             ))}
           </Stack>

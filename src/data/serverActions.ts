@@ -79,25 +79,36 @@ export async function getBadge(id: string): Promise<Badge> {
 
 export async function sessionCreateBadgeAwards(
   sessionId: string,
+  awardedToUid: string,
   pubkey: string
 ) {
-  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+  // return header with AKA_API_KEY authorization
+  const getAuthHeaders = () => {
+    const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
 
-  const url = `https://getsessionbadgeawards-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getSessionBadgeAwards?session=${sessionId}&publickey=${pubkey}`;
+    return {
+      "Content-Type": "application/json",
+      "Authorization": authorization,
+    };
+  };
+
+  const url = `https://sessioncreatebadgeawards-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/sessionCreateBadgeAwards`;
 
   const postData = {
     session: sessionId,
+    awardedToUid: awardedToUid,
     publickey: pubkey,
   };
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { authorization },
+    headers: getAuthHeaders(),
     body: JSON.stringify(postData),
     cache: "no-cache",
   });
 
   if (!response.ok) {
+    console.log(response);
     // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to fetch data");
   }

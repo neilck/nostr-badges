@@ -17,10 +17,14 @@ import {
   createSession,
   CreateSessionParams,
   CreateSessionResult,
+  ItemState,
 } from "@/data/sessionLib";
 import { getSession } from "@/data/serverActions";
 import { Badge, loadBadge as fsLoadBadge } from "@/data/badgeLib";
 import { loadGroup as fsLoadGroup } from "@/data/groupLib";
+import { sessionCreateBadgeAwards } from "@/data/serverActions";
+import { NostrEvent } from "@nostr-dev-kit/ndk";
+import { Event, toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
 
 const contextDebug = debug("aka:sessionContext");
 
@@ -29,6 +33,7 @@ export enum SessionState {
   InProgress = "InProgress",
   DialogOpen = "DialogOpen",
   ReadyToAward = "ReadyToAward",
+  BadgeAwardsCreated = "BadgeAwardsCreated",
 }
 
 export type Display = {
@@ -84,6 +89,8 @@ const SessionContext = createContext<
       resumeSession: () => Promise<boolean>;
       setCurrentBadge: (badgeId: string) => void;
       redirectToLogin: (naddr: string) => void;
+      createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
+      getSignedEvents: () => Promise<NostrEvent[]>;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
       reload: () => void;
     }
@@ -168,8 +175,38 @@ function SessionProvider(props: SessionProviderProps) {
     session: Session | undefined,
     currentId: string | null
   ) => {
+    contextDebug(
+      `updateSessionState(session: ${session}, currentId: ${currentId})`
+    );
+
     if (!session) {
       dispatch({ type: "setSessionState", sessionState: SessionState.Initial });
+      return;
+    }
+
+    let testItemState: ItemState | undefined = undefined;
+    if (session.type == "BADGE" || session.type == "GROUP") {
+      testItemState = session.itemState;
+    } else {
+      if (session.requiredGroups && session.requiredGroups.length > 0) {
+        testItemState = session.requiredGroups[0].itemState;
+      } else if (session.requiredBadges && session.requiredBadges.length > 0) {
+        testItemState = session.requiredBadges[0].itemState;
+      }
+    }
+
+    contextDebug(`updateSessionState testItemState: ${testItemState}`);
+
+    if (!testItemState) {
+      dispatch({ type: "setSessionState", sessionState: SessionState.Initial });
+      return;
+    }
+
+    if (testItemState.event && testItemState.event != "") {
+      dispatch({
+        type: "setSessionState",
+        sessionState: SessionState.BadgeAwardsCreated,
+      });
       return;
     }
 
@@ -330,6 +367,17 @@ function SessionProvider(props: SessionProviderProps) {
     }
   };
 
+  const createBadgeAwards = async (uid: string, publickey: string) => {
+    console.log(`createBadgeAwards ${uid}, ${publickey}`);
+    console.log(state);
+    if (state.sessionId) {
+      if (state.session) state.session.pubkey = publickey;
+      await sessionCreateBadgeAwards(state.sessionId, uid, publickey);
+      return reload();
+    }
+    return false;
+  };
+
   const loadBadge = async (badgeId: string) => {
     if (!state.badges) {
       state.badges = {};
@@ -348,6 +396,43 @@ function SessionProvider(props: SessionProviderProps) {
     return undefined;
   };
 
+  const getSignedEvents = async () => {
+    const items: ItemState[] = [];
+    const awardIds: string[] = [];
+
+    const session = state.session;
+    if (!session) return [];
+
+    if (session.type == "BADGE" || session.type == "GROUP")
+      items.push(session.itemState);
+
+    if (session.requiredBadges)
+      session.requiredBadges.forEach((badge) => {
+        items.push(badge.itemState);
+      });
+
+    if (session.requiredGroups)
+      session.requiredGroups.forEach((group) => {
+        items.push(group.itemState);
+      });
+
+    for (let i = 0; i < items.length; i++) {
+      const itemState = items[i];
+      if (itemState.event && itemState.event != "")
+        awardIds.push(itemState.event);
+    }
+
+    console.log(session);
+    console.log(awardIds);
+    const events: NostrEvent[] = [];
+    for (let i = 0; i < awardIds.length; i++) {
+      const event = await loadBadgeEvent(awardIds[0]);
+      if (event) events.push(toNostrEvent(event));
+    }
+
+    return events;
+  };
+
   // reload sesison from db
   // call when isAwarded changed via server call
   const reload = async () => {
@@ -361,6 +446,7 @@ function SessionProvider(props: SessionProviderProps) {
         return true;
       }
     }
+    return false;
   };
 
   // Checks for cases when dialog should automatically open
@@ -381,6 +467,8 @@ function SessionProvider(props: SessionProviderProps) {
     resumeSession: resumeSession,
     setCurrentBadge: setCurrentBadge,
     redirectToLogin: redirectToLogin,
+    createBadgeAwards: createBadgeAwards,
+    getSignedEvents: getSignedEvents,
     reload: reload,
     loadBadge: loadBadge,
   };

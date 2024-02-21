@@ -3,15 +3,15 @@
 import * as nip19 from "@/nostr-tools/nip19";
 import { Profile } from "@/data/profileLib";
 import { useAccountContext } from "@/context/AccountContext";
+import { useSessionContext } from "@/context/SessionContext";
 import GoogleButton from "@/app/components/Login/GoogleButton";
 import { UserCredential } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { Box, Button, Card, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { ProfileSmall } from "./ProfileSmall";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { NostrButton } from "@/app/components/Login/NostrButton";
-import { sessionCreateBadgeAwards } from "@/data/serverActions";
-
+import { SessionState } from "@/context/SessionContext";
 const shortNpub = (pubkey: string) => {
   const long = nip19.npubEncode(pubkey);
   return long.substring(0, 10) + "...";
@@ -20,6 +20,7 @@ const shortNpub = (pubkey: string) => {
 export const Sign = (props: { instructions: string }) => {
   const instructions = props.instructions;
   const accountContext = useAccountContext();
+  const sessionContext = useSessionContext();
   const [readyToSign, setReadyToSign] = useState(false);
   const [saveDisahbled, setSaveDisabled] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -65,6 +66,28 @@ export const Sign = (props: { instructions: string }) => {
   };
 
   const onSaveClick = async () => {
+    if (!profile) return { success: false };
+
+    const state = sessionContext.getSessionState();
+    console.log(state);
+    if (
+      state != SessionState.ReadyToAward &&
+      state != SessionState.BadgeAwardsCreated
+    )
+      return { success: false };
+
+    if (state == SessionState.ReadyToAward) {
+      await sessionContext.createBadgeAwards(profile.uid, profile.publickey);
+    }
+
+    const events = await sessionContext.getSignedEvents();
+    console.log(events);
+    if (profile.hasPrivateKey) {
+      // generate all events and publish
+    } else {
+      // get profile badges events to sign
+    }
+
     return { success: true };
   };
 
