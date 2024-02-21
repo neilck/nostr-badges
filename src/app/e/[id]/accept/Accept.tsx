@@ -14,7 +14,10 @@ export const Accept = (props: {
   id: string;
   type: string;
   nostrEvent: NostrEvent;
-  badgeItems: { badge: Badge; awardData?: object }[];
+  badgeItems: {
+    badge: Badge;
+    awardData?: { [key: string]: string } | undefined;
+  }[];
 }) => {
   const { id, type, nostrEvent, badgeItems } = props;
   const recordTags = parseEventTags(nostrEvent);

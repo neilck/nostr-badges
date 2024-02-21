@@ -6,7 +6,7 @@ export type ItemState = {
   awardtoken: string;
   isAwarded: boolean;
   event?: string;
-  awardData?: object;
+  awardData?: { [key: string]: string } | undefined;
 };
 
 export type SessionBadge = {

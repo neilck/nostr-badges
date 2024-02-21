@@ -243,6 +243,7 @@ function SessionProvider(props: SessionProviderProps) {
     contextDebug(`startSession called ${JSON.stringify(params)}`);
     // createSession creates session in DB
     const result = await createSession(params);
+    contextDebug(`createSession result ${JSON.stringify(result)}`);
     if (result) {
       // update context with new session
       dispatch({ type: "setSessionId", sessionId: result.sessionId });
@@ -422,11 +423,9 @@ function SessionProvider(props: SessionProviderProps) {
         awardIds.push(itemState.event);
     }
 
-    console.log(session);
-    console.log(awardIds);
     const events: NostrEvent[] = [];
     for (let i = 0; i < awardIds.length; i++) {
-      const event = await loadBadgeEvent(awardIds[0]);
+      const event = await loadBadgeEvent(awardIds[i]);
       if (event) events.push(toNostrEvent(event));
     }
 
@@ -442,7 +441,7 @@ function SessionProvider(props: SessionProviderProps) {
       if (session) {
         dispatch({ type: "setSessionId", sessionId: sessionId });
         dispatch({ type: "setSession", session: session });
-        updateFromSession(session);
+        await updateFromSession(session);
         return true;
       }
     }

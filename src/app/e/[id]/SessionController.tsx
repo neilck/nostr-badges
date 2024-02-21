@@ -46,6 +46,7 @@ export const SessionController = (props: {
         state: state,
         pubkey: pubkey,
       });
+      console.log(`start session result ${JSON.stringify(result)}`);
     }
   };
 

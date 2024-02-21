@@ -23,12 +23,18 @@ export default async function AcceptPage({
   const id = eventResult.id;
 
   let badges: Badge[] = [];
-  let badgeItems: { badge: Badge; awardData?: object }[] = [];
+  let badgeItems: {
+    badge: Badge;
+    awardData?: { [key: string]: string } | undefined;
+  }[] = [];
   if (session.requiredBadges) {
     const promises: Promise<Badge>[] = [];
     for (let i = 0; i < session.requiredBadges.length; i++) {
       const badge = await getBadge(session.requiredBadges[i].badgeId);
-      const badgeItem: { badge: Badge; awardData?: object } = { badge: badge };
+      const badgeItem: {
+        badge: Badge;
+        awardData?: { [key: string]: string } | undefined;
+      } = { badge: badge };
       if (session.requiredBadges[i].itemState.awardData) {
         badgeItem.awardData = session.requiredBadges[i].itemState.awardData;
       }
