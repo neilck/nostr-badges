@@ -1,4 +1,3 @@
-import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   SaveResult,
   AddResult,
@@ -18,6 +17,7 @@ export type BadgeAward = {
   uid: string; // publisher uid
   badge: string; // badge id
   awardedTo: string; // awardee uid
+  publickey: string;
   type: BadgeAwardType;
   event: string;
 };

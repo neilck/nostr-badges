@@ -30,6 +30,7 @@ export type Session = {
   requiredGroups?: SessionGroup[];
   requiredBadges?: SessionBadge[];
   lastUpdated?: FieldValue;
+  redirectUrl: string;
 };
 
 export type CreateSessionParams = {
@@ -52,6 +53,7 @@ export const getEmptySession = (): Session => {
     state: "",
     pubkey: "",
     uid: "",
+    redirectUrl: "",
   };
 };
 

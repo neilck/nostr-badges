@@ -7,27 +7,31 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-
+import * as nip19 from "@/nostr-tools/nip19";
+import { useNostrContext } from "@/context/NostrContext";
 import { shortenDesc } from "@/app/utils/utils";
+import { useEffect, useState } from "react";
 
 type WidthOption = "normal" | "wide";
 
 export type Item = {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
+  pubkey: string;
   widthOption?: WidthOption;
   sx?: SxProps<Theme> | undefined;
 };
 
 export const ProfileSmall = (item: Item) => {
-  const { id, name, description, image, sx, widthOption } = item;
+  const { pubkey, widthOption, sx } = item;
+  const nostrContext = useNostrContext();
 
-  const textWidth = widthOption && widthOption == "wide" ? "220px" : "180px";
-  const truncateLength = widthOption && widthOption == "wide" ? 70 : 50;
-  const shortDesc = shortenDesc(description, truncateLength);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState("/default/profile.png");
 
+  const textWidth = widthOption == "wide" ? "220px" : "180px";
+  const truncateLength = widthOption == "wide" ? 70 : 50;
+
+  console.log(`ProfileSmall init ${pubkey}`);
   const defaultSx = {
     border: 0,
     pt: 1,
@@ -35,6 +39,44 @@ export const ProfileSmall = (item: Item) => {
     pr: 1,
     "&:hover": { backgroundColor: "grey.200" },
   };
+
+  useEffect(() => {
+    console.log(`ProfileSmall useEffect ${pubkey}`);
+    const shortNpub = (pubkey: string) => {
+      const long = nip19.npubEncode(pubkey);
+      return long.substring(0, 16) + "...";
+    };
+
+    const getProfile = async (pubkey: string) => {
+      let name = "";
+      let image = "";
+      let description = "";
+
+      const profile = await nostrContext.fetchProfile(pubkey);
+      if (profile) {
+        if (name == "" && profile.displayName) name = profile.displayName;
+
+        if (name == "" && profile.name) name = profile.name;
+
+        if (description == "" && profile.about)
+          description = shortenDesc(profile.about, truncateLength);
+
+        if (description == "" && profile.bio)
+          description = shortenDesc(profile.bio, truncateLength);
+
+        if (profile.image) image = profile.image;
+      }
+
+      if (name == "") name = shortNpub(pubkey);
+      if (image == "") image = "/default/profile.png";
+
+      setName(name);
+      setDescription(description);
+      setImage(image);
+    };
+
+    getProfile(pubkey);
+  }, [pubkey]);
 
   return (
     <Card variant="outlined" sx={{ ...defaultSx, ...sx }}>
@@ -69,7 +111,7 @@ export const ProfileSmall = (item: Item) => {
             </div>
 
             <Typography variant="body2" whiteSpace="pre-wrap">
-              {shortDesc}
+              {description}
             </Typography>
           </Stack>
         </Box>

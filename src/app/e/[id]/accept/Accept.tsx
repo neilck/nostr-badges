@@ -13,13 +13,14 @@ import { Sign } from "./Sign";
 export const Accept = (props: {
   id: string;
   type: string;
+  pubkey: string;
   nostrEvent: NostrEvent;
   badgeItems: {
     badge: Badge;
     awardData?: { [key: string]: string } | undefined;
   }[];
 }) => {
-  const { id, type, nostrEvent, badgeItems } = props;
+  const { id, type, pubkey, nostrEvent, badgeItems } = props;
   const recordTags = parseEventTags(nostrEvent);
 
   let name = "";
@@ -102,7 +103,7 @@ export const Accept = (props: {
       </Box>
 
       <Box pt={2} pb={3} width="100%">
-        <Sign instructions={instructions} />
+        <Sign instructions={instructions} pubkey={pubkey} />
       </Box>
     </Box>
   );

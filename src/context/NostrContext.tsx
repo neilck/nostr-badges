@@ -10,19 +10,20 @@ import NDK, {
   NDKRelay,
   NDKPrivateKeySigner,
 } from "@nostr-dev-kit/ndk";
-import { getDefaultRelays } from "@/data/relays";
+import { getProfileRelays } from "@/data/relays";
 
-const defaultRelays = getDefaultRelays();
+const profileRelays = getProfileRelays();
 
 // global ndk instances
 const _signer = NDKPrivateKeySigner.generate();
 const _ndk = new NDK({
   autoConnectUserRelays: false,
   enableOutboxModel: false,
-  explicitRelayUrls: defaultRelays,
+  explicitRelayUrls: profileRelays,
 });
 
 _ndk.connect(5000);
+
 export const _publishNdk = new NDK({
   autoConnectUserRelays: false,
   enableOutboxModel: false,

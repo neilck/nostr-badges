@@ -57,6 +57,7 @@ export default async function AcceptPage({
           <Accept
             id={id}
             type={session.type}
+            pubkey={session.pubkey}
             nostrEvent={nostrEvent}
             badgeItems={badgeItems}
           />
