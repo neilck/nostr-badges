@@ -55,8 +55,14 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
 
   useEffect(() => {
     if (sessionContext.state.session) {
-      console.log(sessionContext.state.session);
-      setRedirectUrl(sessionContext.state.session.redirectUrl);
+      let redirectUrl = sessionContext.state.session.redirectUrl;
+      const state = sessionContext.state.session.state;
+
+      if (state != "" && redirectUrl != "") {
+        redirectUrl = `${redirectUrl}?state=${state}`;
+      }
+
+      setRedirectUrl(redirectUrl);
       setDomain(getDomain(sessionContext.state.session.redirectUrl));
     }
   }, [sessionContext.state.session]);
