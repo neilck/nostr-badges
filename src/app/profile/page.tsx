@@ -18,50 +18,11 @@ import { SaveButtonEx } from "../components/items/SaveButtonEx";
 
 export default function Profile() {
   const accountContext = useAccountContext();
-  const pendingAward = accountContext.state.pendingAward;
+
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<Session | undefined>(undefined);
   const [groups, setGroups] = useState<Group[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      if (pendingAward) {
-        const session = await getSession(pendingAward);
-        if (session) {
-          const updatedBadges = [];
-          const updatedGroups = [];
-          setSession(session);
-          if (session.type == "GROUP" && session.itemState.isAwarded) {
-            const group = await loadGroup(session.targetId);
-            if (group) {
-              updatedGroups.push(group);
-            }
-          }
-          if (session.type == "BADGE" && session.itemState.isAwarded) {
-            const badge = await loadBadge(session.targetId);
-            if (badge) {
-              updatedBadges.push(badge);
-            }
-          }
-          if (session.requiredBadges) {
-            for (let i = 0; i < session.requiredBadges.length; i++) {
-              const sessionBadge = session.requiredBadges[i];
-              if (sessionBadge.itemState.isAwarded) {
-                const badge = await loadBadge(sessionBadge.badgeId);
-                if (badge) updatedBadges.push(badge);
-              }
-            }
-          }
-          setGroups(updatedGroups);
-          setBadges(updatedBadges);
-        }
-      }
-      setIsLoading(false);
-    };
-
-    load();
-  }, [pendingAward]);
 
   const onClick = async () => {
     return { success: true, mesg: "Added to profile" };

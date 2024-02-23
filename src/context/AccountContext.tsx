@@ -2,7 +2,6 @@
 
 import debug from "debug";
 import {
-  useState,
   useEffect,
   useContext,
   useReducer,
@@ -26,8 +25,7 @@ type Action =
   | { type: "setLoading"; loading: boolean }
   | { type: "setAccount"; account: Account | null }
   | { type: "setCurrentProfile"; currentProfile: Profile | null }
-  | { type: "setCreatorMode"; creatorMode: boolean }
-  | { type: "setPendingAward"; pendingAward: string | null };
+  | { type: "setCreatorMode"; creatorMode: boolean };
 
 type Dispatch = (action: Action) => void;
 
@@ -36,7 +34,6 @@ type State = {
   account: Account | null;
   profiles: Profile[];
   currentProfile: Profile | null;
-  pendingAward: string | null;
   creatorMode: boolean;
 };
 
@@ -47,7 +44,6 @@ const AccountContext = createContext<
       state: State;
       dispatch: Dispatch;
       signOut: (redirect?: boolean) => {};
-      clearPending: () => void;
       getRelays: () => string[];
     }
   | undefined
@@ -68,9 +64,6 @@ function reducer(state: State, action: Action) {
     case "setCreatorMode": {
       return { ...state, creatorMode: action.creatorMode };
     }
-    case "setPendingAward": {
-      return { ...state, pendingAward: action.pendingAward };
-    }
   }
 }
 
@@ -86,7 +79,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
     profiles: [],
     currentProfile: null,
     creatorMode: true,
-    pendingAward: null,
   });
 
   const signOut = async (redirect = true) => {
@@ -96,12 +88,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
     await auth.signOut();
     contextDebug("signed out");
     if (redirect) router.push("/");
-  };
-
-  // clears pending award from context and session storage
-  const clearPending = () => {
-    sessionStorage.removeItem("pendingAward");
-    dispatch({ type: "setPendingAward", pendingAward: null });
   };
 
   const getRelays = () => {
@@ -207,17 +193,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
     setCurrentProfileFromAccount(account);
     dispatch({ type: "setCreatorMode", creatorMode: true });
     contextDebug("/user on onAuthStateChanged user not null");
-
-    // checking for pending badge award
-    contextDebug("checking sessionStorage for pendingAward");
-    const pendingAwardValue = sessionStorage.getItem("pendingAward");
-    if (pendingAwardValue) {
-      contextDebug("pendingAward loaded from session: " + pendingAwardValue);
-      const pendingAward = JSON.parse(pendingAwardValue);
-      dispatch({ type: "setPendingAward", pendingAward: pendingAward });
-    }
-
-    if (pathname == "/") return router.push("/creator");
   };
 
   useEffect(() => {
@@ -227,7 +202,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth]);
 
-  const value = { state, dispatch, signOut, clearPending, getRelays };
+  const value = { state, dispatch, signOut, getRelays };
 
   return (
     <AccountContext.Provider value={value}>
@@ -246,4 +221,5 @@ const useAccountContext = () => {
 };
 
 export { useAccountContext };
+
 export default AccountProvider;
