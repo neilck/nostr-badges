@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useSessionContext } from "@/context/SessionContext";
-import { getAuth, signInAnonymously } from "firebase/auth";
 
 export const SessionController = (props: {
   badgeId: string;
@@ -13,7 +12,6 @@ export const SessionController = (props: {
   pubkey?: string;
   isGroup?: boolean;
 }) => {
-  const auth = getAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -39,10 +37,6 @@ export const SessionController = (props: {
   }, []);
 
   const init = async () => {
-    if (auth.currentUser == null) {
-      await signInAnonymously(auth);
-    }
-
     const exists = await sessionContext.resumeSession();
     if (!exists) {
       console.log("starting session");

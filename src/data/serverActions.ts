@@ -5,6 +5,20 @@ import { Badge } from "./badgeLib";
 import { Event } from "./eventLib";
 import { Session } from "./sessionLib";
 
+export type CreateSessionParams = {
+  type: "BADGE" | "GROUP" | "OFFER";
+  docId: string;
+  state?: string;
+  pubkey?: string;
+};
+
+export type CreateSessionResult =
+  | {
+      sessionId: string;
+      session: Session;
+    }
+  | undefined;
+
 // returns docId as id, Event as event
 export const getEvent = async (
   naddr: string
@@ -77,21 +91,90 @@ export async function getBadge(id: string): Promise<Badge> {
   return res.json();
 }
 
+// return header with AKA_API_KEY authorization
+const getAkaApiPostHeader = () => {
+  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+
+  return {
+    "Content-Type": "application/json",
+    "Authorization": authorization,
+  };
+};
+
+export async function createBadgeSession(
+  badgeId: string,
+  state: string,
+  pubkey: string
+): Promise<CreateSessionResult> {
+  const postData = {
+    badgeId: badgeId,
+    state: state,
+    pubkey: pubkey,
+  };
+
+  const url = `https://createbadgesession-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/createBadgeSession`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: getAkaApiPostHeader(),
+    body: JSON.stringify(postData),
+    cache: "no-cache",
+  });
+
+  if (!response.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+  return response.json();
+}
+
+export async function createGroupSession(
+  groupId: string,
+  state: string,
+  pubkey: string
+): Promise<CreateSessionResult> {
+  const postData = {
+    groupId: groupId,
+    state: state,
+    pubkey: pubkey,
+  };
+
+  const url = `https://creategroupsession-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/createGroupSession`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: getAkaApiPostHeader(),
+    body: JSON.stringify(postData),
+    cache: "no-cache",
+  });
+
+  if (!response.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+  return response.json();
+}
+
+export async function createSession(params: CreateSessionParams) {
+  const { type, docId, state, pubkey } = params;
+  const safeState = state ? state : "";
+  const safePubkey = pubkey ? pubkey : "";
+
+  switch (type) {
+    case "BADGE":
+      return createBadgeSession(docId, safeState, safePubkey);
+    case "GROUP":
+      return createGroupSession(docId, safeState, safePubkey);
+    default:
+      return undefined;
+  }
+}
+
 export async function sessionCreateBadgeAwards(
   sessionId: string,
   awardedToUid: string,
   pubkey: string
 ) {
-  // return header with AKA_API_KEY authorization
-  const getAuthHeaders = () => {
-    const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
-
-    return {
-      "Content-Type": "application/json",
-      "Authorization": authorization,
-    };
-  };
-
   const url = `https://sessioncreatebadgeawards-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/sessionCreateBadgeAwards`;
 
   const postData = {
@@ -102,7 +185,7 @@ export async function sessionCreateBadgeAwards(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: getAkaApiPostHeader(),
     body: JSON.stringify(postData),
     cache: "no-cache",
   });
