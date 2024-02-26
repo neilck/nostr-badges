@@ -126,7 +126,7 @@ export const Accept = (props: {
       </Box>
 
       <Box pt={2} pb={3} width="100%">
-        {pubkey == "" && <Sign header={header} instructions={instructions} />}
+        <Sign header={header} instructions={instructions} reqPubkey={pubkey} />
       </Box>
     </Box>
   );

@@ -22,8 +22,12 @@ import { ProfileSmall } from "./ProfileSmall";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { Buttons } from "./Buttons";
 
-export const Sign = (props: { header: string; instructions: string }) => {
-  const { header, instructions } = props;
+export const Sign = (props: {
+  header: string;
+  instructions: string;
+  reqPubkey: string;
+}) => {
+  const { header, instructions, reqPubkey } = props;
 
   const sessionContext = useSessionContext();
   const nostrContext = useNostrContext();
@@ -113,7 +117,11 @@ export const Sign = (props: { header: string; instructions: string }) => {
 
   const verifiedHandler = (pubkey: string) => {
     console.log(`verifiedHandler ${pubkey}`);
-    setPubkey(pubkey);
+    if (reqPubkey != "" && pubkey != reqPubkey) {
+      setAlertError("Accounts do not match.");
+    } else {
+      setPubkey(pubkey);
+    }
   };
 
   return (
@@ -122,7 +130,7 @@ export const Sign = (props: { header: string; instructions: string }) => {
         <Stack width="100%" alignItems="center">
           <Box pt={2} width="100%">
             <Typography variant="body1" fontWeight={600} textAlign="left">
-              Profile
+              Account
             </Typography>
           </Box>
           <Box width="100%">
@@ -137,13 +145,13 @@ export const Sign = (props: { header: string; instructions: string }) => {
             alignItems="center"
           >
             <SaveButtonEx
-              buttonLabel="Save to this profile"
+              buttonLabel="Save to this account"
               disabled={saved}
               onClick={onSaveClick}
               sx={{ width: "auto" }}
             />
             {!saved && (
-              <Button onClick={onChangeProfile}>change profile</Button>
+              <Button onClick={onChangeProfile}>change account</Button>
             )}
             {saved && domain != "" && (
               <Box>
@@ -156,24 +164,30 @@ export const Sign = (props: { header: string; instructions: string }) => {
 
       {!readyToSign && (
         <Stack width="100%" alignItems="center" spacing={1.5}>
-          <Box pt={1} pb={1} pl={3} pr={3}>
+          <Box pt={1} pl={3} pr={3}>
             <Typography variant="body1" fontWeight={600} sx={{ pb: 1 }}>
               {header}
             </Typography>
             <Typography variant="body1">{instructions}</Typography>
+            {reqPubkey != "" && (
+              <>
+                <Box width="100%" pt={2}>
+                  <ProfileSmall key="selectedProfile" pubkey={reqPubkey} />
+                </Box>
+                <Collapse in={alertError != ""}>
+                  <Alert
+                    severity={"error"}
+                    onClose={() => {
+                      setAlertError("");
+                    }}
+                    sx={{ minWidth: "100px", width: "fit-content" }}
+                  >
+                    {alertError}
+                  </Alert>
+                </Collapse>
+              </>
+            )}
           </Box>
-
-          <Collapse in={alertError != ""}>
-            <Alert
-              severity={"error"}
-              onClose={() => {
-                setAlertError("");
-              }}
-              sx={{ minWidth: "100px", width: "fit-content" }}
-            >
-              {alertError}
-            </Alert>
-          </Collapse>
 
           <Buttons onVerified={verifiedHandler} />
         </Stack>
