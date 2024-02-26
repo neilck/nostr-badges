@@ -36,27 +36,50 @@ export const Accept = (props: {
   const getTitle = (type: string) => {
     switch (type) {
       case "BADGE":
-        return "Badge earned!";
+        return "Ready to Issue";
       case "GROUP":
-        return "Membership approved!";
+        return "Ready to Issue";
       default:
         return "Approved";
     }
   };
 
-  const getInstructions = (type: string) => {
+  const getHeader = (type: string) => {
     switch (type) {
       case "BADGE":
-        return "To save your badge, please sign in.";
+        return "Badge issued!";
       case "GROUP":
-        return "To save your group membership, please sign in.";
+        return "Membership approved!";
       default:
-        return "Approved";
+        return "Approved!";
+    }
+  };
+
+  const getInstructions = (type: string, useRecommended: boolean) => {
+    if (!useRecommended) {
+      switch (type) {
+        case "BADGE":
+          return "Select an account to assign this badge.";
+        case "GROUP":
+          return "Select an account to assign this group membership.";
+        default:
+          return "Select an account";
+      }
+    } else {
+      switch (type) {
+        case "BADGE":
+          return "Login with this account to accept this badge.";
+        case "GROUP":
+          return "Login with this account to accept group membership.";
+        default:
+          return "Login";
+      }
     }
   };
 
   const title = getTitle(type);
-  const instructions = getInstructions(type);
+  const header = getHeader(type);
+  const instructions = getInstructions(type, pubkey != "");
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
@@ -103,7 +126,7 @@ export const Accept = (props: {
       </Box>
 
       <Box pt={2} pb={3} width="100%">
-        <Sign instructions={instructions} pubkey={pubkey} />
+        {pubkey == "" && <Sign header={header} instructions={instructions} />}
       </Box>
     </Box>
   );

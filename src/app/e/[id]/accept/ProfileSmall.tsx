@@ -11,6 +11,7 @@ import * as nip19 from "@/nostr-tools/nip19";
 import { useNostrContext } from "@/context/NostrContext";
 import { shortenDesc } from "@/app/utils/utils";
 import { useEffect, useState } from "react";
+import { basename } from "path/win32";
 
 type WidthOption = "normal" | "wide";
 
@@ -31,7 +32,7 @@ export const ProfileSmall = (item: Item) => {
   const textWidth = widthOption == "wide" ? "220px" : "180px";
   const truncateLength = widthOption == "wide" ? 70 : 50;
 
-  console.log(`ProfileSmall init ${pubkey}`);
+  console.log(`ProfileSmall render name: ${name}, pubkey: ${pubkey}`);
   const defaultSx = {
     border: 0,
     pt: 1,
@@ -41,7 +42,12 @@ export const ProfileSmall = (item: Item) => {
   };
 
   useEffect(() => {
-    console.log(`ProfileSmall useEffect ${pubkey}`);
+    console.log(`ProfileSmall useEffect [] ${pubkey}`);
+  }, []);
+
+  useEffect(() => {
+    console.log(`ProfileSmall useEffect [pubkey] ${pubkey}`);
+    let isCancelled = false;
     const shortNpub = (pubkey: string) => {
       const long = nip19.npubEncode(pubkey);
       return long.substring(0, 16) + "...";
@@ -52,30 +58,44 @@ export const ProfileSmall = (item: Item) => {
       let image = "";
       let description = "";
 
-      const profile = await nostrContext.fetchProfile(pubkey);
-      if (profile) {
-        if (name == "" && profile.displayName) name = profile.displayName;
+      if (pubkey != "") {
+        console.log(`ProfileSmall fetch ${pubkey} about to be called.`);
+        const profile = await nostrContext.fetchProfile(pubkey);
+        console.log(
+          `ProfileSmall fetch ${pubkey} result: ${JSON.stringify(
+            profile
+          )} isCancelled: ${isCancelled}`
+        );
+        if (!isCancelled && profile) {
+          if (name == "" && profile.displayName) name = profile.displayName;
 
-        if (name == "" && profile.name) name = profile.name;
+          if (name == "" && profile.name) name = profile.name;
 
-        if (description == "" && profile.about)
-          description = shortenDesc(profile.about, truncateLength);
+          if (description == "" && profile.about)
+            description = shortenDesc(profile.about, truncateLength);
 
-        if (description == "" && profile.bio)
-          description = shortenDesc(profile.bio, truncateLength);
+          if (description == "" && profile.bio)
+            description = shortenDesc(profile.bio, truncateLength);
 
-        if (profile.image) image = profile.image;
+          if (profile.image) image = profile.image;
+        }
       }
-
       if (name == "") name = shortNpub(pubkey);
       if (image == "") image = "/default/profile.png";
 
+      console.log(`ProfileSmall setting name ${name}`);
       setName(name);
       setDescription(description);
       setImage(image);
     };
 
-    getProfile(pubkey);
+    if (pubkey != "") {
+      getProfile(pubkey);
+    }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [pubkey]);
 
   return (

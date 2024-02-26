@@ -103,7 +103,7 @@ export const NostrButton = (props: {
       }}
     >
       <Typography variant="body1" fontWeight={600}>
-        Nostr Login
+        Nostr Extension
       </Typography>
     </Button>
   );

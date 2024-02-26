@@ -1,33 +1,39 @@
 "use client";
 
-import { useAccountContext } from "@/context/AccountContext";
-import { useSessionContext } from "@/context/SessionContext";
-import { useNostrContext } from "@/context/NostrContext";
-import GoogleButton from "@/app/components/Login/GoogleButton";
-import { UserCredential } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { Box, Button, Link, Stack, Typography } from "@mui/material";
-import { ProfileSmall } from "./ProfileSmall";
-import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
-import { NostrButton } from "@/app/components/Login/NostrButton";
-import { SessionState } from "@/context/SessionContext";
+import { UserCredential } from "firebase/auth";
+
+import { useAccountContext } from "@/context/AccountContext";
+import { useSessionContext, SessionState } from "@/context/SessionContext";
+import { useNostrContext } from "@/context/NostrContext";
+
 import { getDefaultRelays } from "@/data/relays";
 import { getRelays } from "@/data/serverActions";
 
-export const Sign = (props: { instructions: string; pubkey: string }) => {
-  const instructions = props.instructions;
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Collapse from "@mui/material/Collapse";
+import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
-  const accountContext = useAccountContext();
+import { ProfileSmall } from "./ProfileSmall";
+import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
+import { Buttons } from "./Buttons";
+
+export const Sign = (props: { header: string; instructions: string }) => {
+  const { header, instructions } = props;
+
   const sessionContext = useSessionContext();
   const nostrContext = useNostrContext();
 
+  const [alertError, setAlertError] = useState("");
   const [readyToSign, setReadyToSign] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [pubkey, setPubkey] = useState(props.pubkey);
-  const [uid, setUid] = useState("");
+  const [pubkey, setPubkey] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [domain, setDomain] = useState("");
-  const [usePubkey, setUsePubkey] = useState(props.pubkey != "");
 
   function getDomain(urlString: string): string {
     try {
@@ -39,19 +45,8 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
   }
 
   useEffect(() => {
-    console.log(`useEffect[pubkey] setReadyToSign(${pubkey != ""})`);
     setReadyToSign(pubkey != "");
   }, [pubkey]);
-
-  useEffect(() => {
-    if (!usePubkey) {
-      const profile = accountContext.state.currentProfile;
-      if (profile) {
-        setPubkey(profile.publickey);
-        setUid(profile.uid);
-      }
-    }
-  }, [accountContext.state.currentProfile]);
 
   useEffect(() => {
     if (sessionContext.state.session) {
@@ -67,11 +62,6 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
     }
   }, [sessionContext.state.session]);
 
-  const onSignIn = (userCredential: UserCredential | void) => {
-    if (userCredential) {
-    }
-  };
-
   const redirectToTargetPage = (url: string) => {
     setTimeout(() => {
       window.location.href = url;
@@ -82,8 +72,6 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
     if (!sessionContext.state.session) return { success: false };
 
     const state = sessionContext.getSessionState();
-
-    console.log(state);
     if (
       state != SessionState.ReadyToAward &&
       state != SessionState.BadgeAwardsCreated
@@ -91,7 +79,7 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
       return { success: false };
 
     if (state == SessionState.ReadyToAward) {
-      await sessionContext.createBadgeAwards(uid, pubkey);
+      await sessionContext.createBadgeAwards("", pubkey);
     }
 
     const events = await sessionContext.getSignedEvents();
@@ -120,10 +108,14 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
   };
 
   const onChangeProfile = () => {
-    setUsePubkey(false);
-    setReadyToSign(false);
-    accountContext.signOut(false);
+    setPubkey("");
   };
+
+  const verifiedHandler = (pubkey: string) => {
+    console.log(`verifiedHandler ${pubkey}`);
+    setPubkey(pubkey);
+  };
+
   return (
     <Box width="100%" alignItems="center">
       {readyToSign && (
@@ -134,7 +126,7 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
             </Typography>
           </Box>
           <Box width="100%">
-            <ProfileSmall pubkey={pubkey} />
+            <ProfileSmall key="selectedProfile" pubkey={pubkey} />
           </Box>
 
           <Box
@@ -165,10 +157,25 @@ export const Sign = (props: { instructions: string; pubkey: string }) => {
       {!readyToSign && (
         <Stack width="100%" alignItems="center" spacing={1.5}>
           <Box pt={1} pb={1} pl={3} pr={3}>
+            <Typography variant="body1" fontWeight={600} sx={{ pb: 1 }}>
+              {header}
+            </Typography>
             <Typography variant="body1">{instructions}</Typography>
           </Box>
-          <GoogleButton disabled={false} redirect={false} onSignIn={onSignIn} />
-          <NostrButton redirect={false} onSignIn={onSignIn} />
+
+          <Collapse in={alertError != ""}>
+            <Alert
+              severity={"error"}
+              onClose={() => {
+                setAlertError("");
+              }}
+              sx={{ minWidth: "100px", width: "fit-content" }}
+            >
+              {alertError}
+            </Alert>
+          </Collapse>
+
+          <Buttons onVerified={verifiedHandler} />
         </Stack>
       )}
     </Box>
