@@ -54,7 +54,14 @@ export const StartSessionButton = (props: {
           return;
         }
     }
-  }, [sessionContext.state.sessionState]);
+  }, [
+    sessionContext.state.sessionState,
+    awardedLabel,
+    defaultLabel,
+    isGroup,
+    naddr,
+    sessionContext,
+  ]);
 
   const onClick = async () => {
     if (isGroup) {

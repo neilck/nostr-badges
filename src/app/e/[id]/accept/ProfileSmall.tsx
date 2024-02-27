@@ -42,11 +42,6 @@ export const ProfileSmall = (item: Item) => {
   };
 
   useEffect(() => {
-    console.log(`ProfileSmall useEffect [] ${pubkey}`);
-  }, []);
-
-  useEffect(() => {
-    console.log(`ProfileSmall useEffect [pubkey] ${pubkey}`);
     let isCancelled = false;
     const shortNpub = (pubkey: string) => {
       const long = nip19.npubEncode(pubkey);
@@ -59,13 +54,7 @@ export const ProfileSmall = (item: Item) => {
       let description = "";
 
       if (pubkey != "") {
-        console.log(`ProfileSmall fetch ${pubkey} about to be called.`);
         const profile = await nostrContext.fetchProfile(pubkey);
-        console.log(
-          `ProfileSmall fetch ${pubkey} result: ${JSON.stringify(
-            profile
-          )} isCancelled: ${isCancelled}`
-        );
         if (!isCancelled && profile) {
           if (name == "" && profile.displayName) name = profile.displayName;
 
@@ -83,7 +72,6 @@ export const ProfileSmall = (item: Item) => {
       if (name == "") name = shortNpub(pubkey);
       if (image == "") image = "/default/profile.png";
 
-      console.log(`ProfileSmall setting name ${name}`);
       setName(name);
       setDescription(description);
       setImage(image);
@@ -96,7 +84,7 @@ export const ProfileSmall = (item: Item) => {
     return () => {
       isCancelled = true;
     };
-  }, [pubkey]);
+  }, [pubkey, nostrContext, truncateLength]);
 
   return (
     <Card variant="outlined" sx={{ ...defaultSx, ...sx }}>
