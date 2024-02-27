@@ -18,17 +18,12 @@
     "@mui/material": "^5.14.14",
     "@nostr-dev-kit/ndk": "^2.3.2",
     "@react-oauth/google": "^0.11.0",
-    "@types/node": "20.4.1",
-    "@types/react": "18.2.14",
-    "@types/react-dom": "18.2.6",
     "debug": "^4.3.4",
     "deep-equal": "^2.2.2",
-    "eslint": "8.44.0",
-    "eslint-config-next": "13.4.9",
     "firebase": "^10.0.0",
     "firebase-admin": "^11.11.0",
     "firebase-functions": "^4.4.1",
-    "next": "^14.0.3",
+    "next": "^14.1.0",
     "nostr-tools": "^1.17.0",
     "react": "^18",
     "react-dom": "^18",
@@ -37,6 +32,11 @@
   "devDependencies": {
     "@types/debug": "^4.1.8",
     "encoding": "^0.1.13",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0"
   }
 }
