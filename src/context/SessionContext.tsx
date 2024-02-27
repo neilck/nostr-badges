@@ -368,8 +368,6 @@ function SessionProvider(props: SessionProviderProps) {
   };
 
   const createBadgeAwards = async (uid: string, publickey: string) => {
-    console.log(`createBadgeAwards ${uid}, ${publickey}`);
-    console.log(state);
     if (state.sessionId) {
       if (state.session) state.session.pubkey = publickey;
       await sessionCreateBadgeAwards(state.sessionId, uid, publickey);

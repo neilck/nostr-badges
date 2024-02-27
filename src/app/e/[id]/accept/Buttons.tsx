@@ -13,8 +13,6 @@ export const Buttons = (props: { onVerified: (publickey: string) => void }) => {
   const [state, setState] = useState("");
   const [pubkey, setPubkey] = useState("");
 
-  console.log(`Buttons render state: ${state}`);
-
   const handleNostrStart = async () => {
     setState("EXT");
     // create a NIP-98 like event so we can verify
@@ -36,7 +34,6 @@ export const Buttons = (props: { onVerified: (publickey: string) => void }) => {
       ?.signEvent(event)
       .catch((error) => {
         // happens if user cancels
-        console.log("handleNostrStart: " + error);
         return;
       });
 

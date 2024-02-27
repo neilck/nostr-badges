@@ -200,7 +200,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
     contextDebug("/user on onAuthStateChanged user not null");
 
     // go to home page
-    console.log(pathname);
     if (user != null && pathname == "/") {
       router.push("/creator");
     }

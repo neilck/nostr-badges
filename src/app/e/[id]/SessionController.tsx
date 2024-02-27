@@ -39,14 +39,12 @@ export const SessionController = (props: {
   const init = async () => {
     const exists = await sessionContext.resumeSession();
     if (!exists) {
-      console.log("starting session");
       const result = await sessionContext.startSession({
         type: isGroup ? "GROUP" : "BADGE",
         docId: badgeId,
         state: state,
         pubkey: pubkey,
       });
-      console.log(`start session result ${JSON.stringify(result)}`);
     }
   };
 

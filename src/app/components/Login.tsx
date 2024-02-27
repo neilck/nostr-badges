@@ -130,9 +130,7 @@ export const Login = () => {
           onClick={() => {
             signOut();
             dispatch({ type: "setLoading", loading: true });
-            onNostrClick().catch((error) => {
-              console.log(error);
-            });
+            onNostrClick();
           }}
           disabled={loading}
           sx={{

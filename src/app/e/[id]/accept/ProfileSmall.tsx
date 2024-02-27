@@ -32,7 +32,6 @@ export const ProfileSmall = (item: Item) => {
   const textWidth = widthOption == "wide" ? "220px" : "180px";
   const truncateLength = widthOption == "wide" ? 70 : 50;
 
-  console.log(`ProfileSmall render name: ${name}, pubkey: ${pubkey}`);
   const defaultSx = {
     border: 0,
     pt: 1,

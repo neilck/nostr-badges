@@ -15,7 +15,6 @@ export const GenericButton = (props: {
   sx?: SxProps<Theme> | undefined;
   disabled?: boolean;
 }) => {
-  console.log(`GenericButton render disabled: ${props.disabled}`);
   const { onClick } = props;
   const [isDisabled, setIsDisabled] = useState(false);
   const [buttonLabel, setButtonLabel] = useState(

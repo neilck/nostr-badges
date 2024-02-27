@@ -20,7 +20,6 @@ export const PrivateKeyButton = (props: {
   onEnd: () => void;
   onPubkey: (pubkey: string) => void;
 }) => {
-  console.log(`PrivateKeyButton render disabled: ${props.disabled}`);
   const { disabled, onStart, onEnd, onPubkey } = props;
 
   const [edit, setEdit] = useState(false);

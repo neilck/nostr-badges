@@ -23,7 +23,6 @@ export const StartSessionButton = (props: {
 
   useEffect(() => {
     const sessionState = sessionContext.state.sessionState;
-    console.log(`StartSessionButton useEffect ${sessionState} ${isGroup}`);
 
     switch (sessionState) {
       case SessionState.Initial:

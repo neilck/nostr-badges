@@ -24,10 +24,7 @@ export const SessionController = () => {
   }, []);
 
   const init = async () => {
-    const exists = await sessionContext.resumeSession();
-    if (!exists) {
-      console.log("error resuming session");
-    }
+    await sessionContext.resumeSession();
   };
 
   // Since there's no UI to return, you can return null

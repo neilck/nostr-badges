@@ -116,7 +116,6 @@ export const Sign = (props: {
   };
 
   const verifiedHandler = (pubkey: string) => {
-    console.log(`verifiedHandler ${pubkey}`);
     if (reqPubkey != "" && pubkey != reqPubkey) {
       setAlertError("Accounts do not match.");
     } else {

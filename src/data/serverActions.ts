@@ -191,7 +191,6 @@ export async function sessionCreateBadgeAwards(
   });
 
   if (!response.ok) {
-    console.log(response);
     // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to fetch data");
   }
