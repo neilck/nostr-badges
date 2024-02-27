@@ -143,6 +143,16 @@ export const AccountProvider = (props: AccountProviderProps) => {
   // called on onAuthStateChanged
   // could be first login without account, login of existing account, or logout
   const handleUserChange = async (user: User | null) => {
+    // return to login page
+    if (user == null && pathname != "/") {
+      router.push("/");
+    }
+
+    // go to home page
+    if (user != null && pathname == "/") {
+      router.push("/creator");
+    }
+
     dispatch({ type: "setLoading", loading: false });
 
     // log out

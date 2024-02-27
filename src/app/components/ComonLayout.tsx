@@ -66,7 +66,7 @@ export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
           sx={{
             flexGrow: 1,
             flexShrink: 1,
-            bgcolor: theme.palette.common.white,
+            bgcolor: theme.palette.background.default,
           }}
         >
           {children}

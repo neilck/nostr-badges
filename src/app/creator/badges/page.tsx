@@ -87,59 +87,62 @@ export default function Badges() {
 
   return (
     <CommonLayout>
-      <Stack direction="column" pl={3} maxWidth={600}>
-        <CardHeading>Hosted Badges</CardHeading>
-        <Typography variant="body2">
-          Users can apply for hosted badges using AKA Profiles.
-        </Typography>
-        <DocLink doc="hosted-badges/introduction">learn more...</DocLink>
-      </Stack>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          rowGap: 1.5,
-          p: 2,
-          maxWidth: "400px",
-          backgroundColor: theme.palette.grey[100],
-          height: "auto",
-        }}
-      >
-        <AddButtonEx placeholder="new badge name" onAdd={onAddHandler} />
+      <Box width="auto">
+        <Stack direction="column" pt={1} pl={3} maxWidth={600}>
+          <CardHeading>Hosted Badges</CardHeading>
+          <Typography variant="body2">
+            Users can apply for hosted badges using AKA Profiles.
+          </Typography>
+          <DocLink doc="hosted-badges/introduction">learn more...</DocLink>
+        </Stack>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            rowGap: 1.5,
+            p: 2,
+            maxWidth: "400px",
+            backgroundColor: theme.palette.background.default,
+            height: "auto",
+          }}
+        >
+          <AddButtonEx placeholder="new badge name" onAdd={onAddHandler} />
 
-        {Object.keys(badges).map((key) => {
-          const badge = badges[key];
-          let imageUrl = badge.thumbnail;
-          if (badge.thumbnail == "") imageUrl = badge.image;
-          if (imageUrl == "") imageUrl = "/default/badge.png";
-          return (
-            <ItemRow
-              id={key}
-              key={key}
-              name={badge.name}
-              description={
-                badge.description != ""
-                  ? badge.description
-                  : "<description not set>"
-              }
-              image={imageUrl}
-              onClick={() => {
-                displayBadge(badge, key);
-              }}
-              onEdit={onEditClicked}
-              onDelete={onDeleteClicked}
-            ></ItemRow>
-          );
-        })}
+          {Object.keys(badges).map((key) => {
+            const badge = badges[key];
+            let imageUrl = badge.thumbnail;
+            if (badge.thumbnail == "") imageUrl = badge.image;
+            if (imageUrl == "") imageUrl = "/default/badge.png";
+            return (
+              <Box key={key} pt={0.5}>
+                <ItemRow
+                  id={key}
+                  name={badge.name}
+                  description={
+                    badge.description != ""
+                      ? badge.description
+                      : "<description not set>"
+                  }
+                  image={imageUrl}
+                  onClick={() => {
+                    displayBadge(badge, key);
+                  }}
+                  onEdit={onEditClicked}
+                  onDelete={onDeleteClicked}
+                ></ItemRow>
+              </Box>
+            );
+          })}
+        </Box>
+        {selectedBadge && selectedNaddr && (
+          <BadgeDialog
+            open={open}
+            onClose={onClose}
+            badge={selectedBadge}
+            naddr={selectedNaddr}
+          />
+        )}
       </Box>
-      {selectedBadge && selectedNaddr && (
-        <BadgeDialog
-          open={open}
-          onClose={onClose}
-          badge={selectedBadge}
-          naddr={selectedNaddr}
-        />
-      )}
     </CommonLayout>
   );
 }

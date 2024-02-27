@@ -1,5 +1,6 @@
 "use client";
 
+import theme from "../ThemeRegistry/theme";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -45,6 +46,9 @@ export const AddButtonEx = (props: {
           fullWidth
           placeholder={placeholder}
           onChange={onChangeHandler}
+          sx={{
+            backgroundColor: theme.palette.grey[200],
+          }}
         ></TextField>
       </Box>
       <Box width="100px" paddingLeft={2}>

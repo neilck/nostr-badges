@@ -204,13 +204,13 @@ export const GroupEligibilityEdit = (props: { groupId: string }) => {
           <CardHeading>Redirect URL</CardHeading>
           <Box sx={{ width: "100%" }}>
             <Typography textAlign="left" variant="body1">
-              Optional redirect URL on approval
+              Optional redirect URL after approval
             </Typography>
             <Box pt={1.5}>
               <TextField
                 id="redirect"
                 label="Redirect URL"
-                helperText="include [pubkey] to insert pubkey into URL"
+                helperText="Redirect user on approval"
                 value={group?.redirect}
                 onChange={onChangeHandler}
                 size="small"

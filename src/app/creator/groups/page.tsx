@@ -79,53 +79,60 @@ export default function Groups() {
 
   return (
     <CommonLayout>
-      <Stack direction="column" pl={3} maxWidth={600}>
-        <CardHeading>User Groups</CardHeading>
-        <Typography variant="body2">Manage users using a group.</Typography>
-      </Stack>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          rowGap: 1.5,
-          p: 2,
-          maxWidth: "400px",
-          backgroundColor: theme.palette.grey[100],
-          height: "100%",
-        }}
-      >
-        <AddButtonEx placeholder="new group name" onAdd={onAddHandler} />
-        {Object.keys(groups).map((key) => {
-          const group = groups[key];
+      <Box width="auto">
+        <Stack direction="column" pt={1} pl={3} maxWidth={600}>
+          <CardHeading>Group Badges</CardHeading>
+          <Typography variant="body2">
+            Award group badges to your users.
+          </Typography>
+        </Stack>
 
-          return (
-            <ItemRow
-              id={key}
-              key={key}
-              name={group.name}
-              description={
-                group.description == ""
-                  ? "<description not net>"
-                  : group.description
-              }
-              image={group.image == "" ? "/default/group.png" : group.image}
-              onClick={() => {
-                displayGroup(key, group);
-              }}
-              onDelete={onDeleteClicked}
-              onEdit={onEditClicked}
-            ></ItemRow>
-          );
-        })}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            rowGap: 1.5,
+            p: 2,
+            maxWidth: "400px",
+            backgroundColor: theme.palette.background.default,
+            height: "100%",
+          }}
+        >
+          <AddButtonEx placeholder="new group name" onAdd={onAddHandler} />
+          {Object.keys(groups).map((key) => {
+            const group = groups[key];
+
+            return (
+              <Box pt={0.5}>
+                <ItemRow
+                  id={key}
+                  key={key}
+                  name={group.name}
+                  description={
+                    group.description == ""
+                      ? "<description not set>"
+                      : group.description
+                  }
+                  image={group.image == "" ? "/default/group.png" : group.image}
+                  onClick={() => {
+                    displayGroup(key, group);
+                  }}
+                  onDelete={onDeleteClicked}
+                  onEdit={onEditClicked}
+                ></ItemRow>
+              </Box>
+            );
+          })}
+        </Box>
+        {selectedGroup && (
+          <GroupDialog
+            open={open}
+            onClose={onClose}
+            groupId={selectedId}
+            group={selectedGroup}
+          />
+        )}
       </Box>
-      {selectedGroup && (
-        <GroupDialog
-          open={open}
-          onClose={onClose}
-          groupId={selectedId}
-          group={selectedGroup}
-        />
-      )}
     </CommonLayout>
   );
 }
