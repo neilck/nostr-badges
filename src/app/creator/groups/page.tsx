@@ -103,10 +103,9 @@ export default function Groups() {
             const group = groups[key];
 
             return (
-              <Box pt={0.5}>
+              <Box key={key} pt={0.5}>
                 <ItemRow
                   id={key}
-                  key={key}
                   name={group.name}
                   description={
                     group.description == ""
