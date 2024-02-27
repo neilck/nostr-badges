@@ -2,38 +2,43 @@
 
 import theme from "@/app/components/ThemeRegistry/theme";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-
+import MuiNextLink from "../components/items/MuiNextLink";
 import { CommonLayout } from "../components/ComonLayout";
+import { CardHeading, CardSubHeading } from "../components/items/CardHeadings";
 
 export default function CreatorHome() {
   return (
     <CommonLayout>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          rowGap: 2,
-          p: 2,
-          maxWidth: "360px",
-          backgroundColor: theme.palette.grey[100],
+          pt: 2,
         }}
       >
-        <Typography variant="h2">H2 Header Text</Typography>
-        <Typography variant="h3">H3 Header Text</Typography>
-        <Typography variant="h4">H4 Header Text</Typography>
-        <Typography variant="h5">H5 Header Text</Typography>
-        <Typography variant="h6">H6 Header Text</Typography>
-        <Typography variant="body1">Body1 Text</Typography>
-        <Typography variant="body2">Body2 Text</Typography>
-        <Typography variant="subtitle1">Subtitle1 Text</Typography>
-        <Typography variant="subtitle2">Subtitle2 Text</Typography>
-        <h1>H1 Header Text</h1>
-        <h2>H2 Header Text</h2>
-        <h3>H3 Header Text</h3>
-        <h4>H4 Header Text</h4>
-        <h5>H5 Header Text</h5>
-        <h6>H6 Header Text</h6>
+        <Box
+          sx={{
+            p: 2,
+            width: "100%",
+            minHeight: "100px",
+            borderColor: theme.palette.grey[500],
+            borderRadius: "10px",
+            backgroundColor: theme.palette.background.paper,
+          }}
+        >
+          <Typography variant="h5">Welcome to AKA Profiles</Typography>
+          <CardSubHeading>
+            Self-issued badges for decentralized identities.
+          </CardSubHeading>
+
+          <Typography variant="body1" pt={1}>
+            Documentation is available at{" "}
+            <MuiNextLink href="https://docs.akaprofiles.com" target="_blank">
+              docs.akaprofiles.com
+            </MuiNextLink>
+          </Typography>
+          <Typography variant="body1" fontWeight={600}></Typography>
+        </Box>
       </Box>
     </CommonLayout>
   );
