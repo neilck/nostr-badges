@@ -148,11 +148,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
       router.push("/");
     }
 
-    // go to home page
-    if (user != null && pathname == "/") {
-      router.push("/creator");
-    }
-
     dispatch({ type: "setLoading", loading: false });
 
     // log out
@@ -203,6 +198,12 @@ export const AccountProvider = (props: AccountProviderProps) => {
     setCurrentProfileFromAccount(account);
     dispatch({ type: "setCreatorMode", creatorMode: true });
     contextDebug("/user on onAuthStateChanged user not null");
+
+    // go to home page
+    console.log(pathname);
+    if (user != null && pathname == "/") {
+      router.push("/creator");
+    }
   };
 
   useEffect(() => {
