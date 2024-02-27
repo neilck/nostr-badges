@@ -16,7 +16,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.11",
     "@mui/material": "^5.15.11",
-    "@nostr-dev-kit/ndk": "^2.3.2",
+    "@nostr-dev-kit/ndk": "^2.5.0",
     "@react-oauth/google": "^0.11.0",
     "debug": "^4.3.4",
     "deep-equal": "^2.2.2",
