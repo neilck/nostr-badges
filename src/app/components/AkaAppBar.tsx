@@ -39,11 +39,16 @@ export const AkaAppBar = (props: any) => {
   let iconColor = theme.palette.orange.main;
   let bgColor = theme.palette.grey[800];
 
-  const dispatch = useAccountContext().dispatch;
   const hasAccount = account && account.uid != "";
 
   const provider = new GoogleAuthProvider();
   const isDev = process.env.NODE_ENV == "development";
+
+  const homeClicked = () => {
+    if (hasAccount) {
+      router.push("/creator");
+    }
+  };
 
   // menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -56,13 +61,7 @@ export const AkaAppBar = (props: any) => {
   };
 
   const handleClickLogin = () => {
-    provider.setCustomParameters({
-      prompt: "select_account",
-    });
-    signInWithPopup(auth, provider).catch((error) => {
-      console.error("signInWithPopup error: %O", error);
-    });
-    handleClose();
+    router.push("/");
   };
 
   const handleClickLogout = () => {
@@ -120,7 +119,11 @@ export const AkaAppBar = (props: any) => {
         }}
       >
         <Stack direction="row" alignItems="center" columnGap="10px">
-          <CapIcon fontSize="medium" sx={{ color: iconColor }} />
+          <CapIcon
+            fontSize="medium"
+            onClick={homeClicked}
+            sx={{ color: iconColor }}
+          />
           {/* display at sm and smaller */}
           <Box
             sx={{
@@ -162,42 +165,43 @@ export const AkaAppBar = (props: any) => {
           </Box>
         </Stack>
 
-        <IconButton
-          size="large"
-          edge="start"
-          id="menu-button"
-          aria-label="menu"
-          aria-controls={open ? "basic-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleClick}
-          sx={{ color: theme.palette.common.white }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Menu
-          id="menu"
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          disableScrollLock={true}
-          open={open}
-          onClose={handleClose}
-          MenuListProps={{
-            "aria-labelledby": "menu-button",
-          }}
-        >
-          {hasAccount && signedInMenuItems().props.children}
-          {!hasAccount && (
-            <MenuItem onClick={handleClickLogin}>sign in</MenuItem>
-          )}
-        </Menu>
+        {hasAccount && (
+          <>
+            <IconButton
+              size="large"
+              edge="start"
+              id="menu-button"
+              aria-label="menu"
+              aria-controls={open ? "basic-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleClick}
+              sx={{ color: theme.palette.common.white }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              disableScrollLock={true}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "menu-button",
+              }}
+            >
+              {signedInMenuItems().props.children}
+            </Menu>
+          </>
+        )}
       </Box>
     </Stack>
   );
