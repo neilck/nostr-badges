@@ -45,9 +45,9 @@ export default function Nostr() {
   return (
     <NostrLayout>
       <Stack direction="column" pl={3} maxWidth={600}>
-        <CardHeading>Issuer Keypair</CardHeading>
+        <CardHeading>Issuer Private Key</CardHeading>
         <Typography variant="body2">
-          Issuer keypair is used to publish badges and badge awards.
+          Private key used to publish badges and badge awards.
         </Typography>
         <Link
           href="../../help/issuerkeypair"
