@@ -86,7 +86,7 @@ const SessionContext = createContext<
         params: CreateSessionParams
       ) => Promise<CreateSessionResult>;
       resumeSession: () => Promise<boolean>;
-      setCurrentBadge: (badgeId: string) => void;
+      setCurrentBadge: (badgeId: string, session?: Session) => void;
       redirectToLogin: (naddr: string) => void;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
       getSignedEvents: () => Promise<NostrEvent[]>;
@@ -278,7 +278,7 @@ function SessionProvider(props: SessionProviderProps) {
   const updateFromSession = async (session: Session) => {
     const currentId = getAutoOpenBadge(session);
     if (currentId) {
-      await setCurrentBadge(currentId);
+      await setCurrentBadge(currentId, session);
     }
 
     // load badge or group for display
@@ -306,10 +306,12 @@ function SessionProvider(props: SessionProviderProps) {
     updateSessionState(session, currentId);
   };
 
-  const setCurrentBadge = async (badgeId: string) => {
-    if (!state.session) {
-      return;
+  const setCurrentBadge = async (badgeId: string, session?: Session) => {
+    if (!session && state.session) {
+      session = state.session;
     }
+
+    if (!session) return;
 
     dispatch({ type: "setCurrentId", currentId: badgeId });
 
@@ -325,14 +327,14 @@ function SessionProvider(props: SessionProviderProps) {
       let awardtoken = "";
 
       // single badge
-      if (state.session.type == "BADGE" && state.session.targetId == badgeId) {
-        awardtoken = state.session.itemState.awardtoken;
+      if (session.type == "BADGE" && session.targetId == badgeId) {
+        awardtoken = session.itemState.awardtoken;
       } else {
         // from required badges
-        if (state.session.requiredBadges) {
-          for (let i = 0; i < state.session.requiredBadges.length; i++) {
-            if (state.session.requiredBadges[i].badgeId == badgeId) {
-              awardtoken = state.session.requiredBadges[i].itemState.awardtoken;
+        if (session.requiredBadges) {
+          for (let i = 0; i < session.requiredBadges.length; i++) {
+            if (session.requiredBadges[i].badgeId == badgeId) {
+              awardtoken = session.requiredBadges[i].itemState.awardtoken;
               break;
             }
           }
