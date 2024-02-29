@@ -6,8 +6,8 @@ import Box from "@mui/material/Box";
 import { AkaAppBar } from "./components/AkaAppBar";
 import { Login } from "./components/Login";
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import ThemeRegistry from "./components/ThemeRegistry/ThemeRegistry";
+import { CapIcon } from "./components/items/CapIcon";
 
 export default function Home() {
   return (
@@ -28,13 +28,31 @@ export default function Home() {
           item
           xs={12}
           md={6}
-          sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1 }}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            flexGrow: 1,
+          }}
         >
-          <img
-            src="/heroes.png"
-            alt="Your Image"
-            style={{ width: "100%", height: "auto", objectFit: "cover" }}
-          />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: theme.palette.blue.light,
+              width: "100%",
+              pb: "30px",
+            }}
+          >
+            <CapIcon
+              fontSize="large"
+              sx={{
+                color: theme.palette.orange.main,
+                width: "280px",
+                height: "280px",
+              }}
+            />
+          </Box>
         </Grid>
 
         {/* Login box on the right for screens greater than md breakpoint */}
@@ -44,29 +62,33 @@ export default function Home() {
           md={6}
           sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1 }}
         >
-          <Paper
-            style={{
-              padding: theme.spacing(3),
-              textAlign: "center",
-              height: "100%",
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: theme.palette.background.paper,
               width: "100%",
+              pb: "30px",
             }}
           >
             <Login />
-          </Paper>
+          </Box>
         </Grid>
 
         {/* Login box centered for screens less than md breakpoint */}
         <Grid item xs={12} sx={{ display: { md: "none" }, flexGrow: 1 }}>
-          <Paper
-            style={{
+          <Box
+            sx={{
               padding: theme.spacing(3),
               textAlign: "center",
               height: "100%",
+              bgcolor: theme.palette.background.paper,
             }}
           >
             <Login />
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </ThemeRegistry>

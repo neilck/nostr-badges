@@ -2,7 +2,6 @@
 
 import debug from "debug";
 import theme from "@/app/components/ThemeRegistry/theme";
-import { useEffect } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { auth } from "@/firebase-config";
 import {
@@ -15,7 +14,6 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { CapIcon } from "./items/CapIcon";
 import { GoogleButton } from "./items/GoogleButton";
 import { useAccountContext } from "@/context/AccountContext";
 
@@ -107,10 +105,6 @@ export const Login = () => {
         alignItems="center"
         spacing={2}
       >
-        <CapIcon
-          fontSize="medium"
-          sx={{ color: iconColor, width: "100px", height: "100px" }}
-        />
         <Typography variant="h3" align="center">
           Access without identity
         </Typography>
