@@ -9,8 +9,6 @@ import {
   addItem,
 } from "./firestoreLib";
 
-const origin = process.env.NEXT_PUBLIC_APP_ORIGIN;
-
 export type Group = {
   uid: string;
   name: string;
