@@ -86,7 +86,11 @@ const SessionContext = createContext<
         params: CreateSessionParams
       ) => Promise<CreateSessionResult>;
       resumeSession: () => Promise<boolean>;
-      setCurrentBadge: (badgeId: string, session?: Session) => void;
+      setCurrentBadge: (
+        badgeId: string,
+        sessionId?: string,
+        session?: Session
+      ) => void;
       redirectToLogin: (naddr: string) => void;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
       getSignedEvents: () => Promise<NostrEvent[]>;
@@ -247,7 +251,7 @@ function SessionProvider(props: SessionProviderProps) {
       // update context with new session
       dispatch({ type: "setSessionId", sessionId: result.sessionId });
       dispatch({ type: "setSession", session: result.session });
-      updateFromSession(result.session);
+      updateFromSession(result.sessionId, result.session);
 
       // save session Id to sessionStorage
       sessionStorage.setItem("session", result.sessionId);
@@ -264,7 +268,7 @@ function SessionProvider(props: SessionProviderProps) {
       if (session) {
         dispatch({ type: "setSessionId", sessionId: sessionId });
         dispatch({ type: "setSession", session: session });
-        updateFromSession(session);
+        updateFromSession(sessionId, session);
         return true;
       }
     }
@@ -275,10 +279,10 @@ function SessionProvider(props: SessionProviderProps) {
   /***
    * update client session properies when loaded from database
    */
-  const updateFromSession = async (session: Session) => {
+  const updateFromSession = async (sessionId: string, session: Session) => {
     const currentId = getAutoOpenBadge(session);
     if (currentId) {
-      await setCurrentBadge(currentId, session);
+      await setCurrentBadge(currentId, sessionId, session);
     }
 
     // load badge or group for display
@@ -306,12 +310,18 @@ function SessionProvider(props: SessionProviderProps) {
     updateSessionState(session, currentId);
   };
 
-  const setCurrentBadge = async (badgeId: string, session?: Session) => {
+  // when called during start / resume session, must pass in sessionId ans session, as not yet set in context
+  const setCurrentBadge = async (
+    badgeId: string,
+    sessionId?: string,
+    session?: Session
+  ) => {
     if (!session && state.session) {
       session = state.session;
+      sessionId = state.sessionId!;
     }
 
-    if (!session) return;
+    if (!session || !sessionId) return;
 
     dispatch({ type: "setCurrentId", currentId: badgeId });
 
@@ -348,7 +358,7 @@ function SessionProvider(props: SessionProviderProps) {
           description: badge.description,
           image: badge.thumbnail != "" ? badge.thumbnail : badge.image,
           applyURL: badge.applyURL,
-          sessionId: state.sessionId ? state.sessionId : "",
+          sessionId: sessionId,
           awardtoken: awardtoken,
         };
         dispatch({ type: "setCurrent", current: current });
@@ -440,7 +450,7 @@ function SessionProvider(props: SessionProviderProps) {
       if (session) {
         dispatch({ type: "setSessionId", sessionId: sessionId });
         dispatch({ type: "setSession", session: session });
-        await updateFromSession(session);
+        await updateFromSession(sessionId, session);
         return true;
       }
     }
