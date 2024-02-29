@@ -93,7 +93,7 @@ export default function Badges() {
           <Typography variant="body2">
             Users can apply for hosted badges using AKA Profiles.
           </Typography>
-          <DocLink doc="hosted-badges/introduction">learn more...</DocLink>
+          <DocLink doc="intro">learn more...</DocLink>
         </Stack>
         <Box
           sx={{

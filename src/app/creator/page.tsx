@@ -33,8 +33,8 @@ export default function CreatorHome() {
 
           <Typography variant="body1" pt={1}>
             Documentation is available at{" "}
-            <MuiNextLink href="https://docs.akaprofiles.com" target="_blank">
-              docs.akaprofiles.com
+            <MuiNextLink href="https://www.akaprofiles.com" target="_blank">
+              www.akaprofiles.com
             </MuiNextLink>
           </Typography>
           <Typography variant="body1" fontWeight={600}></Typography>

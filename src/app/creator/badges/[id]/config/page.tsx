@@ -7,7 +7,7 @@ export default function ConfigPage({ params }: { params: { id: string } }) {
   return (
     <EditCardFrame
       instructions="Set the options required to integrate your badge with AKA Profiles."
-      docLink="hosted-badges/badge-config"
+      docLink="help-pages/badge-config"
     >
       <ConfigEdit docId={id} />
     </EditCardFrame>

@@ -7,7 +7,7 @@ export default function BadgePage({ params }: { params: { id: string } }) {
   return (
     <EditCardFrame
       instructions="Set the badge name, description, and image."
-      docLink="hosted-badges/basic-badge"
+      docLink="help-pages/basic-badge"
     >
       <BadgeEdit docId={id} />
     </EditCardFrame>

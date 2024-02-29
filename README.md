@@ -8,4 +8,4 @@ It enables users to apply for and be awarded badges, enabling self-enrollment in
 
 Still in development. 
 
-See [AKA Profiles Documentation](https://docs.akaprofiles.com/docs/intro).
+See [AKA Profiles Documentation](https://www.akaprofiles.com).

@@ -81,7 +81,7 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
   return (
     <EditCardFrame
       instructions="Re-publish group badge to your configured relays.."
-      docLink="hosted-badges/badge-publish"
+      docLink="help-pages/badge-publish"
     >
       <Stack direction="column" pl={2} pr={2} maxWidth={600} spacing={2}>
         <Box>

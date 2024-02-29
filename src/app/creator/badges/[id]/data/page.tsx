@@ -6,7 +6,7 @@ export default function DataPage({ params }: { params: { id: string } }) {
   return (
     <EditCardFrame
       instructions="If you badge return data when awarded, describe it here."
-      docLink="hosted-badges/badge-data"
+      docLink="help-pages/badge-data"
     >
       <DataEdit docId={id} />
     </EditCardFrame>
