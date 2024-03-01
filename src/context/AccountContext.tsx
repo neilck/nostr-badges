@@ -144,8 +144,12 @@ export const AccountProvider = (props: AccountProviderProps) => {
   // could be first login without account, login of existing account, or logout
   const handleUserChange = async (user: User | null) => {
     // return to login page
-    if (user == null && pathname != "/") {
-      router.push("/");
+    if (user == null) {
+      const publicPath =
+        pathname == "/" ||
+        pathname.startsWith("/njump/") ||
+        pathname.startsWith("/e/");
+      if (!publicPath) router.push("/");
     }
 
     dispatch({ type: "setLoading", loading: false });
