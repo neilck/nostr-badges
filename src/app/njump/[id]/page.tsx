@@ -72,6 +72,8 @@ export async function generateMetadata(
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;
 
+const getURL = process.env.NEXT_PUBLIC_AKA_GET;
+
 export default async function Njump({
   params,
   searchParams,
@@ -81,7 +83,7 @@ export default async function Njump({
 }) {
   const naddr = params.id;
   const { state, pubkey } = searchParams;
-  let url = `/e/${naddr}`;
+  let url = `${getURL}/e/${naddr}`;
   let addedParam = false;
   if (state && state != "") {
     url = url + `?state=${state}`;

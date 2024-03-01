@@ -26,6 +26,7 @@ import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { Event, toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
 
 const contextDebug = debug("aka:sessionContext");
+const getURL = process.env.NEXT_PUBLIC_AKA_GET;
 
 export enum SessionState {
   Initial = "Initial",
@@ -374,7 +375,7 @@ function SessionProvider(props: SessionProviderProps) {
     if (state.sessionId) {
       const searchParams = new URLSearchParams();
       searchParams.set("session", state.sessionId);
-      const updatedURL = `/e/${naddr}/accept?${searchParams.toString()}`;
+      const updatedURL = `${getURL}/e/${naddr}/accept?${searchParams.toString()}`;
       router.push(updatedURL);
     }
   };

@@ -9,6 +9,8 @@ import Typography from "@mui/material/Typography";
 import { BadgeView } from "./BadgeView";
 import { Badge } from "@/data/badgeLib";
 
+const getURL = process.env.NEXT_PUBLIC_AKA_GET;
+
 export interface BadgeDialogProps {
   badge: Badge;
   naddr: string;
@@ -43,7 +45,7 @@ export function BadgeDialog(props: BadgeDialogProps) {
         }}
       >
         <MuiNextLink
-          href={`/e/${naddr}`}
+          href={`${getURL}/e/${naddr}`}
           rel="noopener noreferrer"
           target="_blank"
         >

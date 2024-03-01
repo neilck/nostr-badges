@@ -12,6 +12,8 @@ import Typography from "@mui/material/Typography";
 import MuiNextLink from "@/app/components/items/MuiNextLink";
 import { CodeDialog } from "@/app/components/CodeDialog";
 
+const getURL = process.env.NEXT_PUBLIC_AKA_GET;
+
 export const BadgeTestLinks = (props: { event: Event }) => {
   const { event } = props;
   const nostrEvent = toNostrEvent(event);
@@ -45,7 +47,7 @@ export const BadgeTestLinks = (props: { event: Event }) => {
         </Button>
 
         <MuiNextLink
-          href={`/njump/${event.encodedAddress}`}
+          href={`${getURL}/njump/${event.encodedAddress}`}
           rel="noopener noreferrer"
           target="_blank"
         >

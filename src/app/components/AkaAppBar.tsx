@@ -60,10 +60,6 @@ export const AkaAppBar = (props: any) => {
     setAnchorEl(null);
   };
 
-  const handleClickLogin = () => {
-    router.push("/");
-  };
-
   const handleClickLogout = () => {
     signOut();
     handleClose();
