@@ -1,4 +1,5 @@
 ## nostr-badges
+Version 0.0.1
 
 Microservice for Nostr badges. 
 Rather than manual badge awards, enables users to apply for and be awarded badges.
