@@ -5,6 +5,7 @@ import { BadgeView } from "@/app/components/BadgeView";
 import { parseEventTags } from "../../utils/parseEvent";
 import { BadgeAwardedList } from "../BadgeAwardedList";
 import { ReactNode } from "react";
+import { Checker } from "./Checker";
 
 export const ViewBadgeEventSession = async (props: {
   id: string;
@@ -47,6 +48,7 @@ export const ViewBadgeEventSession = async (props: {
           Eligibility requirements
         </Typography>
       )}
+      <Checker />
       <BadgeAwardedList />
       {children}
     </Stack>
