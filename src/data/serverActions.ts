@@ -91,6 +91,25 @@ export async function getBadge(id: string): Promise<Badge> {
   return res.json();
 }
 
+export async function getBadgeDefEvent(
+  type: "BADGE" | "GROUP",
+  badgeId: string
+): Promise<Event> {
+  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+
+  const url = `https://getbadgedefevent-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getbadgedefevent?type=${type}&badgeid=${badgeId}`;
+  const res = await fetch(url, {
+    headers: { authorization },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+  return res.json();
+}
+
 // return header with AKA_API_KEY authorization
 const getAkaApiPostHeader = () => {
   const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
