@@ -5,6 +5,7 @@ export type ItemState = {
   owner: string;
   awardtoken: string;
   isAwarded: boolean;
+  prevAward: boolean;
   event?: string;
   awardData?: { [key: string]: string } | undefined;
 };
@@ -39,6 +40,7 @@ export const getEmptySession = (): Session => {
       awardtoken: "",
       owner: "",
       isAwarded: false,
+      prevAward: false,
       awardData: undefined,
     },
     state: "",
