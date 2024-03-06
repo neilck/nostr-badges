@@ -3,9 +3,11 @@
 import theme from "@/app/components/ThemeRegistry/theme";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 import { SessionState, useSessionContext } from "@/context/SessionContext";
+import Link from "next/link";
 
 export const StartSessionButton = (props: {
   badgeId: string;
@@ -17,6 +19,7 @@ export const StartSessionButton = (props: {
 
   const defaultLabel = isGroup ? "Join Group" : "Get Badge";
   const awardedLabel = isGroup ? "Join Group" : "Badge Awarded";
+  const instructions = ".";
 
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
   const [disabled, setDisabled] = useState(false);
@@ -74,24 +77,44 @@ export const StartSessionButton = (props: {
   };
 
   return (
-    <Button
-      onClick={onClick}
-      disabled={disabled}
-      variant="contained"
-      color="secondary"
-      sx={{
-        width: "80%",
-        color: theme.palette.grey[200],
-        backgroundColor: theme.palette.orange.main,
-        "&:hover": {
-          color: theme.palette.grey[100],
-          backgroundColor: theme.palette.orange.dark,
-        },
-      }}
-    >
-      <Typography variant="body2" align="center" fontWeight="800">
-        {buttonLabel}
-      </Typography>
-    </Button>
+    <>
+      {disabled && (
+        <Box display="flex" flexDirection="column">
+          <Typography>Click badges above to apply.</Typography>
+          <Box display="Flex" flexDirection="row" pt={0.5}>
+            <Typography variant="body2">Already have an account?</Typography>
+            <Box>
+              <Typography
+                variant="body2"
+                color="primary"
+                fontWeight={600}
+                pl={1}
+              >
+                login
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
+      <Button
+        onClick={onClick}
+        disabled={disabled}
+        variant="contained"
+        color="secondary"
+        sx={{
+          width: "80%",
+          color: theme.palette.grey[200],
+          backgroundColor: theme.palette.orange.main,
+          "&:hover": {
+            color: theme.palette.grey[100],
+            backgroundColor: theme.palette.orange.dark,
+          },
+        }}
+      >
+        <Typography variant="body2" align="center" fontWeight="800">
+          {buttonLabel}
+        </Typography>
+      </Button>
+    </>
   );
 };
