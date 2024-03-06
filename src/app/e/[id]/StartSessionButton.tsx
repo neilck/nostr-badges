@@ -78,7 +78,7 @@ export const StartSessionButton = (props: {
 
   return (
     <>
-      {disabled && (
+      {/* disabled && (
         <Box display="flex" flexDirection="column">
           <Typography>Click badges above to apply.</Typography>
           <Box display="Flex" flexDirection="row" pt={0.5}>
@@ -95,7 +95,7 @@ export const StartSessionButton = (props: {
             </Box>
           </Box>
         </Box>
-      )}
+      ) */}
       <Button
         onClick={onClick}
         disabled={disabled}
