@@ -62,7 +62,16 @@ export const FrameDialog = (props: {
         if (awardtoken) {
           const encodedIdentifier = encodeURIComponent(identifier);
           const url = `${applyURL}?session=${sessionId}&identifier=${encodedIdentifier}&awardtoken=${awardtoken}`;
-          setUrl(url);
+          const testDomain = process.env.NEXT_PUBLIC_DEV_APPLYURL_OVERRIDE;
+          if (testDomain && testDomain != "") {
+            const tempUrl = new URL(url);
+            const path = tempUrl.pathname + tempUrl.search;
+            const overrideUrl = `${testDomain}${path}`;
+            console.log(`Using override url ${overrideUrl}`);
+            setUrl(overrideUrl);
+          } else {
+            setUrl(url);
+          }
         }
       } else {
         setValidUrl(false);
