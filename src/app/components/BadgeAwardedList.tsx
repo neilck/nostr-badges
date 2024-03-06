@@ -30,6 +30,10 @@ export function renderBadge(item: Item, handler: OnBadgeSelectedHandler) {
       onClick={() => {
         handler(docId, badge);
       }}
+      sx={{
+        "p": 0.5,
+        "&:hover": { border: 2, borderRadius: 1, borderColor: "blue.light" },
+      }}
     >
       <BadgeAwardedRow
         name={badge.name}
@@ -75,7 +79,13 @@ export const BadgeAwardedList = (props: {}) => {
   };
 
   return (
-    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+    <Stack
+      direction="column"
+      spacing={1}
+      useFlexGap
+      flexWrap="wrap"
+      alignItems="center"
+    >
       {isLoading && <CircularProgress />}
       {!isLoading &&
         items.map((item) => (
