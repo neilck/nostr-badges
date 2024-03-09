@@ -71,7 +71,7 @@ export const EditableTextArea: React.FC<EditableTextProps> = ({
           onMouseLeave={handleMouseLeave}
           variant="standard"
           multiline
-          minRows={2}
+          minRows={1}
           fullWidth
           autoFocus
           sx={{

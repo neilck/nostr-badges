@@ -189,6 +189,31 @@ export async function createSession(params: CreateSessionParams) {
   }
 }
 
+export async function changeSessionPubkey(
+  session: string,
+  pubkey: string
+): Promise<{ success: boolean; message: string }> {
+  const postData = {
+    session: session,
+    pubkey: pubkey,
+  };
+
+  const url = `https://changesessionpubkey-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/changeSessionPubkey`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: getAkaApiPostHeader(),
+    body: JSON.stringify(postData),
+    cache: "no-cache",
+  });
+
+  if (!response.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+  return response.json();
+}
+
 export async function sessionCreateBadgeAwards(
   sessionId: string,
   awardedToUid: string,

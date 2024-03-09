@@ -18,7 +18,7 @@ import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { ProfileSmall } from "./ProfileSmall";
+import { ProfileSmall } from "../ProfileSmall";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { Buttons } from "./Buttons";
 

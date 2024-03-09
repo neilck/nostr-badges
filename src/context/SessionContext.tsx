@@ -16,6 +16,7 @@ import { Session, ItemState } from "@/data/sessionLib";
 import {
   getSession,
   createSession,
+  changeSessionPubkey,
   CreateSessionParams,
   CreateSessionResult,
 } from "@/data/serverActions";
@@ -93,6 +94,7 @@ const SessionContext = createContext<
         session?: Session
       ) => void;
       redirectToLogin: (naddr: string) => void;
+      changePubkey: (pubkey: string) => Promise<boolean>;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
       getSignedEvents: () => Promise<NostrEvent[]>;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
@@ -151,13 +153,13 @@ function SessionProvider(props: SessionProviderProps) {
       return false;
     }
 
-    if (!session.itemState.isAwarded) {
+    if (!(session.itemState.isAwarded || session.itemState.prevAward)) {
       return false;
     }
 
     if (session.requiredBadges) {
       session.requiredBadges.forEach((badge) => {
-        if (!badge.itemState.isAwarded) {
+        if (!(badge.itemState.isAwarded || badge.itemState.prevAward)) {
           return false;
         }
       });
@@ -165,7 +167,7 @@ function SessionProvider(props: SessionProviderProps) {
 
     if (session.requiredGroups) {
       session.requiredGroups.forEach((group) => {
-        if (!group.itemState.isAwarded) {
+        if (!(group.itemState.isAwarded || group.itemState.prevAward)) {
           return false;
         }
       });
@@ -380,6 +382,14 @@ function SessionProvider(props: SessionProviderProps) {
     }
   };
 
+  const changePubkey = async (pubkey: string) => {
+    if (state.sessionId) {
+      const result = await changeSessionPubkey(state.sessionId, pubkey);
+      return reload();
+    }
+    return false;
+  };
+
   const createBadgeAwards = async (uid: string, publickey: string) => {
     if (state.sessionId) {
       if (state.session) state.session.pubkey = publickey;
@@ -463,7 +473,11 @@ function SessionProvider(props: SessionProviderProps) {
     if (session == null) return null;
 
     // only auto open if single required badge, not awarded,  and nothing else to display
-    if (session.type == "BADGE" && !session.itemState.isAwarded)
+    if (
+      session.type == "BADGE" &&
+      !session.itemState.isAwarded &&
+      !session.itemState.prevAward
+    )
       return session.targetId;
     else return null;
   };
@@ -476,6 +490,7 @@ function SessionProvider(props: SessionProviderProps) {
     resumeSession: resumeSession,
     setCurrentBadge: setCurrentBadge,
     redirectToLogin: redirectToLogin,
+    changePubkey: changePubkey,
     createBadgeAwards: createBadgeAwards,
     getSignedEvents: getSignedEvents,
     reload: reload,

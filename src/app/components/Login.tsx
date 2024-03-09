@@ -134,7 +134,7 @@ export const Login = () => {
             height: "40px",
           }}
         >
-          Nostr Login
+          Nostr Extension
         </Button>
       </Stack>
     </Box>

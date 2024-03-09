@@ -62,7 +62,9 @@ export const BadgeAwardedList = (props: {}) => {
             newItems.push({
               docId: sessionBadge.badgeId,
               badge: badge,
-              isAwarded: sessionBadge.itemState.isAwarded,
+              isAwarded:
+                sessionBadge.itemState.isAwarded ||
+                sessionBadge.itemState.prevAward,
             });
           }
         }

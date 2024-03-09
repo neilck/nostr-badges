@@ -88,7 +88,7 @@ export const ProfileSmall = (item: Item) => {
   return (
     <Card variant="outlined" sx={{ ...defaultSx, ...sx }}>
       <Box sx={{ display: "flex" }}>
-        <Box sx={{ width: 40, height: 40 }}>
+        <Box pt={0.5} sx={{ width: 40, height: 46 }}>
           {image != "" && (
             <CardMedia
               component="img"
