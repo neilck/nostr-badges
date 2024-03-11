@@ -26,22 +26,11 @@ export const FrameDialog = (props: {
   description: string;
   image: string;
   applyURL: string;
-  sessionId: string;
-  awardtoken: string;
+  code: string;
   show?: boolean;
   onClose?: () => void;
 }) => {
-  const {
-    identifier,
-    title,
-    description,
-    image,
-    applyURL,
-    sessionId,
-    awardtoken,
-    show,
-    onClose,
-  } = props;
+  const { title, description, image, applyURL, code, show, onClose } = props;
   const [url, setUrl] = useState("");
   const [validUrl, setValidUrl] = useState(false);
 
@@ -59,9 +48,8 @@ export const FrameDialog = (props: {
     {
       if (isValidUrl(applyURL)) {
         setValidUrl(true);
-        if (awardtoken) {
-          const encodedIdentifier = encodeURIComponent(identifier);
-          const url = `${applyURL}?session=${sessionId}&identifier=${encodedIdentifier}&awardtoken=${awardtoken}`;
+        if (code) {
+          const url = `${applyURL}?code=${code}`;
           const testDomain = process.env.NEXT_PUBLIC_DEV_APPLYURL_OVERRIDE;
           if (testDomain && testDomain != "") {
             const tempUrl = new URL(url);
@@ -77,7 +65,7 @@ export const FrameDialog = (props: {
         setValidUrl(false);
       }
     }
-  }, [applyURL, awardtoken, sessionId, identifier]);
+  }, [applyURL, code]);
 
   const onCloseClick = () => {
     if (onClose) {
