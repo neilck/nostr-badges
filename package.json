@@ -1,6 +1,6 @@
 {
   "name": "aka-creator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "ngrok": "ngrok http --domain=midge-shining-tomcat.ngrok-free.app 3001",
