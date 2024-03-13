@@ -61,7 +61,8 @@ type Action =
   | { type: "setCurrent"; current: Current | null }
   | { type: "setDisplay"; display: Display | null }
   | { type: "setBadges"; badges: Record<string, Badge> | null }
-  | { type: "setSessionState"; sessionState: SessionState };
+  | { type: "setSessionState"; sessionState: SessionState }
+  | { type: "setIsUpdating"; isUpdating: boolean };
 
 type Dispatch = (action: Action) => void;
 
@@ -73,6 +74,7 @@ type State = {
   current: Current | null;
   display: Display | null;
   badges: Record<string, Badge> | null;
+  isUpdating: boolean;
 };
 
 type SessionProviderProps = {
@@ -129,6 +131,9 @@ function reducer(state: State, action: Action) {
       );
       return { ...state, sessionState: action.sessionState };
     }
+    case "setIsUpdating": {
+      return { ...state, isUpdating: action.isUpdating };
+    }
   }
 }
 
@@ -143,6 +148,7 @@ function SessionProvider(props: SessionProviderProps) {
     current: null,
     display: null,
     badges: null,
+    isUpdating: false,
   });
 
   const router = useRouter();
@@ -283,6 +289,7 @@ function SessionProvider(props: SessionProviderProps) {
    * update client session properies when loaded from database
    */
   const updateFromSession = async (sessionId: string, session: Session) => {
+    dispatch({ type: "setIsUpdating", isUpdating: true });
     const currentId = getAutoOpenBadge(session);
     if (currentId) {
       await setCurrentBadge(currentId, sessionId, session);
@@ -311,6 +318,7 @@ function SessionProvider(props: SessionProviderProps) {
     dispatch({ type: "setDisplay", display: display });
 
     updateSessionState(session, currentId);
+    dispatch({ type: "setIsUpdating", isUpdating: false });
   };
 
   // when called during start / resume session, must pass in sessionId ans session, as not yet set in context
@@ -326,6 +334,7 @@ function SessionProvider(props: SessionProviderProps) {
 
     if (!session || !sessionId) return;
 
+    dispatch({ type: "setIsUpdating", isUpdating: true });
     dispatch({ type: "setCurrentId", currentId: badgeId });
 
     // update current
@@ -371,6 +380,7 @@ function SessionProvider(props: SessionProviderProps) {
         });
       }
     }
+    dispatch({ type: "setIsUpdating", isUpdating: false });
   };
 
   const redirectToLogin = (naddr: string) => {

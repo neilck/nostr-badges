@@ -25,12 +25,15 @@ export const StartSessionButton = (props: {
   const instructions = ".";
 
   const [pubkey, setPubkey] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
   const [disabled, setDisabled] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     const sessionState = sessionContext.state.sessionState;
+
+    setIsLoading(sessionState == SessionState.Initial);
 
     switch (sessionState) {
       case SessionState.Initial:
@@ -103,6 +106,8 @@ export const StartSessionButton = (props: {
     setShowDialog(true);
   };
 
+  if (isLoading) return <></>;
+
   return (
     <>
       {disabled && (
@@ -113,10 +118,6 @@ export const StartSessionButton = (props: {
             p: 0.5,
             pl: 1,
             pr: 1,
-            border: 2,
-            borderRadius: 10,
-            borderColor: "blue.main",
-            color: "blue.main",
           }}
         >
           <Typography variant="body2" fontWeight={600}>

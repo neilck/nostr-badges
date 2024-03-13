@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import CardActionArea from "@mui/material/CardActionArea";
 import Box from "@mui/material/Box";
+import CardActionArea from "@mui/material/CardActionArea";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { CircularProgress } from "@mui/material";
-import TextField from "@mui/material/TextField";
+import LinearProgress from "@mui/material/LinearProgress";
+import CircularProgress from "@mui/material/CircularProgress";
+
 import { BadgeAwardedRow } from "./BadgeAwardedRow";
-import { ItemRowSmall } from "./ItemRowSmall";
-import { Badge, getEmptyBadge } from "@/data/badgeLib";
+import { Badge } from "@/data/badgeLib";
 
 import { useSessionContext } from "@/context/SessionContext";
 
@@ -47,9 +47,18 @@ export function renderBadge(item: Item, handler: OnBadgeSelectedHandler) {
 
 export const BadgeAwardedList = (props: {}) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const sessionContext = useSessionContext();
   const session = sessionContext.state.session;
+
+  const startTimer = () => {
+    setTimerRunning(true);
+    setTimeout(() => {
+      setTimerRunning(false);
+    }, 1000);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -76,6 +85,13 @@ export const BadgeAwardedList = (props: {}) => {
     load();
   }, [session, sessionContext]);
 
+  useEffect(() => {
+    setIsUpdating(sessionContext.state.isUpdating);
+    if (sessionContext.state.isUpdating) {
+      startTimer();
+    }
+  }, [sessionContext.state.isUpdating]);
+
   const handleClick: OnBadgeSelectedHandler = (docId: string, badge: Badge) => {
     sessionContext.setCurrentBadge(docId);
   };
@@ -89,10 +105,26 @@ export const BadgeAwardedList = (props: {}) => {
       alignItems="center"
     >
       {isLoading && <CircularProgress />}
+
       {!isLoading &&
         items.map((item) => (
           <div key={item.docId}>{renderBadge(item, handleClick)}</div>
         ))}
+      {!isLoading && (isUpdating || timerRunning) && (
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          width="100%"
+        >
+          <Box width="auto" pb={0.5}>
+            <Typography fontWeight="600">updating...</Typography>
+          </Box>
+          <Box width="100%">
+            <LinearProgress />
+          </Box>
+        </Box>
+      )}
     </Stack>
   );
 };
