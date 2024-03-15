@@ -13,13 +13,12 @@ const getURL = process.env.NEXT_PUBLIC_AKA_GET;
 
 export interface BadgeDialogProps {
   badge: Badge;
-  naddr: string;
   open: boolean;
   onClose: () => void;
 }
 
 export function BadgeDialog(props: BadgeDialogProps) {
-  const { badge, onClose, naddr, open } = props;
+  const { badge, onClose, open } = props;
   let description = badge.description;
   if (description == "") description = "<description not set>";
   let imageUrl = badge.image;
@@ -45,7 +44,7 @@ export function BadgeDialog(props: BadgeDialogProps) {
         }}
       >
         <MuiNextLink
-          href={`${getURL}/e/${naddr}`}
+          href={`${getURL}/e/${badge.event}`}
           rel="noopener noreferrer"
           target="_blank"
         >

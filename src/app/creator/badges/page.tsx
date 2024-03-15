@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loadBadgeEventRecord } from "@/data/nip19sLib";
 
 import theme from "@/app/components/ThemeRegistry/theme";
 import Box from "@mui/material/Box";
@@ -36,9 +35,6 @@ export default function Badges() {
   const [selectedBadge, setSelectedBadge] = useState<Badge | undefined>(
     undefined
   );
-  const [selectedNaddr, setSelectedNaddr] = useState<string | undefined>(
-    undefined
-  );
 
   useEffect(() => {
     if (account?.uid) loadBadges(account.uid);
@@ -51,8 +47,6 @@ export default function Badges() {
 
   async function displayBadge(badge: Badge, id: string) {
     setSelectedBadge(badge);
-    const result = await loadBadgeEventRecord(badge.uid, id);
-    setSelectedNaddr(result?.naddr);
     setOpen(true);
   }
 
@@ -134,13 +128,8 @@ export default function Badges() {
             );
           })}
         </Box>
-        {selectedBadge && selectedNaddr && (
-          <BadgeDialog
-            open={open}
-            onClose={onClose}
-            badge={selectedBadge}
-            naddr={selectedNaddr}
-          />
+        {selectedBadge && (
+          <BadgeDialog open={open} onClose={onClose} badge={selectedBadge} />
         )}
       </Box>
     </CommonLayout>
