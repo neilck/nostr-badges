@@ -7,6 +7,8 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { ConfigManager } from "./ConfigManager";
@@ -84,6 +86,9 @@ export const ConfigEdit = (props: { docId: string }) => {
       case "applyURL":
         updated.applyURL = event.currentTarget.value;
         break;
+      case "shared":
+        updated.shared = event.currentTarget.checked;
+        break;
     }
     setBadge(updated);
   };
@@ -157,6 +162,31 @@ export const ConfigEdit = (props: { docId: string }) => {
             onChange={onUserParamsChangedHandler}
           />
 
+          <Box width="100%">
+            <Box sx={{ width: "100%" }}>
+              <Typography textAlign="left" fontWeight={600} variant="body1">
+                Share in Badge Library
+              </Typography>
+              <Typography textAlign="left" variant="body1">
+                Share as group eligbility criteria.
+              </Typography>
+            </Box>
+
+            <Box
+              id="shared"
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              mt={0}
+            >
+              <Checkbox
+                id="shared"
+                checked={badge.shared}
+                onChange={onChangeHandler}
+              />
+              <Typography>Shared</Typography>
+            </Box>
+          </Box>
           <Box
             sx={{
               pt: 2.5,

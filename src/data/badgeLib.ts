@@ -98,11 +98,6 @@ export const saveBadge = async (
     badge.created_at = Math.floor(Date.now() / 1000);
   }
 
-  // mark badge as shared if ready to be be shared
-  if (badge.name != "" && badge.description != "" && badge.applyURL != "") {
-    badge.shared = true;
-  }
-
   badge.eventUpdated = false;
 
   const saveResult = await saveItem<Badge>(docId, badge, colPath);
