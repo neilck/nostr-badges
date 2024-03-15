@@ -5,7 +5,7 @@ import { useGroupContext } from "@/context/GroupContext";
 import { useAccountContext } from "@/context/AccountContext";
 
 import { Group } from "@/data/groupLib";
-import { saveImageToCloud } from "@/data/firestoreLib";
+import { DEFAULT_GROUP_IMAGE, saveImageToCloud } from "@/data/firestoreLib";
 
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -52,6 +52,10 @@ export const GroupEdit = (props: { groupId: string }) => {
 
     if (group.uid == "" || group.name == "" || group.description == "") {
       return { success: false, mesg: "Required field is missing" };
+    }
+
+    if (group.image == "") {
+      group.image = DEFAULT_GROUP_IMAGE;
     }
 
     // try save image first

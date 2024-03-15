@@ -28,6 +28,25 @@ const contextDebug = debug("aka:firestorelib");
 
 const db = getFirestore();
 
+export const DEFAULT_BADGE_IMAGE =
+  process.env.NEXT_PUBLIC_AKA_DEFAULT_IMG_URL +
+  "%2Fbadge%2Fresized%2Fbadge_1080x1080.png?alt=media";
+export const DEFAULT_BADGE_THUMB =
+  process.env.NEXT_PUBLIC_AKA_DEFAULT_IMG_URL +
+  "%2Fbadge%2Fresized%2Fbadge_128x128.png?alt=media";
+export const DEFAULT_GROUP_IMAGE =
+  process.env.NEXT_PUBLIC_AKA_DEFAULT_IMG_URL +
+  "%2Fgroup%2Fresized%2Fgroup_1080x1080.png?alt=media";
+export const DEFAULT_GROUP_THUMB =
+  process.env.NEXT_PUBLIC_AKA_DEFAULT_IMG_URL +
+  "%2Fgroup%2Fresized%2Fgroup_128x128.png?alt=media";
+export const DEFAULT_PROFILE_IMAGE =
+  process.env.NEXT_PUBLIC_AKA_DEFAULT_IMG_URL +
+  "%2Fprofile%2Fresized%2Fprofile_1080x1080.png?alt=media";
+export const DEFAULT_PROFILE_THUMB =
+  process.env.NEXT_PUBLIC_AKA_DEFAULT_IMG_URL +
+  "%2Fprofile%2Fresized%2Fprofile_128x128.png?alt=media";
+
 export type SaveResult = {
   success: boolean;
   error: string;

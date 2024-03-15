@@ -5,7 +5,11 @@ import { useBadgeContext } from "@/context/BadgeContext";
 import { useRouter } from "next/navigation";
 import { useAccountContext } from "@/context/AccountContext";
 import { Badge, getEmptyBadge } from "@/data/badgeLib";
-import { saveImageToCloud } from "@/data/firestoreLib";
+import {
+  DEFAULT_BADGE_IMAGE,
+  DEFAULT_BADGE_THUMB,
+  saveImageToCloud,
+} from "@/data/firestoreLib";
 
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -47,6 +51,12 @@ export const BadgeEdit = (props: { docId: string }) => {
 
     if (badge.name == "" || badge.description == "") {
       return { success: false, mesg: "Required field is missing." };
+    }
+
+    if (badge.image == "") {
+      // use default
+      badge.image = DEFAULT_BADGE_IMAGE;
+      badge.thumbnail = DEFAULT_BADGE_THUMB;
     }
 
     if (uid == undefined) {
