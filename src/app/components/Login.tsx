@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import debug from "debug";
 import theme from "@/app/components/ThemeRegistry/theme";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -24,9 +25,11 @@ const onGoogleClick = async () => {
   provider.setCustomParameters({
     prompt: "select_account",
   });
-  signInWithPopup(auth, provider).catch((error) => {
+  const result = await signInWithPopup(auth, provider).catch((error) => {
     loginDebug("signInWithPopup error: %o", error);
   });
+
+  return result;
 };
 
 const onNostrClick = async () => {
@@ -77,15 +80,19 @@ const onNostrClick = async () => {
   // @ts-ignore
   const token = result.data.token;
 
-  signInWithCustomToken(auth, token).catch((error) => {
-    loginDebug("Custom token signin error: %o", error);
-  });
+  const signInResult = await signInWithCustomToken(auth, token).catch(
+    (error) => {
+      loginDebug("Custom token signin error: %o", error);
+    }
+  );
+
+  return signInResult;
 };
 
 export const Login = () => {
   const { loading, account, creatorMode } = useAccountContext().state;
+  const router = useRouter();
   const signOut = useAccountContext().signOut;
-
   const dispatch = useAccountContext().dispatch;
   const iconColor = theme.palette.orange.main;
 
@@ -112,19 +119,25 @@ export const Login = () => {
           Join today.
         </Typography>
         <GoogleButton
-          onClick={() => {
+          onClick={async () => {
             signOut();
-            onGoogleClick();
+            const result = await onGoogleClick();
+            if (result) {
+              router.push("/creator");
+            }
           }}
           disabled={loading}
         />
         <Typography variant="body1">or</Typography>
         <Button
           variant="contained"
-          onClick={() => {
+          onClick={async () => {
             signOut();
             dispatch({ type: "setLoading", loading: true });
-            onNostrClick();
+            const result = await onNostrClick();
+            if (result) {
+              router.push("/creator");
+            }
           }}
           disabled={loading}
           sx={{
