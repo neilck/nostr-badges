@@ -21,7 +21,7 @@ import Typography from "@mui/material/Typography";
 import { EditCardFrame } from "@/app/components/EditCardFrame";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { BadgeStatus } from "@/app/components/BadgeStatus";
-import { BadgeTestLinks } from "@/app/components/BadgeTestLinks";
+import { ViewRawEvent } from "@/app/components/ViewRawEvent";
 
 export default function PublishPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -101,7 +101,7 @@ export default function PublishPage({ params }: { params: { id: string } }) {
         </Box>
 
         <SaveButtonEx onClick={onSaveClick} buttonLabel="Publish" />
-        <BadgeTestLinks event={event} />
+        <ViewRawEvent event={event} />
       </Stack>
     </EditCardFrame>
   );

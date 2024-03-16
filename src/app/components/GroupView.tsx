@@ -9,16 +9,20 @@ import Stack from "@mui/material/Stack";
 
 import { Group } from "@/data/groupLib";
 import { Badge, loadBadge } from "@/data/badgeLib";
+import { Event, loadBadgeEvent } from "@/data/eventLib";
 
 import { CardHeading } from "./items/CardHeadings";
 import { ItemRowSmall } from "./ItemRowSmall";
 import { BadgesList } from "./BadgesList";
+import { BadgeTestLinks } from "./BadgeTestLinks";
 
 export const GroupView = (props: { groupId: string; group: Group }) => {
   const { group } = props;
   const groupId = props.groupId;
   const uid = group.uid;
   const [badges, setBadges] = useState<Record<string, Badge>>({});
+  const [hasBadges, setHasBadges] = useState(false);
+  const [event, setEvent] = useState<Event | undefined>(undefined);
   const { image, name, description } = group;
 
   const router = useRouter();
@@ -34,11 +38,17 @@ export const GroupView = (props: { groupId: string; group: Group }) => {
         const badge = await loadBadge(id);
         if (badge) requiredBadges[id] = badge;
       }
-
+      setHasBadges(group.badges.length > 0);
       setBadges(requiredBadges);
     };
 
+    const loadEvent = async (id: string) => {
+      const event = await loadBadgeEvent(id);
+      setEvent(event);
+    };
+
     loadBadges(uid);
+    loadEvent(group.event);
   }, [uid, groupId, group]);
 
   return (
@@ -78,9 +88,14 @@ export const GroupView = (props: { groupId: string; group: Group }) => {
           maxWidth: theme.breakpoints.values.sm,
         }}
       >
-        <CardHeading sx={{ pb: 0.5 }}>Required badges to join</CardHeading>
-        <BadgesList records={badges} />
+        {hasBadges && (
+          <>
+            <CardHeading sx={{ pb: 0.5 }}>Required badges to join</CardHeading>
+            <BadgesList records={badges} />
+          </>
+        )}
       </Stack>
+      {event && <BadgeTestLinks event={event} type="GROUP" />}
     </Box>
   );
 };

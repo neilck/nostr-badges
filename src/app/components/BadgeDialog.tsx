@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 
-import { BadgeView } from "./BadgeView";
+import { BadgeViewEx } from "./BadgeViewEx";
 import { Badge } from "@/data/badgeLib";
 
 const getURL = process.env.NEXT_PUBLIC_AKA_GET;
@@ -27,10 +27,11 @@ export function BadgeDialog(props: BadgeDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>
       <Box sx={{ pt: 2 }}>
-        <BadgeView
+        <BadgeViewEx
           name={badge.name}
           description={description}
           image={imageUrl}
+          eventId={badge.event}
         />
       </Box>
 
@@ -43,23 +44,6 @@ export function BadgeDialog(props: BadgeDialogProps) {
           mb: 2,
         }}
       >
-        <MuiNextLink
-          href={`${getURL}/e/${badge.event}`}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <Typography
-            variant="subtitle2"
-            align="center"
-            fontWeight="600"
-            sx={{
-              "&:hover": { color: { color: theme.palette.blue.dark } },
-            }}
-          >
-            APPLY
-          </Typography>
-        </MuiNextLink>
-
         <Button onClick={onClose}>
           <Typography
             variant="subtitle2"

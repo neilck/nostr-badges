@@ -30,6 +30,7 @@ export function GroupDialog(props: GroupDialogProps) {
             align="center"
             fontWeight="600"
             sx={{
+              pt: 1,
               width: "160px",
               "&:hover": { color: { color: theme.palette.blue.dark } },
             }}

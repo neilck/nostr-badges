@@ -1,53 +1,77 @@
 "use client";
 
-import { useState } from "react";
-import { NostrEvent } from "@/data/ndk-lite";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Event, toNostrEvent } from "@/data/eventLib";
 
 import theme from "@/app/components/ThemeRegistry/theme";
 
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import MuiNextLink from "@/app/components/items/MuiNextLink";
-import { CodeDialog } from "@/app/components/CodeDialog";
+import { CopiableText } from "./items/CopiableText";
 
-const getURL = process.env.NEXT_PUBLIC_AKA_GET;
-
-export const BadgeTestLinks = (props: { event: Event }) => {
-  const { event } = props;
+export const BadgeTestLinks = (props: {
+  event: Event;
+  title?: string;
+  type?: string;
+}) => {
+  const applyURL = `${process.env.NEXT_PUBLIC_AKA_GET}/njump/${props.event.encodedAddress}`;
+  const shortURL = applyURL.substring(0, 40);
+  const { title, event } = props;
+  const [type, setType] = useState(props.type ?? "BADGE");
+  const [applyTitle, setApplyTitle] = useState("");
+  const [awardName, setAwardName] = useState("");
   const nostrEvent = toNostrEvent(event);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  useEffect(() => {
+    if (type == "GROUP") {
+      setApplyTitle("Apply to group link");
+      setAwardName("group members");
+    } else {
+      setApplyTitle("Get badge link");
+      setAwardName("badge awards");
+    }
+  }, [type]);
 
   return (
-    <>
-      <Box display="flex" flexDirection="column" alignItems="flex-start">
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="flex-start"
+      width="100%"
+    >
+      {title && (
         <Typography textAlign="left" fontWeight={600} variant="body1">
-          Test Links
+          {title}
         </Typography>
-        <Button
-          variant="text"
-          size="small"
-          onClick={() => {
-            setDialogOpen(true);
-          }}
-          sx={{ textAlign: "left" }}
-        >
+      )}
+
+      <Box justifyContent="left">
+        <Typography variant="subtitle2" fontWeight={600}>
+          {applyTitle}
+        </Typography>
+        <Box width="320px">
+          <CopiableText initValue={applyURL} variant="body2" />
+        </Box>
+        <MuiNextLink href={applyURL} rel="noopener noreferrer" target="_blank">
           <Typography
             variant="subtitle2"
-            align="center"
-            fontWeight="600"
+            fontWeight="500"
+            pl={0.7}
             sx={{
               "&:hover": { color: { color: theme.palette.blue.dark } },
             }}
           >
-            View raw event
+            open in new tab
           </Typography>
-        </Button>
+        </MuiNextLink>
+      </Box>
 
+      <Box pt={2} pb={2} display="flex" alignItems="center">
+        <Typography variant="subtitle1">Visit </Typography>
         <MuiNextLink
-          href={`${getURL}/njump/${event.encodedAddress}`}
+          href={`https://badges.page/a/${event.encodedAddress}`}
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -60,18 +84,11 @@ export const BadgeTestLinks = (props: { event: Event }) => {
               "&:hover": { color: { color: theme.palette.blue.dark } },
             }}
           >
-            Apply for badge link
+            badges.page
           </Typography>
         </MuiNextLink>
+        <Typography pl={0.5}>to manage {awardName}.</Typography>
       </Box>
-      <CodeDialog
-        open={dialogOpen}
-        onClose={() => {
-          setDialogOpen(false);
-        }}
-        title={"Badge Event"}
-        code={JSON.stringify(nostrEvent, null, 2)}
-      />
-    </>
+    </Box>
   );
 };
