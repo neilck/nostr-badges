@@ -18,7 +18,6 @@ import { Tab, TabNav } from "../../../components/TabNav";
 const tabsTemplate: Tab[] = [
   { name: "BADGE", path: "/creator/groups/[ID]/edit" },
   { name: "ELIGIBILITY", path: "/creator/groups/[ID]/eligibility" },
-  { name: "MEMBERS", path: "/creator/groups/[ID]/members" },
   { name: "PUBLISH", path: "/creator/groups/[ID]/publish" },
 ];
 
