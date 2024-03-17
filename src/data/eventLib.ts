@@ -77,10 +77,6 @@ export const loadBadgeEvent = async (id: string) => {
   return await loadItem<Event>(id, "events");
 };
 
-export const deleteBadgeEvent = async (uid: string, badgeId: string) => {
-  return deleteEvent(uid, badgeId, "badges");
-};
-
 export const createGroupEvent = async (groupId: string) => {
   const functions = getFunctions();
   const createGroupEvent = httpsCallable(functions, "createGroupEvent");
@@ -90,10 +86,6 @@ export const createGroupEvent = async (groupId: string) => {
   const data = createGroupResult.data;
   if (data == undefined) return undefined;
   else return data as Event;
-};
-
-export const deleteGroupEvent = async (uid: string, groupId: string) => {
-  return deleteEvent(uid, groupId, "groups");
 };
 
 export const getEmptyNostrEvent = (): NostrEvent => {
@@ -154,27 +146,4 @@ export const toNostrEvent = (saveEvent: Event): NostrEvent => {
   // Convert array of objects back to array of string arrays
   nostr.tags = saveEvent.tags.map(({ name, values }) => [name, ...values]);
   return nostr;
-};
-
-export const deleteEvent = async (
-  uid: string,
-  docId: string,
-  docCollection: string
-) => {
-  const db = getFirestore();
-
-  const colRef = collection(db, "events");
-  const docRef = doc(db, `${docCollection}/${docId}`);
-
-  const q = query(
-    colRef,
-    where("uid", "==", uid),
-    where("docRef", "==", docRef),
-    limit(1)
-  );
-
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    deleteDoc(doc.ref);
-  });
 };

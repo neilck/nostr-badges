@@ -14,11 +14,7 @@ import {
   saveBadge as fsSaveBadge,
 } from "@/data/badgeLib";
 import { BadgeConfig, loadBadgeConfig } from "@/data/badgeConfigLib";
-import {
-  createBadgeEvent,
-  deleteBadgeEvent,
-  toNostrEvent,
-} from "@/data/eventLib";
+import { createBadgeEvent, toNostrEvent } from "@/data/eventLib";
 import { publishEvent } from "@/data/publishEvent";
 
 // <---------- REDUCER ---------->
@@ -131,7 +127,6 @@ function BadgeProvider(props: BadgeProviderProps) {
 
       // call server-side event creation with callback
       const createEvent = async (badgeId: string, badge: Badge) => {
-        await deleteBadgeEvent(badge.uid, badgeId);
         const event = await createBadgeEvent(badgeId);
         if (event) {
           const nostrEvent = toNostrEvent(event);
@@ -145,7 +140,7 @@ function BadgeProvider(props: BadgeProviderProps) {
       };
 
       // async call with callback to return event for publishing
-      createEvent(badgeId, savedBadge);
+      await createEvent(badgeId, savedBadge);
     }
 
     return saveResult;

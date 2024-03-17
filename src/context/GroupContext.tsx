@@ -9,11 +9,7 @@ import {
 } from "../data/groupLib";
 import { loadBadge } from "@/data/badgeLib";
 import { RequiredBadge } from "./RequiredBadge";
-import {
-  createGroupEvent,
-  deleteGroupEvent,
-  toNostrEvent,
-} from "@/data/eventLib";
+import { createGroupEvent, toNostrEvent } from "@/data/eventLib";
 import { publishEvent } from "@/data/publishEvent";
 
 // <---------- REDUCER ---------->
@@ -107,7 +103,6 @@ function GroupProvider(props: GroupProviderProps) {
 
       // call server-side event creation with callback
       const createEvent = async (groupId: string, group: Group) => {
-        await deleteGroupEvent(group.uid, groupId);
         const event = await createGroupEvent(groupId);
         if (event) {
           // reload group from db to pickup .event field
@@ -123,7 +118,7 @@ function GroupProvider(props: GroupProviderProps) {
       };
 
       // async call with callback to return event for publishing
-      createEvent(groupId, savedGroup);
+      await createEvent(groupId, savedGroup);
     }
 
     return saveResult;
