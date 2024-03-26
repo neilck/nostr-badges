@@ -130,7 +130,7 @@ export const FrameDialog = (props: {
               pt={2}
             >
               <Typography>
-                By clicking the link below, you'll be directed to the
+                By clicking the link below, you will be directed to the
                 application page to apply for this badge.
               </Typography>
               <Box pt={2}>
