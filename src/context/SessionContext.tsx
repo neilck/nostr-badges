@@ -10,7 +10,8 @@
 "use client";
 
 import debug from "debug";
-import { useContext, useReducer, createContext } from "react";
+import { useEffect, useContext, useReducer, createContext } from "react";
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Session, ItemState } from "@/data/sessionLib";
 import {
@@ -49,6 +50,7 @@ export type Current = {
   description: string;
   image: string;
   applyURL: string;
+  noIFrame: boolean;
   sessionId: string;
   awardtoken: string;
 };
@@ -152,6 +154,23 @@ function SessionProvider(props: SessionProviderProps) {
   });
 
   const router = useRouter();
+
+  // setup listener for database change
+  useEffect(() => {
+    // Set up a listener for database changes
+    if (state.sessionId != null && state.sessionId != "") {
+      const db = getFirestore();
+      const unsub = onSnapshot(doc(db, "sessions", state.sessionId), (doc) => {
+        console.log("Session changed: ", doc.data());
+        reload();
+      });
+
+      // Clean up listener when component unmounts
+      return () => {
+        unsub();
+      };
+    }
+  }, [state.sessionId]);
 
   // returns true is all required badges are awarded.
   const readyToAward = (session: Session) => {
@@ -370,6 +389,7 @@ function SessionProvider(props: SessionProviderProps) {
           description: badge.description,
           image: badge.thumbnail != "" ? badge.thumbnail : badge.image,
           applyURL: badge.applyURL,
+          noIFrame: badge.noIFrame,
           sessionId: sessionId,
           awardtoken: awardtoken,
         };

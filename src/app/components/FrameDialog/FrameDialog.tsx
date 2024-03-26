@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
+import MuiNextLink from "../items/MuiNextLink";
 import { CardHeading } from "../items/CardHeadings";
 import { ItemRow } from "../ItemRow";
 
@@ -26,13 +27,20 @@ export const FrameDialog = (props: {
   description: string;
   image: string;
   applyURL: string;
+  noIFrame: boolean;
   code: string;
   show?: boolean;
   onClose?: () => void;
 }) => {
-  const { title, description, image, applyURL, code, show, onClose } = props;
+  const { title, description, image, applyURL, noIFrame, code, show, onClose } =
+    props;
   const [url, setUrl] = useState("");
   const [validUrl, setValidUrl] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState("");
+
+  useEffect(() => {
+    setCurrentUrl(encodeURIComponent(window.location.href));
+  }, []); // Run once on component mount
 
   useEffect(() => {
     if (show) {
@@ -97,7 +105,7 @@ export const FrameDialog = (props: {
               readOnly={true}
             />
           </Box>
-          {validUrl && (
+          {validUrl && !noIFrame && (
             <Box width="100%" height="100%">
               <iframe
                 id="contentFrame"
@@ -110,6 +118,28 @@ export const FrameDialog = (props: {
                   border: 0,
                 }}
               ></iframe>
+            </Box>
+          )}
+          {validUrl && noIFrame && (
+            <Box
+              width="80%"
+              height="100%"
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              pt={2}
+            >
+              <Typography>
+                By clicking the link below, you'll be directed to the
+                application page to apply for this badge.
+              </Typography>
+              <Box pt={2}>
+                <MuiNextLink href={`${url}&redirect=${currentUrl}`}>
+                  <Typography variant="body1" fontWeight={600}>
+                    READY
+                  </Typography>
+                </MuiNextLink>
+              </Box>
             </Box>
           )}
           {!validUrl && <Box>Invalid Badge Apply URL: {applyURL}</Box>}

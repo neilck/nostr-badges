@@ -89,6 +89,9 @@ export const ConfigEdit = (props: { docId: string }) => {
       case "shared":
         updated.shared = event.currentTarget.checked;
         break;
+      case "noIFrame":
+        updated.noIFrame = event.currentTarget.checked;
+        break;
     }
     setBadge(updated);
   };
@@ -133,20 +136,41 @@ export const ConfigEdit = (props: { docId: string }) => {
           </Box>
 
           <Box sx={{ width: "100%" }}>
+            <Typography textAlign="left" fontWeight={600} variant="body1">
+              Badge Award Page
+            </Typography>
             <TextField
               id="applyURL"
-              label="Badge Award Page"
+              label="Award Page URL"
               helperText="e.g. https://domain.com/path/badgeaward"
               value={badge.applyURL}
               onChange={onChangeHandler}
               size="small"
               fullWidth
               sx={{
+                mt: 1.5,
                 input: {
                   background: theme.palette.common.white,
                 },
               }}
             />
+            <Box
+              id="newTabBox"
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              sx={{ width: "100%", mt: 0 }}
+            >
+              <Checkbox
+                id="noIFrame"
+                checked={badge.noIFrame}
+                onChange={onChangeHandler}
+                sx={{ p: 0.5, color: "grey.600" }}
+              />
+              <Typography variant="subtitle2" color="grey.600">
+                Use redirect (no iframe)
+              </Typography>
+            </Box>
           </Box>
 
           <Box sx={{ width: "100%" }}>

@@ -95,8 +95,7 @@ export const Accept = (props: {
           display: "flex",
           flexDirection: "column",
           alignItems: "stretch",
-          border: 1,
-          borderColor: "grey.400",
+          backgroundColor: "grey.200",
         }}
       >
         <Box width="auto" pt={1} pb={1}>

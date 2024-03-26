@@ -27,6 +27,7 @@ export const SessionFrameDialog = () => {
         description={current.description}
         image={current.image}
         applyURL={current.applyURL}
+        noIFrame={current.noIFrame}
         code={current.sessionId + current.awardtoken}
         onClose={onClose}
         show={current != null}
