@@ -2,7 +2,7 @@
 
 /* Style for the dialog container with a class name */
 .customdialog {
-    position: fixed;
+    position: absolute;
     margin: 0 !important;
     top: 0;
     left: 0;
@@ -13,7 +13,6 @@
     border: 0;
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black backdrop */
     z-index: 2;
-    overflow: hidden;
 }
 
 /* Style for the dialog content */
@@ -31,6 +30,8 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Box shadow for a subtle lift effect */
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Add a filter effect to the dialog content if needed */
