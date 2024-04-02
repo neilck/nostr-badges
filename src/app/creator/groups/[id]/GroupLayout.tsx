@@ -30,6 +30,7 @@ export const GroupLayout = (props: {
   const groupContext = useGroupContext();
   const name = group?.name ? group.name : "";
   const image = group?.image ? group.image : "";
+  const event = group?.event ? group.event : "";
 
   useEffect(() => {
     if (id != "") {
@@ -94,7 +95,9 @@ export const GroupLayout = (props: {
           >
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
-              {name && image && <GroupViewSmall name={name} image={image} />}
+              {name && image && (
+                <GroupViewSmall name={name} image={image} event={event} />
+              )}
               <CreatorNavMenu />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
