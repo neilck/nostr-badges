@@ -6,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
 import { CreatorNavMenu } from "./NavMenu";
+import { Footer } from "./Footer";
 
 export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -71,6 +72,18 @@ export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
         >
           {children}
         </Box>
+      </Box>
+      {/* display at sm or larger */}
+      <Box
+        sx={{
+          display: { xs: "none", sm: "flex" },
+          height: "40px",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Footer />
       </Box>
     </Box>
   );
