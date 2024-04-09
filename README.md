@@ -1,3 +1,8 @@
+### Disambiguation
+
+Looking for the [AKA Profiles Chrome Extension](https://github.com/neilck/aka-extension)?
+
+
 ## nostr-badges
 
 AKA Profiles is a microservice/app for Nostr badges that can be integrated into any Nostr client.
