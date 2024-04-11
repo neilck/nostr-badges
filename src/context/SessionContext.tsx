@@ -33,7 +33,6 @@ const getURL = process.env.NEXT_PUBLIC_AKA_GET;
 export enum SessionState {
   Initial = "Initial",
   InProgress = "InProgress",
-  DialogOpen = "DialogOpen",
   ReadyToAward = "ReadyToAward",
   BadgeAwardsCreated = "BadgeAwardsCreated",
 }
@@ -44,23 +43,10 @@ export type Display = {
   image: string;
 };
 
-export type Current = {
-  identifier: string;
-  title: string;
-  description: string;
-  image: string;
-  applyURL: string;
-  noIFrame: boolean;
-  sessionId: string;
-  awardtoken: string;
-};
-
 // <---------- REDUCER ---------->
 type Action =
   | { type: "setSessionId"; sessionId: string | null }
   | { type: "setSession"; session: Session | null }
-  | { type: "setCurrentId"; currentId: string | null }
-  | { type: "setCurrent"; current: Current | null }
   | { type: "setDisplay"; display: Display | null }
   | { type: "setBadges"; badges: Record<string, Badge> | null }
   | { type: "setSessionState"; sessionState: SessionState }
@@ -72,8 +58,6 @@ type State = {
   sessionId: string | null;
   session: Session | null;
   sessionState: SessionState;
-  currentId: string | null;
-  current: Current | null;
   display: Display | null;
   badges: Record<string, Badge> | null;
   isUpdating: boolean;
@@ -92,17 +76,13 @@ const SessionContext = createContext<
         params: CreateSessionParams
       ) => Promise<CreateSessionResult>;
       resumeSession: () => Promise<boolean>;
-      setCurrentBadge: (
-        badgeId: string,
-        sessionId?: string,
-        session?: Session
-      ) => void;
       redirectToLogin: (naddr: string) => void;
       changePubkey: (pubkey: string) => Promise<boolean>;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
       getSignedEvents: () => Promise<NostrEvent[]>;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
       reload: () => void;
+      shouldAutoOpen: () => boolean;
     }
   | undefined
 >(undefined);
@@ -114,12 +94,6 @@ function reducer(state: State, action: Action) {
     }
     case "setSession": {
       return { ...state, session: action.session };
-    }
-    case "setCurrentId": {
-      return { ...state, currentId: action.currentId };
-    }
-    case "setCurrent": {
-      return { ...state, current: action.current };
     }
     case "setDisplay": {
       return { ...state, display: action.display };
@@ -146,8 +120,6 @@ function SessionProvider(props: SessionProviderProps) {
     sessionId: null,
     session: null,
     sessionState: SessionState.Initial,
-    currentId: null,
-    current: null,
     display: null,
     badges: null,
     isUpdating: false,
@@ -202,14 +174,7 @@ function SessionProvider(props: SessionProviderProps) {
   };
 
   // set SessionState based on loaded session
-  const updateSessionState = (
-    session: Session | undefined,
-    currentId: string | null
-  ) => {
-    contextDebug(
-      `updateSessionState(session: ${session}, currentId: ${currentId})`
-    );
-
+  const updateSessionState = (session: Session | undefined) => {
     if (!session) {
       dispatch({ type: "setSessionState", sessionState: SessionState.Initial });
       return;
@@ -250,20 +215,12 @@ function SessionProvider(props: SessionProviderProps) {
       return;
     }
 
-    // if in progress
-    if (currentId && currentId != "") {
-      dispatch({
-        type: "setSessionState",
-        sessionState: SessionState.DialogOpen,
-      });
-      return;
-    } else {
-      dispatch({
-        type: "setSessionState",
-        sessionState: SessionState.InProgress,
-      });
-      return;
-    }
+    // else set in progress
+    dispatch({
+      type: "setSessionState",
+      sessionState: SessionState.InProgress,
+    });
+    return;
   };
 
   const getSessionState = () => {
@@ -309,10 +266,6 @@ function SessionProvider(props: SessionProviderProps) {
    */
   const updateFromSession = async (sessionId: string, session: Session) => {
     dispatch({ type: "setIsUpdating", isUpdating: true });
-    const currentId = getAutoOpenBadge(session);
-    if (currentId) {
-      await setCurrentBadge(currentId, sessionId, session);
-    }
 
     // load badge or group for display
     const display: Display = { title: "", description: "", image: "" };
@@ -336,70 +289,7 @@ function SessionProvider(props: SessionProviderProps) {
 
     dispatch({ type: "setDisplay", display: display });
 
-    updateSessionState(session, currentId);
-    dispatch({ type: "setIsUpdating", isUpdating: false });
-  };
-
-  // when called during start / resume session, must pass in sessionId ans session, as not yet set in context
-  const setCurrentBadge = async (
-    badgeId: string,
-    sessionId?: string,
-    session?: Session
-  ) => {
-    if (!session && state.session) {
-      session = state.session;
-      sessionId = state.sessionId!;
-    }
-
-    if (!session || !sessionId) return;
-
-    dispatch({ type: "setIsUpdating", isUpdating: true });
-    dispatch({ type: "setCurrentId", currentId: badgeId });
-
-    // update current
-    if (badgeId == null || badgeId == "") {
-      dispatch({ type: "setCurrent", current: null });
-      dispatch({
-        type: "setSessionState",
-        sessionState: SessionState.InProgress,
-      });
-    } else {
-      const badge = await loadBadge(badgeId);
-      let awardtoken = "";
-
-      // single badge
-      if (session.type == "BADGE" && session.targetId == badgeId) {
-        awardtoken = session.itemState.awardtoken;
-      } else {
-        // from required badges
-        if (session.requiredBadges) {
-          for (let i = 0; i < session.requiredBadges.length; i++) {
-            if (session.requiredBadges[i].badgeId == badgeId) {
-              awardtoken = session.requiredBadges[i].itemState.awardtoken;
-              break;
-            }
-          }
-        }
-      }
-
-      if (badge) {
-        const current: Current = {
-          identifier: badge.identifier,
-          title: badge.name,
-          description: badge.description,
-          image: badge.thumbnail != "" ? badge.thumbnail : badge.image,
-          applyURL: badge.applyURL,
-          noIFrame: badge.noIFrame,
-          sessionId: sessionId,
-          awardtoken: awardtoken,
-        };
-        dispatch({ type: "setCurrent", current: current });
-        dispatch({
-          type: "setSessionState",
-          sessionState: SessionState.DialogOpen,
-        });
-      }
-    }
+    updateSessionState(session);
     dispatch({ type: "setIsUpdating", isUpdating: false });
   };
 
@@ -498,18 +388,16 @@ function SessionProvider(props: SessionProviderProps) {
     return false;
   };
 
-  // Checks for cases when dialog should automatically open
-  const getAutoOpenBadge = (session: Session | null): string | null => {
-    if (session == null) return null;
-
+  // When single badge
+  const shouldAutoOpen = (): boolean => {
+    if (state.session == null) return false;
+    const session = state.session;
     // only auto open if single required badge, not awarded,  and nothing else to display
-    if (
+    const autoOpen =
       session.type == "BADGE" &&
       !session.itemState.isAwarded &&
-      !session.itemState.prevAward
-    )
-      return session.targetId;
-    else return null;
+      !session.itemState.prevAward;
+    return autoOpen;
   };
 
   const contextValue = {
@@ -518,13 +406,13 @@ function SessionProvider(props: SessionProviderProps) {
     getSessionState: getSessionState,
     startSession: startSession,
     resumeSession: resumeSession,
-    setCurrentBadge: setCurrentBadge,
     redirectToLogin: redirectToLogin,
     changePubkey: changePubkey,
     createBadgeAwards: createBadgeAwards,
     getSignedEvents: getSignedEvents,
     reload: reload,
     loadBadge: loadBadge,
+    shouldAutoOpen: shouldAutoOpen,
   };
 
   return (
