@@ -11,6 +11,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 
+import { DocLink } from "@/app/components/items/DocLink";
 import { CardHeading } from "@/app/components/items/CardHeadings";
 import { ChangeEvent } from "react";
 import { useAccountContext } from "@/context/AccountContext";
@@ -109,7 +110,7 @@ export default function Relays() {
         <Typography variant="body2">
           Relays for publishing badges and badge awards.
         </Typography>
-
+        <DocLink doc="badge-integration/configuration">learn more...</DocLink>
         <FormGroup>
           <FormControlLabel
             control={

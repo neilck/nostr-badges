@@ -7,10 +7,10 @@ import { NostrLayout } from "@/app/components/NostrLayout";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
+import { DocLink } from "@/app/components/items/DocLink";
 import { CardHeading } from "@/app/components/items/CardHeadings";
 import { KeypairDialog } from "@/app/components/KeypairDialog";
 import { useAccountContext } from "@/context/AccountContext";
@@ -49,15 +49,7 @@ export default function Nostr() {
         <Typography variant="body2">
           Private key used to publish badges and badge awards.
         </Typography>
-        <Link
-          href="../../help/issuerkeypair"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <Typography variant="body2" color={theme.palette.primary.main}>
-            learn more...
-          </Typography>
-        </Link>
+        <DocLink doc="badge-integration/configuration">learn more...</DocLink>
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1">Current issuer npub:</Typography>
