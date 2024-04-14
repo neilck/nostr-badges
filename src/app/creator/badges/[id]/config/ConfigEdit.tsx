@@ -89,9 +89,6 @@ export const ConfigEdit = (props: { docId: string }) => {
       case "shared":
         updated.shared = event.currentTarget.checked;
         break;
-      case "noIFrame":
-        updated.noIFrame = event.currentTarget.checked;
-        break;
     }
     setBadge(updated);
   };
@@ -154,23 +151,6 @@ export const ConfigEdit = (props: { docId: string }) => {
                 },
               }}
             />
-            <Box
-              id="newTabBox"
-              display="flex"
-              flexDirection="row"
-              alignItems="center"
-              sx={{ width: "100%", mt: 0 }}
-            >
-              <Checkbox
-                id="noIFrame"
-                checked={badge.noIFrame}
-                onChange={onChangeHandler}
-                sx={{ p: 0.5, color: "grey.600" }}
-              />
-              <Typography variant="subtitle2" color="grey.600">
-                Use redirect (no iframe)
-              </Typography>
-            </Box>
           </Box>
 
           <Box sx={{ width: "100%" }}>

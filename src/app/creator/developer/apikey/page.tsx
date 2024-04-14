@@ -7,6 +7,7 @@ import { NostrLayout } from "@/app/components/NostrLayout";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import { DocLink } from "@/app/components/items/DocLink";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
@@ -49,6 +50,7 @@ export default function ApiKey() {
         <Typography variant="body2">
           API key for calling AKA Profiles API.
         </Typography>
+        <DocLink doc="badge-integration/configuration">learn more...</DocLink>
 
         <Box sx={{ mt: 2 }}>
           {apiKey != "" && (

@@ -30,7 +30,6 @@ export type Badge = {
   dataFields: DataField[];
   eventUpdated: boolean;
   shared: boolean;
-  noIFrame: boolean;
 };
 
 const emptyBadge: Badge = {
@@ -46,7 +45,6 @@ const emptyBadge: Badge = {
   dataFields: [],
   eventUpdated: false,
   shared: false,
-  noIFrame: false,
 };
 
 export const getEmptyBadge = (): Badge => {

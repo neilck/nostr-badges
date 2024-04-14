@@ -41,16 +41,7 @@ export const StartSessionButton = (props: {
         setDisabled(false);
         break;
       case SessionState.InProgress:
-        if (isGroup) {
-          setButtonLabel(defaultLabel);
-          setDisabled(true);
-        } else {
-          setButtonLabel(defaultLabel);
-          setDisabled(false);
-        }
-        break;
-      case SessionState.DialogOpen:
-        setButtonLabel("waiting...");
+        setButtonLabel(defaultLabel);
         setDisabled(true);
         break;
       case SessionState.ReadyToAward:
@@ -86,9 +77,6 @@ export const StartSessionButton = (props: {
       // button only enabled after all badges awarded
       // manual click to advance
       sessionContext.redirectToLogin(naddr);
-    } else {
-      // single baddge, so open dialog
-      sessionContext.setCurrentBadge(badgeId);
     }
   };
 
