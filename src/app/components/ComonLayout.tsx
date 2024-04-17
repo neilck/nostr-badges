@@ -5,10 +5,16 @@ import Stack from "@mui/material/Stack";
 
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
-import { CreatorNavMenu } from "./NavMenu";
+import { NavMenu } from "./NavMenu";
 import { Footer } from "./Footer";
 
-export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
+export const CommonLayout = ({
+  creatorMode = false,
+  children,
+}: {
+  creatorMode: boolean;
+  children: React.ReactNode;
+}) => {
   return (
     <Box
       id="frame"
@@ -53,7 +59,7 @@ export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
               <Profile />
-              <CreatorNavMenu />
+              <NavMenu creatorMode={creatorMode} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>
