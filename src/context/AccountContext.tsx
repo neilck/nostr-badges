@@ -24,8 +24,7 @@ const defaultRelays = getDefaultRelays();
 type Action =
   | { type: "setLoading"; loading: boolean }
   | { type: "setAccount"; account: Account | null }
-  | { type: "setCurrentProfile"; currentProfile: Profile | null }
-  | { type: "setCreatorMode"; creatorMode: boolean };
+  | { type: "setCurrentProfile"; currentProfile: Profile | null };
 
 type Dispatch = (action: Action) => void;
 
@@ -34,7 +33,6 @@ type State = {
   account: Account | null;
   profiles: Profile[];
   currentProfile: Profile | null;
-  creatorMode: boolean;
 };
 
 type AccountProviderProps = { children: ReactNode };
@@ -61,9 +59,6 @@ function reducer(state: State, action: Action) {
     case "setCurrentProfile": {
       return { ...state, currentProfile: action.currentProfile };
     }
-    case "setCreatorMode": {
-      return { ...state, creatorMode: action.creatorMode };
-    }
   }
 }
 
@@ -78,12 +73,10 @@ export const AccountProvider = (props: AccountProviderProps) => {
     account: null,
     profiles: [],
     currentProfile: null,
-    creatorMode: true,
   });
 
   const signOut = async (redirect = true) => {
     dispatch({ type: "setAccount", account: null });
-    // dispatch({ type: "setCreatorMode", creatorMode: false });
     setCurrentProfileFromAccount(null);
     await auth.signOut();
     contextDebug("signed out");
@@ -200,7 +193,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
 
     contextDebug(`setCurrentProfileFromAccount ${JSON.stringify(account)}`);
     setCurrentProfileFromAccount(account);
-    dispatch({ type: "setCreatorMode", creatorMode: true });
     contextDebug("/user on onAuthStateChanged user not null");
 
     // go to home page

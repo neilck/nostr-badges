@@ -90,7 +90,7 @@ const onNostrClick = async () => {
 };
 
 export const Login = () => {
-  const { loading, account, creatorMode } = useAccountContext().state;
+  const { loading } = useAccountContext().state;
   const router = useRouter();
   const signOut = useAccountContext().signOut;
   const dispatch = useAccountContext().dispatch;

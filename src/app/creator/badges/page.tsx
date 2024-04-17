@@ -28,8 +28,7 @@ import { useAccountContext } from "@/context/AccountContext";
 export default function Badges() {
   const router = useRouter();
 
-  const { loading, account, creatorMode, currentProfile } =
-    useAccountContext().state;
+  const { account } = useAccountContext().state;
 
   const [badges, setBadges] = useState<Record<string, Badge>>({});
   const [selectedBadge, setSelectedBadge] = useState<Badge | undefined>(

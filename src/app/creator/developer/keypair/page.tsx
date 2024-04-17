@@ -18,8 +18,7 @@ import { loadIssuerPublicKey } from "@/data/keyPairLib";
 import * as nip19 from "@/nostr-tools/nip19";
 
 export default function Nostr() {
-  const { loading, account, creatorMode, currentProfile } =
-    useAccountContext().state;
+  const { account } = useAccountContext().state;
   const [publickey, setPublickey] = useState("");
   // Dialog
   const [open, setOpen] = useState(false);

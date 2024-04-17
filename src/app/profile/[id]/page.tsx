@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Profile, loadProfile, getEmptyProfile } from "@/data/profileLib";
 // import { useAccountContext } from "@/context/AccountContext";
 
-export default function Profile({ params }: { params: { id: string } }) {
+export default function ProfilePage({ params }: { params: { id: string } }) {
   // const accountContext = useAccountContext();
 
   const { id } = params;

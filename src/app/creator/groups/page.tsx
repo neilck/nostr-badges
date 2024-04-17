@@ -25,8 +25,7 @@ import {
 
 export default function Groups() {
   const router = useRouter();
-  const { loading, account, creatorMode, currentProfile } =
-    useAccountContext().state;
+  const { account } = useAccountContext().state;
 
   const [groups, setGroups] = useState<Record<string, Group>>({});
   const [selectedGroup, setSelectedGroup] = useState<Group | undefined>(
