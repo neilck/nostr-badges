@@ -5,6 +5,8 @@ import debug from "debug";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccountContext } from "../../context/AccountContext";
+
+import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
@@ -29,6 +31,7 @@ export const AkaAppBar = ({
 
   const profile = accountContext.state.currentProfile;
   const navItems = developerMode ? creatorNavItems : userNavItems;
+  const homePath = developerMode ? "/creator" : "/profile";
 
   const { loading, account, currentProfile } = accountContext.state;
 
@@ -55,18 +58,28 @@ export const AkaAppBar = ({
 
   const homeClicked = () => {
     if (hasAccount) {
-      router.push("/creator");
+      router.push(homePath);
     }
   };
 
   // menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl2, setAnchorEl2] = useState<null | HTMLElement>(null);
+
   const open = Boolean(anchorEl);
+  const open2 = Boolean(anchorEl2);
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+  const handleClick2 = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl2(event.currentTarget);
+  };
+  const handleClose2 = () => {
+    setAnchorEl2(null);
   };
 
   const handleClickLogout = () => {
@@ -74,7 +87,7 @@ export const AkaAppBar = ({
     handleClose();
   };
 
-  const signedInMenuItems = () => {
+  const leftMenuItems = () => {
     return (
       <>
         {navItems.map((item: NavItem) =>
@@ -86,23 +99,24 @@ export const AkaAppBar = ({
               onClick={() => {
                 router.push(item.path);
               }}
-              sx={{
-                display: { xs: "flex", sm: "none" },
-              }}
             >
-              {item.name}
+              <Typography variant="subtitle2"> {item.name}</Typography>
             </MenuItem>
           )
         )}
-        {navItems.length > 0 && (
-          <Divider
-            sx={{
-              display: { xs: "flex", sm: "none" },
-            }}
-          />
-        )}
+      </>
+    );
+  };
 
-        <MenuItem onClick={handleClickLogout}>log out</MenuItem>
+  const rightMenuItems = () => {
+    return (
+      <>
+        <MenuItem key="addprofile" onClick={() => {}}>
+          <Typography variant="subtitle2">Add profile</Typography>
+        </MenuItem>
+        <MenuItem key="signout" onClick={handleClickLogout}>
+          <Typography variant="subtitle2">Sign out</Typography>
+        </MenuItem>
       </>
     );
   };
@@ -123,11 +137,52 @@ export const AkaAppBar = ({
           pr: "10px",
         }}
       >
-        <Stack direction="row" alignItems="center" columnGap="10px">
+        <Stack direction="row" alignItems="center" columnGap="2px">
+          {hasAccount && (
+            <Box
+              sx={{
+                display: { xs: "flex", sm: "none" },
+              }}
+            >
+              <IconButton
+                size="large"
+                edge="start"
+                id="menu-button"
+                aria-label="leftMenu"
+                aria-controls={open ? "basic-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                onClick={handleClick}
+                sx={{ color: theme.palette.common.white }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="leftMenu"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                disableScrollLock={true}
+                open={open}
+                onClose={handleClose}
+                MenuListProps={{
+                  "aria-labelledby": "menu-button",
+                }}
+              >
+                {leftMenuItems().props.children}
+              </Menu>
+            </Box>
+          )}
           <CapIcon
             fontSize="medium"
             onClick={homeClicked}
-            sx={{ color: iconColor }}
+            sx={{ color: iconColor, mr: "6px" }}
           />
           {/* display at sm and smaller */}
           <Box
@@ -169,25 +224,30 @@ export const AkaAppBar = ({
             </Typography>
           </Box>
         </Stack>
-
-        {hasAccount && (
+        {profile && (
           <>
             <IconButton
               size="large"
               edge="start"
               id="menu-button"
-              aria-label="menu"
-              aria-controls={open ? "basic-menu" : undefined}
+              aria-label="rightMenu"
+              aria-controls={open2 ? "basic-menu" : undefined}
               aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
-              onClick={handleClick}
+              aria-expanded={open2 ? "true" : undefined}
+              onClick={handleClick2}
               sx={{ color: theme.palette.common.white }}
             >
-              <MenuIcon />
+              <Avatar
+                src={profile.image}
+                sx={{
+                  width: 34,
+                  height: 34,
+                }}
+              ></Avatar>
             </IconButton>
             <Menu
-              id="menu"
-              anchorEl={anchorEl}
+              id="rightMenu"
+              anchorEl={anchorEl2}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "right",
@@ -197,13 +257,13 @@ export const AkaAppBar = ({
                 horizontal: "right",
               }}
               disableScrollLock={true}
-              open={open}
-              onClose={handleClose}
+              open={open2}
+              onClose={handleClose2}
               MenuListProps={{
                 "aria-labelledby": "menu-button",
               }}
             >
-              {signedInMenuItems().props.children}
+              {rightMenuItems().props.children}
             </Menu>
           </>
         )}
