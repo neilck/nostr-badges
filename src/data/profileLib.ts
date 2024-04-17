@@ -1,4 +1,4 @@
-import { loadItems, saveItem } from "./firestoreLib";
+import { loadItem, loadItems, saveItem } from "./firestoreLib";
 import { NDKUserProfile } from "@nostr-dev-kit/ndk";
 // <---------- Profile ---------->
 export type Profile = {
@@ -42,6 +42,13 @@ export const saveProfile = async (profile: Profile) => {
   const docId = profile.publickey;
   const saveResult = await saveItem(docId, profile, "profiles");
   return saveResult;
+};
+
+export const loadProfile = async (id: string): Promise<Profile | null> => {
+  let profile = await loadItem<Profile>(id, "profiles");
+  if (!profile) return null;
+
+  return profile;
 };
 
 export const loadProfiles = async (
