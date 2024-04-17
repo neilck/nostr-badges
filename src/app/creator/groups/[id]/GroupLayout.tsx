@@ -63,7 +63,7 @@ export const GroupLayout = (props: {
       }}
     >
       <Box id="header">
-        <AkaAppBar id={id} name={name} image={image} />
+        <AkaAppBar creatorMode={true} />
       </Box>
       <Box
         id="main"

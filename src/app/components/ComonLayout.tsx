@@ -26,7 +26,7 @@ export const CommonLayout = ({
       }}
     >
       <Box id="header">
-        <AkaAppBar />
+        <AkaAppBar creatorMode={creatorMode} />
       </Box>
       <Box
         id="main"

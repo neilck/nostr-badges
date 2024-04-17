@@ -15,29 +15,36 @@ import Typography from "@mui/material/Typography";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import { CapIcon } from "./items/CapIcon";
-import { auth } from "@/firebase-config";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { NavItem, creatorNavItems } from "./NavMenu";
+import { GoogleAuthProvider } from "firebase/auth";
+import { NavItem, creatorNavItems, userNavItems } from "./NavMenu";
 
-export const AkaAppBar = (props: any) => {
+export const AkaAppBar = ({
+  creatorMode = false,
+}: {
+  creatorMode: boolean;
+}) => {
   const appBarDebug = debug("aka:AkaAppBar");
   const router = useRouter();
   const accountContext = useAccountContext();
-  const profile = accountContext.state.currentProfile;
 
-  const { loading, account, creatorMode, currentProfile } =
-    accountContext.state;
+  const profile = accountContext.state.currentProfile;
+  const navItems = creatorMode ? creatorNavItems : userNavItems;
+
+  const { loading, account, currentProfile } = accountContext.state;
 
   const signOut = accountContext.signOut;
 
   let name = "AKA Profiles (beta v0.3.0)";
+  if (creatorMode) {
+    name = "Developer Mode (beta v0.3.0)";
+  }
   let username = profile?.displayName;
   if (!username || username == "") username = profile?.name;
   if (!username || username == "") username = account?.uid;
   if (!username || username == "") username = "My Profile";
 
   let iconColor = theme.palette.orange.main;
-  let bgColor = theme.palette.grey[800];
+  let bgColor = creatorMode ? theme.palette.blue.dark : theme.palette.grey[800];
 
   const hasAccount = account && account.uid != "";
 
@@ -68,7 +75,7 @@ export const AkaAppBar = (props: any) => {
   const signedInMenuItems = () => {
     return (
       <>
-        {creatorNavItems.map((item: NavItem) =>
+        {navItems.map((item: NavItem) =>
           item.name == "divider" ? (
             <Divider key={"divider"} />
           ) : (
@@ -85,7 +92,7 @@ export const AkaAppBar = (props: any) => {
             </MenuItem>
           )
         )}
-        {creatorNavItems.length > 0 && (
+        {navItems.length > 0 && (
           <Divider
             sx={{
               display: { xs: "flex", sm: "none" },

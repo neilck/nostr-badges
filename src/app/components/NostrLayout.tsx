@@ -28,7 +28,7 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <Box id="header">
-        <AkaAppBar />
+        <AkaAppBar creatorMode={true} />
       </Box>
       <Box
         id="main"

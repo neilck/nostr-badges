@@ -48,7 +48,7 @@ export const BadgeLayout = (props: {
       }}
     >
       <Box id="header">
-        <AkaAppBar />
+        <AkaAppBar creatorMode={true} />
       </Box>
       <Box
         id="main"
