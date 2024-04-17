@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { BadgeSquare } from "@/app/components/BadgeSquare";
-import { CreatorNavMenu } from "./NavMenu";
+import { NavMenu } from "./NavMenu";
 import { Tab, TabNav } from "@/app/components/TabNav";
 import { useBadgeContext } from "@/context/BadgeContext";
 import React from "react";
@@ -81,7 +81,7 @@ export const BadgeLayout = (props: {
             <Box id="spacer"></Box>
             <Stack id="leftMain" width="240px" direction="column">
               <BadgeSquare badge={badge} />
-              <CreatorNavMenu />
+              <NavMenu creatorMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
-import { CreatorNavMenu } from "./NavMenu";
+import { NavMenu } from "./NavMenu";
 import { Tab, TabNav } from "@/app/components/TabNav";
 
 const tabs: Tab[] = [
@@ -61,7 +61,7 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
               <Profile />
-              <CreatorNavMenu />
+              <NavMenu creatorMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>
