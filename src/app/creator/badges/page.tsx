@@ -79,7 +79,7 @@ export default function Badges() {
   };
 
   return (
-    <CommonLayout creatorMode={true}>
+    <CommonLayout developerMode={true}>
       <Box width="auto">
         <Stack direction="column" pt={1} pl={3} maxWidth={600}>
           <CardHeading>Hosted Badges</CardHeading>

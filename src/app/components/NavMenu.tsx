@@ -30,11 +30,15 @@ export const creatorNavItems: NavItem[] = [
   { name: "Exit Developer Mode", path: "/profile", isSelected: false },
 ];
 
-export const NavMenu = ({ creatorMode = false }: { creatorMode: boolean }) => {
+export const NavMenu = ({
+  developerMode = false,
+}: {
+  developerMode: boolean;
+}) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const navItems = creatorMode ? creatorNavItems : userNavItems;
+  const navItems = developerMode ? creatorNavItems : userNavItems;
 
   const length = navItems.map((item) => {
     item.isSelected = pathname.startsWith(item.path);

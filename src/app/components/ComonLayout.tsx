@@ -9,10 +9,10 @@ import { NavMenu } from "./NavMenu";
 import { Footer } from "./Footer";
 
 export const CommonLayout = ({
-  creatorMode = false,
+  developerMode = false,
   children,
 }: {
-  creatorMode: boolean;
+  developerMode: boolean;
   children: React.ReactNode;
 }) => {
   return (
@@ -26,7 +26,7 @@ export const CommonLayout = ({
       }}
     >
       <Box id="header">
-        <AkaAppBar creatorMode={creatorMode} />
+        <AkaAppBar developerMode={developerMode} />
       </Box>
       <Box
         id="main"
@@ -59,7 +59,7 @@ export const CommonLayout = ({
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
               <Profile />
-              <NavMenu creatorMode={creatorMode} />
+              <NavMenu developerMode={developerMode} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

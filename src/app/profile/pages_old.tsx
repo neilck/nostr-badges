@@ -29,7 +29,7 @@ export default function ProfileOld() {
   };
 
   return (
-    <CommonLayout creatorMode={false}>
+    <CommonLayout developerMode={false}>
       <Box
         sx={{
           display: "flex",

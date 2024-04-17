@@ -63,7 +63,7 @@ export const GroupLayout = (props: {
       }}
     >
       <Box id="header">
-        <AkaAppBar creatorMode={true} />
+        <AkaAppBar developerMode={true} />
       </Box>
       <Box
         id="main"
@@ -98,7 +98,7 @@ export const GroupLayout = (props: {
               {name && image && (
                 <GroupViewSmall name={name} image={image} event={event} />
               )}
-              <NavMenu creatorMode={true} />
+              <NavMenu developerMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

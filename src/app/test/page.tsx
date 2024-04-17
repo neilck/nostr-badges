@@ -8,7 +8,7 @@ import { CommonLayout } from "../components/ComonLayout";
 
 export default function CreatorHome() {
   return (
-    <CommonLayout creatorMode={false}>
+    <CommonLayout developerMode={false}>
       <Box
         sx={{
           display: "flex",

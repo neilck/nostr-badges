@@ -28,7 +28,7 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <Box id="header">
-        <AkaAppBar creatorMode={true} />
+        <AkaAppBar developerMode={true} />
       </Box>
       <Box
         id="main"
@@ -61,7 +61,7 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
               <Profile />
-              <NavMenu creatorMode={true} />
+              <NavMenu developerMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

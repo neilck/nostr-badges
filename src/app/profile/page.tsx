@@ -19,7 +19,7 @@ export default function ProfilePage() {
   const loading = accountContext.state.loading;
 
   return (
-    <CommonLayout creatorMode={false}>
+    <CommonLayout developerMode={false}>
       {loading && (
         <Box
           sx={{

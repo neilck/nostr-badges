@@ -48,7 +48,7 @@ export const BadgeLayout = (props: {
       }}
     >
       <Box id="header">
-        <AkaAppBar creatorMode={true} />
+        <AkaAppBar developerMode={true} />
       </Box>
       <Box
         id="main"
@@ -81,7 +81,7 @@ export const BadgeLayout = (props: {
             <Box id="spacer"></Box>
             <Stack id="leftMain" width="240px" direction="column">
               <BadgeSquare badge={badge} />
-              <NavMenu creatorMode={true} />
+              <NavMenu developerMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

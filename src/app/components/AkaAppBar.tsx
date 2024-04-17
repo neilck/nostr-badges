@@ -19,23 +19,23 @@ import { GoogleAuthProvider } from "firebase/auth";
 import { NavItem, creatorNavItems, userNavItems } from "./NavMenu";
 
 export const AkaAppBar = ({
-  creatorMode = false,
+  developerMode = false,
 }: {
-  creatorMode: boolean;
+  developerMode: boolean;
 }) => {
   const appBarDebug = debug("aka:AkaAppBar");
   const router = useRouter();
   const accountContext = useAccountContext();
 
   const profile = accountContext.state.currentProfile;
-  const navItems = creatorMode ? creatorNavItems : userNavItems;
+  const navItems = developerMode ? creatorNavItems : userNavItems;
 
   const { loading, account, currentProfile } = accountContext.state;
 
   const signOut = accountContext.signOut;
 
   let name = "AKA Profiles (beta v0.3.0)";
-  if (creatorMode) {
+  if (developerMode) {
     name = "Developer Mode (beta v0.3.0)";
   }
   let username = profile?.displayName;
@@ -44,7 +44,9 @@ export const AkaAppBar = ({
   if (!username || username == "") username = "My Profile";
 
   let iconColor = theme.palette.orange.main;
-  let bgColor = creatorMode ? theme.palette.blue.dark : theme.palette.grey[800];
+  let bgColor = developerMode
+    ? theme.palette.blue.dark
+    : theme.palette.grey[800];
 
   const hasAccount = account && account.uid != "";
 

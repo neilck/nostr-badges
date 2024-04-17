@@ -10,7 +10,7 @@ import { CardHeading, CardSubHeading } from "../components/items/CardHeadings";
 
 export default function CreatorHome() {
   return (
-    <CommonLayout creatorMode={true}>
+    <CommonLayout developerMode={true}>
       <Box
         sx={{
           pt: 2,
