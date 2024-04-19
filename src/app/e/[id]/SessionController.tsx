@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { usePathname } from "next/navigation";
 import { useSessionContext } from "@/context/SessionContext";
 
 export const SessionController = (props: {
@@ -12,13 +10,9 @@ export const SessionController = (props: {
   pubkey?: string;
   isGroup?: boolean;
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const sessionContext = useSessionContext();
 
-  const { badgeId, naddr, state, pubkey, isGroup } = props;
-  const session = sessionContext.state.session;
+  const { badgeId, state, pubkey, isGroup } = props;
 
   const effectRan = useRef(false);
   useEffect(() => {

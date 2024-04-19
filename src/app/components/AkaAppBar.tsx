@@ -31,7 +31,7 @@ export const AkaAppBar = ({
 
   const profile = accountContext.state.currentProfile;
   const navItems = developerMode ? creatorNavItems : userNavItems;
-  const homePath = developerMode ? "/creator" : "/profile";
+  const homePath = developerMode ? "/creator" : "/user";
 
   const { loading, account, currentProfile } = accountContext.state;
 
@@ -70,16 +70,22 @@ export const AkaAppBar = ({
   const open2 = Boolean(anchorEl2);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+    const id = event.currentTarget.id;
+    if (id == "menu-button") setAnchorEl(event.currentTarget);
+
+    if (id == "profile-button") setAnchorEl2(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleClick2 = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl2(event.currentTarget);
-  };
+
   const handleClose2 = () => {
     setAnchorEl2(null);
+  };
+
+  const handleAddProfile = () => {
+    handleClose2();
+    router.push("/user/profile?add=true");
   };
 
   const handleClickLogout = () => {
@@ -111,7 +117,7 @@ export const AkaAppBar = ({
   const rightMenuItems = () => {
     return (
       <>
-        <MenuItem key="addprofile" onClick={() => {}}>
+        <MenuItem key="addprofile" onClick={handleAddProfile}>
           <Typography variant="subtitle2">Add profile</Typography>
         </MenuItem>
         <MenuItem key="signout" onClick={handleClickLogout}>
@@ -229,12 +235,12 @@ export const AkaAppBar = ({
             <IconButton
               size="large"
               edge="start"
-              id="menu-button"
+              id="profile-button"
               aria-label="rightMenu"
               aria-controls={open2 ? "basic-menu" : undefined}
               aria-haspopup="true"
               aria-expanded={open2 ? "true" : undefined}
-              onClick={handleClick2}
+              onClick={handleClick}
               sx={{ color: theme.palette.common.white }}
             >
               <Avatar
@@ -260,7 +266,7 @@ export const AkaAppBar = ({
               open={open2}
               onClose={handleClose2}
               MenuListProps={{
-                "aria-labelledby": "menu-button",
+                "aria-labelledby": "profile-button",
               }}
             >
               {rightMenuItems().props.children}

@@ -222,6 +222,35 @@ const nouns = [
   "hedgehog",
   "otter",
   "reindeer",
+  "tree",
+  "lake",
+  "ocean",
+  "flower",
+  "valley",
+  "desert",
+  "sunset",
+  "rainbow",
+  "stream",
+  "canyon",
+  "field",
+  "coast",
+  "bird",
+  "sky",
+  "rock",
+  "breeze",
+  "grass",
+  "waterfall",
+  "volcano",
+  "beach",
+  "island",
+  "moon",
+  "rain",
+  "wildlife",
+  "creek",
+  "hill",
+  "sunrise",
+  "marsh",
+  "plateau",
 ];
 
 const getRndInteger = (min: number, max: number) => {
@@ -236,5 +265,5 @@ export const randomName = () => {
   const adjective = selectRandom(adjectives);
   const noun = selectRandom(nouns);
   const number = getRndInteger(1, 100);
-  return `${adjective}.${noun}.${number}`;
+  return `${adjective}${noun}${number.toString().padStart(2, "0")}`;
 };
