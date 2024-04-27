@@ -133,7 +133,6 @@ function SessionProvider(props: SessionProviderProps) {
     if (state.sessionId != null && state.sessionId != "") {
       const db = getFirestore();
       const unsub = onSnapshot(doc(db, "sessions", state.sessionId), (doc) => {
-        console.log("Session changed: ", doc.data());
         reload();
       });
 

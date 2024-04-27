@@ -2,6 +2,9 @@
 
 import theme from "@/app/components/ThemeRegistry/theme";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { useAccountContext } from "@/context/AccountContext";
 
 import Box from "@mui/material/Box";
@@ -10,13 +13,16 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { CommonLayout } from "../components/ComonLayout";
-import Profile from "../components/Profile";
-import { SaveButtonEx } from "../components/items/SaveButtonEx";
+import { AddProfileDialog } from "@/app/components/AddProfileDialog";
+import { Profile, getEmptyProfile } from "@/data/profileLib";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const accountContext = useAccountContext();
-  const profile = accountContext.state.currentProfile;
   const loading = accountContext.state.loading;
+
+  const router = useRouter();
+  const profile = accountContext.currentProfile;
 
   return (
     <CommonLayout developerMode={false}>
@@ -33,10 +39,12 @@ export default function ProfilePage() {
         </Box>
       )}
       {!loading && (
-        <Box display="flex" flexDirection="column">
-          <Profile />
-          <Button>Manage Accounts</Button>
-        </Box>
+        <>
+          <Link href="/profile/edit">Edit</Link>
+          <Box display="flex" flexDirection="column">
+            pubkey: {profile.publickey}
+          </Box>
+        </>
       )}
     </CommonLayout>
   );

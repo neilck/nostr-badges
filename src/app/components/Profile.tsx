@@ -10,7 +10,7 @@ import { useAccountContext } from "@/context/AccountContext";
 
 export const Profile = () => {
   const accountContext = useAccountContext();
-  const profile = accountContext.state.currentProfile;
+  const profile = accountContext.currentProfile;
 
   if (!profile) {
     return (

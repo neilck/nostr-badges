@@ -64,13 +64,18 @@ export type AddResult = {
 export const loadItems = async <Type>(
   uid: string,
   colPath: string,
-  orderByCreated?: boolean
+  orderByCreated?: boolean,
+  asc?: boolean
 ): Promise<Record<string, Type>> => {
   const items: Record<string, Type> = {};
   const colRef = collection(db, colPath);
   let q: any = undefined;
   if (orderByCreated != undefined && orderByCreated == true)
-    q = query(colRef, where("uid", "==", uid), orderBy("created", "desc"));
+    q = query(
+      colRef,
+      where("uid", "==", uid),
+      orderBy("created", asc ? "asc" : "desc")
+    );
   else q = query(colRef, where("uid", "==", uid));
 
   const querySnapshot = await getDocs(q);

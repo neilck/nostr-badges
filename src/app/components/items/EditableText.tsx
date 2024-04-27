@@ -4,7 +4,7 @@ import theme from "../ThemeRegistry/theme";
 import { Variant } from "@mui/material/styles/createTypography";
 import { TypographyStyle } from "@mui/material/styles/createTypography";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -29,7 +29,12 @@ export const EditableText: React.FC<EditableTextProps> = ({
   onBlur,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedText, setEditedText] = useState(initValue);
+  const [editedText, setEditedText] = useState("");
+
+  useEffect(() => {
+    setEditedText(initValue);
+    setIsEditing(false);
+  }, [initValue]);
 
   let sx = getCssProperties(variant);
   if (fontWeight) {

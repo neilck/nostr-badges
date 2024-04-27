@@ -7,13 +7,16 @@ import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
 import { NavMenu } from "./NavMenu";
 import { Footer } from "./Footer";
+import Link from "next/link";
 
 export const CommonLayout = ({
-  developerMode = false,
   children,
+  developerMode = false,
+  bgColor = theme.palette.background.default,
 }: {
-  developerMode: boolean;
   children: React.ReactNode;
+  developerMode: boolean;
+  bgColor?: string;
 }) => {
   return (
     <Box
@@ -58,7 +61,9 @@ export const CommonLayout = ({
           >
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
-              <Profile />
+              <Link href="/profile">
+                <Profile />
+              </Link>
               <NavMenu developerMode={developerMode} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
@@ -73,7 +78,7 @@ export const CommonLayout = ({
           sx={{
             flexGrow: 1,
             flexShrink: 1,
-            bgcolor: theme.palette.background.default,
+            bgcolor: bgColor,
           }}
         >
           {children}

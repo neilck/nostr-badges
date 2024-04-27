@@ -87,7 +87,6 @@ export const PubkeyDialog = (props: {
     setTextPubkey("");
     setTextError(false);
     const hexPubkey = await window.nostr?.getPublicKey().catch((error) => {
-      console.log(`get public key cancelled: ${error}`);
       return;
     });
     if (hexPubkey && hexPubkey != "") {
@@ -131,10 +130,8 @@ export const PubkeyDialog = (props: {
       const result = await getProfiles();
       if (result.data) {
         const profiles = result.data as Profile[];
-        console.log(`profiles: ${JSON.stringify(profiles)}`);
         if (profiles.length > 0) {
           found = true;
-          console.log(`profile: ${JSON.stringify(profiles[0])}`);
           setPubkey(profiles[0].publickey);
         }
       }

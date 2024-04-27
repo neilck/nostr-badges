@@ -17,8 +17,11 @@ import Typography from "@mui/material/Typography";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import { CapIcon } from "./items/CapIcon";
+import { ProfileRowSmall } from "./ProfileRowSmall";
 import { GoogleAuthProvider } from "firebase/auth";
 import { NavItem, creatorNavItems, userNavItems } from "./NavMenu";
+
+import { Profile } from "@/data/profileLib";
 
 export const AkaAppBar = ({
   developerMode = false,
@@ -29,11 +32,12 @@ export const AkaAppBar = ({
   const router = useRouter();
   const accountContext = useAccountContext();
 
-  const profile = accountContext.state.currentProfile;
+  const profile = accountContext.currentProfile;
+  const profiles = accountContext.state.profiles;
   const navItems = developerMode ? creatorNavItems : userNavItems;
-  const homePath = developerMode ? "/creator" : "/user";
+  const homePath = developerMode ? "/creator" : "/profile";
 
-  const { loading, account, currentProfile } = accountContext.state;
+  const { account } = accountContext.state;
 
   const signOut = accountContext.signOut;
 
@@ -85,7 +89,12 @@ export const AkaAppBar = ({
 
   const handleAddProfile = () => {
     handleClose2();
-    router.push("/user/profile?add=true");
+    router.push("/profile/edit/?add=true");
+  };
+
+  const handleProfileClick = (profile: Profile) => {
+    accountContext.setCurrentProfile(profile);
+    handleClose2();
   };
 
   const handleClickLogout = () => {
@@ -114,12 +123,29 @@ export const AkaAppBar = ({
     );
   };
 
-  const rightMenuItems = () => {
+  const RightMenuItems = (props: { profiles: Record<string, Profile> }) => {
     return (
       <>
+        {/* Render MenuItem for each profile */}
+        {Object.values(props.profiles).map((profile: Profile) => (
+          <MenuItem
+            key={profile.publickey}
+            onClick={() => handleProfileClick(profile)}
+          >
+            <ProfileRowSmall
+              id={profile.publickey}
+              name={profile.name}
+              displayName={profile.displayName}
+              image={profile.image}
+            />
+          </MenuItem>
+        ))}
+
+        <Divider />
         <MenuItem key="addprofile" onClick={handleAddProfile}>
           <Typography variant="subtitle2">Add profile</Typography>
         </MenuItem>
+
         <MenuItem key="signout" onClick={handleClickLogout}>
           <Typography variant="subtitle2">Sign out</Typography>
         </MenuItem>
@@ -269,7 +295,7 @@ export const AkaAppBar = ({
                 "aria-labelledby": "profile-button",
               }}
             >
-              {rightMenuItems().props.children}
+              <RightMenuItems profiles={profiles ?? {}} />
             </Menu>
           </>
         )}

@@ -2,6 +2,7 @@
 
 import theme from "./ThemeRegistry/theme";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import * as nip19 from "@/nostr-tools/nip19";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -16,8 +17,7 @@ import { SaveButtonEx } from "./items/SaveButtonEx";
 import { IconButton } from "@mui/material";
 
 export interface Props {
-  open: boolean;
-  onClose: () => void;
+  onClose: (data: { username?: string; privatekey?: string } | null) => void;
 }
 
 function isNameValid(name: string): boolean {
@@ -35,11 +35,16 @@ function isKeyValid(key: string): string | null {
 }
 
 export function AddProfileDialog(props: Props) {
-  const { open, onClose } = props;
+  const searchParams = useSearchParams();
+  const addParam = searchParams.get("add");
+
+  const open = addParam === "true" ? true : false;
+  const { onClose } = props;
 
   const [isNsec, setIsNsec] = useState(false);
   const [labelname, setLabelname] = useState("username");
   const [username, setUsername] = useState(randomName());
+  const [privatekey, setPrivateKey] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [showNostr, setShowNostr] = useState(false);
 
@@ -52,7 +57,12 @@ export function AddProfileDialog(props: Props) {
   }, [isNsec]);
 
   const onSaveClick = async () => {
-    onClose();
+    if (isNsec && privatekey) {
+      onClose({ privatekey: privatekey });
+    } else {
+      onClose({ username: username });
+    }
+
     return { success: true };
   };
 
@@ -61,6 +71,9 @@ export function AddProfileDialog(props: Props) {
       const privateKey = isKeyValid(username);
       if (!privateKey) {
         setError("Not a valid nsec private key");
+        setPrivateKey(null);
+      } else {
+        setPrivateKey(privateKey);
       }
     }
   };
@@ -131,7 +144,12 @@ export function AddProfileDialog(props: Props) {
             onClick={onSaveClick}
           />
 
-          <Button onClick={onClose} sx={{ pb: 2 }}>
+          <Button
+            onClick={() => {
+              onClose(null);
+            }}
+            sx={{ pb: 2 }}
+          >
             cancel
           </Button>
         </Box>

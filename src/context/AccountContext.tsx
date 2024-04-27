@@ -2,6 +2,7 @@
 
 import debug from "debug";
 import {
+  useState,
   useEffect,
   useContext,
   useReducer,
@@ -11,7 +12,12 @@ import {
 import { User } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { Account, CURRENT_VERSION, loadAccount } from "@/data/accountLib";
-import { Profile, loadProfiles, updateProfile } from "@/data/profileLib";
+import {
+  Profile,
+  loadProfiles,
+  getEmptyProfile,
+  saveProfile as fsSaveProfile,
+} from "@/data/profileLib";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -24,15 +30,14 @@ const defaultRelays = getDefaultRelays();
 type Action =
   | { type: "setLoading"; loading: boolean }
   | { type: "setAccount"; account: Account | null }
-  | { type: "setCurrentProfile"; currentProfile: Profile | null };
+  | { type: "setProfiles"; profiles: Record<string, Profile> | null };
 
 type Dispatch = (action: Action) => void;
 
 type State = {
   loading: boolean;
   account: Account | null;
-  profiles: Profile[];
-  currentProfile: Profile | null;
+  profiles: Record<string, Profile> | null;
 };
 
 type AccountProviderProps = { children: ReactNode };
@@ -40,7 +45,14 @@ type AccountProviderProps = { children: ReactNode };
 const AccountContext = createContext<
   | {
       state: State;
+      currentProfile: Profile;
       dispatch: Dispatch;
+      setCurrentProfile: (profile: Profile) => void;
+      saveProfile: (profile: Profile) => Promise<{
+        success: boolean;
+        profile?: Profile;
+        error?: string;
+      }>;
       signOut: (redirect?: boolean) => {};
       getRelays: () => string[];
     }
@@ -56,8 +68,8 @@ function reducer(state: State, action: Action) {
     case "setAccount": {
       return { ...state, account: action.account };
     }
-    case "setCurrentProfile": {
-      return { ...state, currentProfile: action.currentProfile };
+    case "setProfiles": {
+      return { ...state, profiles: action.profiles };
     }
   }
 }
@@ -71,13 +83,53 @@ export const AccountProvider = (props: AccountProviderProps) => {
   const [state, dispatch] = useReducer(reducer, {
     loading: true,
     account: null,
-    profiles: [],
-    currentProfile: null,
+    profiles: null,
   });
+
+  const [currentProfile, setCurrentProfileInternal] = useState(
+    getEmptyProfile()
+  );
+
+  const loadProfilesInternal = async (uid: string) => {
+    let profiles: Record<string, Profile> = {};
+    const loaded = await loadProfiles(uid).catch((error) => {
+      contextDebug(`error loadProfiles(${uid})`);
+    });
+
+    if (!loaded || Object.keys(loaded).length == 0) {
+      contextDebug(`no profile found for (${uid})`);
+      return profiles;
+    } else {
+      profiles = loaded;
+    }
+
+    dispatch({ type: "setProfiles", profiles: profiles });
+    return profiles;
+  };
+
+  const setCurrentProfile = async (profile: Profile) => {
+    loadProfilesInternal(profile.uid);
+    setCurrentProfileInternal(profile);
+  };
+
+  const saveProfile = async (
+    profile: Profile
+  ): Promise<{ success: boolean; profile?: Profile; error?: string }> => {
+    // save profile to database
+    const saveResult = await fsSaveProfile(profile);
+    if (saveResult.success) {
+      const savedProfile = (
+        saveResult as { success: boolean; profile: Profile }
+      ).profile;
+      setCurrentProfile(profile);
+    }
+
+    return saveResult;
+  };
 
   const signOut = async (redirect = true) => {
     dispatch({ type: "setAccount", account: null });
-    setCurrentProfileFromAccount(null);
+    initProfilesFromAccount(null);
     await auth.signOut();
     contextDebug("signed out");
     if (redirect) router.push("/");
@@ -97,27 +149,30 @@ export const AccountProvider = (props: AccountProviderProps) => {
     return relays;
   };
 
-  const setCurrentProfileFromAccount = async (account: Account | null) => {
-    contextDebug("loading current profile for " + account?.uid);
-    let current = null;
+  const initProfilesFromAccount = async (account: Account | null) => {
+    contextDebug("loading profiles for " + account?.uid);
+
     if (account == null) {
-      dispatch({ type: "setCurrentProfile", currentProfile: null });
+      setCurrentProfile(getEmptyProfile());
+      dispatch({ type: "setProfiles", profiles: {} });
       return null;
     }
 
-    const profiles = await loadProfiles(account?.uid).catch((error) => {
-      contextDebug(`error loadProfiles(${account?.uid})`);
-    });
-
-    if (!profiles || Object.keys(profiles).length == 0) {
-      contextDebug(`no profile found for (${account?.uid})`);
-      return null;
+    let profiles: Record<string, Profile> = {};
+    if (account && account.uid) {
+      profiles = await loadProfilesInternal(account.uid);
     }
 
-    const key = Object.keys(profiles)[0];
-    current = profiles[key];
+    // set default profile
+    if (Object.keys(profiles).length > 0) {
+      const key = Object.keys(profiles)[0];
+      let current = profiles[key];
+      contextDebug("settting profile " + JSON.stringify(current));
+      setCurrentProfileInternal(current);
+    }
 
     // check for profile updates
+    /*
     contextDebug(`checking relays for profile ${current.publickey}`);
     const profile = await nostrContext.fetchProfile(current.publickey);
     contextDebug(`got profile ${profile}`);
@@ -128,9 +183,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
         current = result.profile;
       }
     }
-
-    contextDebug("settting profile " + JSON.stringify(current));
-    dispatch({ type: "setCurrentProfile", currentProfile: current });
+    */
   };
 
   // called on onAuthStateChanged
@@ -191,13 +244,12 @@ export const AccountProvider = (props: AccountProviderProps) => {
 
     dispatch({ type: "setAccount", account: account });
 
-    contextDebug(`setCurrentProfileFromAccount ${JSON.stringify(account)}`);
-    setCurrentProfileFromAccount(account);
-    contextDebug("/user on onAuthStateChanged user not null");
+    contextDebug(`initProfilesFromAccount ${JSON.stringify(account)}`);
+    initProfilesFromAccount(account);
 
     // go to home page
     if (user != null && pathname == "/") {
-      router.push("/creator");
+      router.push("/profile");
     }
   };
 
@@ -208,7 +260,15 @@ export const AccountProvider = (props: AccountProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth]);
 
-  const value = { state, dispatch, signOut, getRelays };
+  const value = {
+    state,
+    dispatch,
+    currentProfile,
+    setCurrentProfile,
+    saveProfile,
+    signOut,
+    getRelays,
+  };
 
   return (
     <AccountContext.Provider value={value}>

@@ -13,7 +13,7 @@ export interface NavItem {
 }
 
 export const userNavItems: NavItem[] = [
-  { name: "My Profile", path: "/user/profile", isSelected: false },
+  { name: "My Profile", path: "/profile", isSelected: false },
   { name: "divider", path: "", isSelected: false },
   { name: "Developer Mode", path: "/creator", isSelected: false },
 ];
@@ -27,7 +27,7 @@ export const creatorNavItems: NavItem[] = [
     isSelected: false,
   },
   { name: "divider", path: "", isSelected: false },
-  { name: "Exit Developer Mode", path: "/user", isSelected: false },
+  { name: "Exit Developer Mode", path: "/profile", isSelected: false },
 ];
 
 export const NavMenu = ({
