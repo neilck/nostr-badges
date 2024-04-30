@@ -2,7 +2,7 @@ import getErrorMessage from "@/errors";
 import {
   SaveResult,
   AddResult,
-  loadItems,
+  loadProfileItems,
   loadItem,
   saveItem,
   deleteItem,
@@ -19,6 +19,7 @@ export type DataField = { name: string; label?: string; description?: string };
 
 export type Badge = {
   uid: string;
+  publickey: string;
   created_at: number;
   name: string;
   description: string;
@@ -34,6 +35,7 @@ export type Badge = {
 
 const emptyBadge: Badge = {
   uid: "",
+  publickey: "",
   created_at: 0,
   name: "",
   description: "",
@@ -53,9 +55,15 @@ export const getEmptyBadge = (): Badge => {
 
 export const loadBadges = async (
   uid: string,
+  publickey: string,
   colPath: string = "badges"
 ): Promise<Record<string, Badge>> => {
-  const loadedItems = await loadItems<Badge>(uid, colPath, true);
+  const loadedItems = await loadProfileItems<Badge>(
+    uid,
+    publickey,
+    colPath,
+    true
+  );
 
   const badges: Record<string, Badge> = {};
 

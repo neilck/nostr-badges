@@ -86,6 +86,40 @@ export const loadItems = async <Type>(
   return items;
 };
 
+// must match uid and publickey
+export const loadProfileItems = async <Type>(
+  uid: string,
+  publickey: string,
+  colPath: string,
+  orderByCreated?: boolean,
+  asc?: boolean
+): Promise<Record<string, Type>> => {
+  const items: Record<string, Type> = {};
+  const colRef = collection(db, colPath);
+  let q: any = undefined;
+  if (orderByCreated != undefined && orderByCreated == true)
+    q = query(
+      colRef,
+      where("uid", "==", uid),
+      where("publickey", "==", publickey),
+      orderBy("created", asc ? "asc" : "desc")
+    );
+  else
+    q = query(
+      colRef,
+      where("uid", "==", uid),
+      where("publickey", "==", publickey)
+    );
+
+  console.log(`loadProfileItems uid: ${uid} publickey: ${publickey}`);
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.docs.forEach((doc) => {
+    items[doc.id] = doc.data() as Type;
+  });
+  return items;
+};
+
 export const loadSharedItems = async <Type>(
   colPath: string
 ): Promise<Record<string, Type>> => {

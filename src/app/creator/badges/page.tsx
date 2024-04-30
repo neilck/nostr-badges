@@ -29,6 +29,7 @@ export default function Badges() {
   const router = useRouter();
 
   const { account } = useAccountContext().state;
+  const profile = useAccountContext().currentProfile;
 
   const [badges, setBadges] = useState<Record<string, Badge>>({});
   const [selectedBadge, setSelectedBadge] = useState<Badge | undefined>(
@@ -36,11 +37,11 @@ export default function Badges() {
   );
 
   useEffect(() => {
-    if (account?.uid) loadBadges(account.uid);
-  }, [account]);
+    if (account?.uid) loadBadges(account.uid, profile.publickey);
+  }, [account, profile]);
 
-  async function loadBadges(uid: string) {
-    const badges = await fsLoadBadges(uid);
+  async function loadBadges(uid: string, publickey: string) {
+    const badges = await fsLoadBadges(uid, publickey);
     setBadges(badges);
   }
 
@@ -56,9 +57,10 @@ export default function Badges() {
     const newBadge = getEmptyBadge();
     newBadge.name = name;
     newBadge.uid = uid;
+    newBadge.publickey = profile.publickey;
     const addResult = await addBadge(newBadge);
     if (addResult.success) {
-      loadBadges(account.uid);
+      loadBadges(account.uid, profile.publickey);
     }
   };
 
@@ -68,7 +70,7 @@ export default function Badges() {
 
   const onDeleteClicked = async (docId: string) => {
     await deleteBadge(docId);
-    if (account?.uid) loadBadges(account.uid);
+    if (account?.uid) loadBadges(account.uid, profile.publickey);
   };
 
   // Dialog
