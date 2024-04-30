@@ -150,6 +150,9 @@ export const AccountProvider = (props: AccountProviderProps) => {
   };
 
   const initProfilesFromAccount = async (account: Account | null) => {
+    contextDebug(
+      `initProfilesFromAccount called with ${JSON.stringify(account)}`
+    );
     contextDebug("loading profiles for " + account?.uid);
 
     if (account == null) {
@@ -221,7 +224,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     contextDebug(
       "handleUserChange loadAccount result: " + JSON.stringify(account)
     );
-    let resultAccount: unknown = undefined;
+    let resultAccount: any = undefined;
 
     if (!account || account.version < CURRENT_VERSION) {
       contextDebug("account not found, checking for publickey on token");
@@ -238,13 +241,11 @@ export const AccountProvider = (props: AccountProviderProps) => {
         contextDebug("calling createdAccount()");
         resultAccount = await createAccount();
       }
-      account = resultAccount as Account;
+      account = resultAccount.data as Account;
       contextDebug("createAccount(...) result: " + JSON.stringify(account));
     }
 
     dispatch({ type: "setAccount", account: account });
-
-    contextDebug(`initProfilesFromAccount ${JSON.stringify(account)}`);
     initProfilesFromAccount(account);
 
     // go to home page
