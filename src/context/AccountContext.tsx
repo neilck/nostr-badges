@@ -16,6 +16,7 @@ import {
   Profile,
   loadProfiles,
   getEmptyProfile,
+  updateProfile,
   saveProfile as fsSaveProfile,
 } from "@/data/profileLib";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -55,6 +56,7 @@ const AccountContext = createContext<
       }>;
       signOut: (redirect?: boolean) => {};
       getRelays: () => string[];
+      reloadProfiles: () => void;
     }
   | undefined
 >(undefined);
@@ -149,9 +151,18 @@ export const AccountProvider = (props: AccountProviderProps) => {
     return relays;
   };
 
-  const initProfilesFromAccount = async (account: Account | null) => {
+  const reloadProfiles = () => {
+    initProfilesFromAccount(state.account);
+  };
+
+  const initProfilesFromAccount = async (
+    account: Account | null,
+    isNew: boolean = false
+  ) => {
     contextDebug(
-      `initProfilesFromAccount called with ${JSON.stringify(account)}`
+      `initProfilesFromAccount called with account: ${JSON.stringify(
+        account
+      )}, isNew: ${isNew}}`
     );
     contextDebug("loading profiles for " + account?.uid);
 
@@ -166,27 +177,28 @@ export const AccountProvider = (props: AccountProviderProps) => {
       profiles = await loadProfilesInternal(account.uid);
     }
 
+    let current: Profile | undefined = undefined;
     // set default profile
     if (Object.keys(profiles).length > 0) {
       const key = Object.keys(profiles)[0];
-      let current = profiles[key];
+      current = profiles[key];
       contextDebug("settting profile " + JSON.stringify(current));
       setCurrentProfileInternal(current);
     }
 
     // check for profile updates
-    /*
-    contextDebug(`checking relays for profile ${current.publickey}`);
-    const profile = await nostrContext.fetchProfile(current.publickey);
-    contextDebug(`got profile ${profile}`);
-    if (profile) {
-      const result = updateProfile(current, profile);
-      if (result.updated) {
-        contextDebug("Updated profile based on Nostr events");
-        current = result.profile;
+    if (isNew && current) {
+      contextDebug(`checking relays for profile ${current.publickey}`);
+      const profile = await nostrContext.fetchProfile(current.publickey);
+      contextDebug(`got profile ${profile}`);
+      if (profile) {
+        const result = updateProfile(current, profile);
+        if (result.updated) {
+          contextDebug("Updated profile based on Nostr events");
+          setCurrentProfile(result.profile);
+        }
       }
     }
-    */
   };
 
   // called on onAuthStateChanged
@@ -226,6 +238,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     );
     let resultAccount: any = undefined;
 
+    let isNew = false;
     if (!account || account.version < CURRENT_VERSION) {
       contextDebug("account not found, checking for publickey on token");
       const token = await user.getIdTokenResult();
@@ -235,6 +248,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
       let result: any = undefined;
       contextDebug(`publickey: ${publickey}`);
       if (publickey) {
+        isNew = true;
         contextDebug(`calling createdAccount({publickey: ${publickey})`);
         resultAccount = await createAccount({ publickey: publickey });
       } else {
@@ -246,7 +260,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     }
 
     dispatch({ type: "setAccount", account: account });
-    initProfilesFromAccount(account);
+    initProfilesFromAccount(account, isNew);
 
     // go to home page
     if (user != null && pathname == "/") {
@@ -269,6 +283,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     saveProfile,
     signOut,
     getRelays,
+    reloadProfiles,
   };
 
   return (

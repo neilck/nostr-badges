@@ -15,13 +15,20 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { CommonLayout } from "@/app/components/ComonLayout";
 import { CardHeading } from "@/app/components/items/CardHeadings";
 import { AddProfileDialog } from "@/app/components/AddProfileDialog";
-import { Profile, getEmptyProfile } from "@/data/profileLib";
+import { ConfirmationDialog } from "./ConfirmationDialog";
+import { Profile, deleteProfile } from "@/data/profileLib";
 import { Section } from "./Section";
+import { ProfileRowSmall } from "@/app/components/ProfileRowSmall";
 import { ProfileDisplay } from "./ProfileDisplay";
 import { ProfileEdit } from "./ProfileEdit";
 
 export default function ProfilePage() {
   const accountContext = useAccountContext();
+  let numProfiles = 0;
+  if (accountContext.state.profiles) {
+    numProfiles = Object.keys(accountContext.state.profiles).length;
+  }
+
   const loading = accountContext.state.loading;
 
   const router = useRouter();
@@ -63,6 +70,22 @@ export default function ProfilePage() {
     }
   };
 
+  // Delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const handleOpenDialog = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeleteProfile = async () => {
+    const result = await deleteProfile(profile.publickey);
+    handleCloseDialog(); // Close dialog after deletion
+    accountContext.reloadProfiles();
+  };
+
   return (
     <CommonLayout
       developerMode={false}
@@ -91,7 +114,34 @@ export default function ProfilePage() {
           )}
           {!loading && !edittingProfile && <ProfileDisplay profile={profile} />}
         </Section>
+        {numProfiles > 1 && (
+          <Box pt={4} display="flex" justifyContent="end" width="100%">
+            <Button
+              variant="contained"
+              size="small"
+              color="error"
+              onClick={handleOpenDialog}
+            >
+              Delete
+            </Button>
+            <ConfirmationDialog
+              title="Delete Profile"
+              prompt="Delete this profile and related badges?"
+              open={deleteDialogOpen}
+              onClose={handleCloseDialog}
+              onConfirm={handleDeleteProfile}
+            >
+              <ProfileRowSmall
+                id={profile.publickey}
+                name={profile.name}
+                displayName={profile.displayName}
+                image={profile.image}
+              />
+            </ConfirmationDialog>
+          </Box>
+        )}
       </Stack>
+
       <Suspense>
         <AddProfileDialog onClose={handleAddClose} />
       </Suspense>

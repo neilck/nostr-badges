@@ -3,6 +3,7 @@ import {
   loadItems,
   addItem,
   saveItem,
+  deleteItem,
   AddResult,
 } from "./firestoreLib";
 import { NDKUserProfile } from "@nostr-dev-kit/ndk";
@@ -98,4 +99,11 @@ export const addProfile = async (
   const addResult: AddResult = await addItem<Profile>(profile, colPath, id);
 
   return addResult;
+};
+
+export const deleteProfile = async (
+  docId: string,
+  colPath: string = "profiles"
+): Promise<{ success: boolean; error: string }> => {
+  return deleteItem<Profile>(docId, colPath);
 };
