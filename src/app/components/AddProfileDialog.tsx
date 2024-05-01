@@ -76,6 +76,12 @@ export function AddProfileDialog(props: Props) {
       } else {
         setPrivateKey(privateKey);
       }
+    } else {
+      if (username.length > 20) {
+        setError("Username must be less than 20 characters.");
+      } else {
+        setError("");
+      }
     }
   };
 
