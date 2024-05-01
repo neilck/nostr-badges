@@ -24,6 +24,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 import { useNostrContext } from "./NostrContext";
 import { getDefaultRelays } from "@/data/relays";
+import { updateDoc } from "firebase/firestore";
 
 const defaultRelays = getDefaultRelays();
 
@@ -56,7 +57,10 @@ const AccountContext = createContext<
       }>;
       signOut: (redirect?: boolean) => {};
       getRelays: () => string[];
-      reloadProfiles: () => void;
+      reloadProfiles: (currentPubkey?: string) => void;
+      updateProfileFromRelays: (
+        profile: Profile
+      ) => Promise<{ updated: boolean; profile: Profile }>;
     }
   | undefined
 >(undefined);
@@ -151,13 +155,51 @@ export const AccountProvider = (props: AccountProviderProps) => {
     return relays;
   };
 
-  const reloadProfiles = () => {
-    initProfilesFromAccount(state.account);
+  const reloadProfiles = (currentPubkey?: string) => {
+    initProfilesFromAccount(state.account, false, currentPubkey);
+  };
+
+  const updateProfileFromRelays = async (profile: Profile) => {
+    const publickey = profile.publickey;
+    contextDebug(`checking relays for profile ${publickey}`);
+    const ndkProfile = await nostrContext.fetchProfile(publickey);
+    contextDebug(`got profile ${ndkProfile?.name}`);
+    if (ndkProfile) {
+      const result = updateProfile(profile, ndkProfile);
+      if (result.updated) {
+        const updatedProfile = result.profile;
+        // update currrent profile
+        if (currentProfile.publickey == updatedProfile.publickey) {
+          setCurrentProfile(updatedProfile);
+        }
+
+        // update item in list of profiles
+        let numProfiles = 0;
+        if (state.profiles) {
+          const profiles = { ...state.profiles };
+          // update context
+          numProfiles = Object.keys(profiles).length;
+          for (let i = 0; i < numProfiles; i++) {
+            const key = Object.keys(profiles)[i];
+            const profile = profiles[key];
+            if (profile.publickey == updatedProfile.publickey) {
+              profiles[key] = updatedProfile;
+              break;
+            }
+          }
+          dispatch({ type: "setProfiles", profiles: profiles });
+        }
+      }
+      return result;
+    } else {
+      return { updated: false, profile: profile };
+    }
   };
 
   const initProfilesFromAccount = async (
     account: Account | null,
-    isNew: boolean = false
+    isNew: boolean = false,
+    currentPubkey: string = ""
   ) => {
     contextDebug(
       `initProfilesFromAccount called with account: ${JSON.stringify(
@@ -178,25 +220,26 @@ export const AccountProvider = (props: AccountProviderProps) => {
     }
 
     let current: Profile | undefined = undefined;
-    // set default profile
-    if (Object.keys(profiles).length > 0) {
-      const key = Object.keys(profiles)[0];
-      current = profiles[key];
-      contextDebug("settting profile " + JSON.stringify(current));
+    const pubkeys = Object.keys(profiles);
+    if (currentPubkey != "" && pubkeys.includes(currentPubkey)) {
+      current = profiles[currentPubkey];
       setCurrentProfileInternal(current);
+    } else {
+      // set default profile
+      if (Object.keys(profiles).length > 0) {
+        const key = Object.keys(profiles)[0];
+        current = profiles[key];
+        contextDebug("settting profile " + JSON.stringify(current));
+        setCurrentProfileInternal(current);
+      }
     }
 
     // check for profile updates
     if (isNew && current) {
-      contextDebug(`checking relays for profile ${current.publickey}`);
-      const profile = await nostrContext.fetchProfile(current.publickey);
-      contextDebug(`got profile ${profile}`);
-      if (profile) {
-        const result = updateProfile(current, profile);
-        if (result.updated) {
-          contextDebug("Updated profile based on Nostr events");
-          setCurrentProfile(result.profile);
-        }
+      const result = await updateProfileFromRelays(current);
+      if (result && result.updated) {
+        contextDebug("Updated profile based on Nostr events");
+        setCurrentProfile(result.profile);
       }
     }
   };
@@ -284,6 +327,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     signOut,
     getRelays,
     reloadProfiles,
+    updateProfileFromRelays,
   };
 
   return (

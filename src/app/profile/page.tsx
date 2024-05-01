@@ -16,6 +16,7 @@ import { CommonLayout } from "../components/ComonLayout";
 import { AddProfileDialog } from "@/app/components/AddProfileDialog";
 import { Profile, getEmptyProfile } from "@/data/profileLib";
 import Link from "next/link";
+import { ProfileDisplay } from "./ProfileDisplay";
 
 export default function ProfilePage() {
   const accountContext = useAccountContext();
@@ -43,6 +44,7 @@ export default function ProfilePage() {
           <Link href="/profile/edit">Edit</Link>
           <Box display="flex" flexDirection="column">
             pubkey: {profile.publickey}
+            <ProfileDisplay profile={profile} extra={true} />
           </Box>
         </>
       )}

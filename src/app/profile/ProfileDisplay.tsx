@@ -8,8 +8,23 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import { Profile } from "@/data/profileLib";
+import { DisplayData } from "./DisplayData";
 
-export const ProfileDisplay = ({ profile }: { profile: Profile }) => {
+const keyList = [
+  "publickey",
+  "website",
+  "nip05",
+  "lud06",
+  "lud16",
+  "zapService",
+];
+export const ProfileDisplay = ({
+  profile,
+  extra,
+}: {
+  profile: Profile;
+  extra?: boolean;
+}) => {
   const id = profile.publickey;
   const name = profile.name ? profile.name : "";
   const displayName = profile.displayName ? profile.displayName : "";
@@ -66,6 +81,13 @@ export const ProfileDisplay = ({ profile }: { profile: Profile }) => {
       >
         {about}
       </Typography>
+      {extra && (
+        <>
+          <Typography>pubkey</Typography>
+          <Typography>{profile.publickey}</Typography>
+          <DisplayData data={profile} keysToShow={keyList} />
+        </>
+      )}
     </Card>
   );
 };

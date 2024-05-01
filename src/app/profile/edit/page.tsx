@@ -19,7 +19,7 @@ import { ConfirmationDialog } from "./ConfirmationDialog";
 import { Profile, deleteProfile } from "@/data/profileLib";
 import { Section } from "./Section";
 import { ProfileRowSmall } from "@/app/components/ProfileRowSmall";
-import { ProfileDisplay } from "./ProfileDisplay";
+import { ProfileDisplay } from "../ProfileDisplay";
 import { ProfileEdit } from "./ProfileEdit";
 
 export default function ProfilePage() {
@@ -46,13 +46,21 @@ export default function ProfilePage() {
   ) => {
     if (data) {
       const { username, privatekey } = data;
+      const functions = getFunctions();
+      const createProfile = httpsCallable(functions, "createProfile");
       if (username) {
-        const functions = getFunctions();
-        const createProfile = httpsCallable(functions, "createProfile");
         const result = await createProfile({ username: username });
         const data: any = result.data;
         const profile: Profile = data;
         accountContext.setCurrentProfile(profile);
+      } else {
+        if (privatekey) {
+          const result = await createProfile({ privatekey: privatekey });
+          const data: any = result.data;
+          const profile: Profile = data;
+          await accountContext.updateProfileFromRelays(profile);
+          accountContext.reloadProfiles(profile.publickey);
+        }
       }
     }
 
