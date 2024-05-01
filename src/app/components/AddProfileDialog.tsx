@@ -13,7 +13,6 @@ import TextField from "@mui/material/TextField";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { randomName } from "@/data/randomName";
 import { CardTitle } from "@/app/components/items/CardHeadings";
-import { SaveButtonEx } from "./items/SaveButtonEx";
 import { IconButton } from "@mui/material";
 
 export interface Props {
@@ -47,6 +46,7 @@ export function AddProfileDialog(props: Props) {
   const [privatekey, setPrivateKey] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [showNostr, setShowNostr] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     if (isNsec) {
@@ -57,6 +57,7 @@ export function AddProfileDialog(props: Props) {
   }, [isNsec]);
 
   const onSaveClick = async () => {
+    setAdding(true);
     if (isNsec && privatekey) {
       onClose({ privatekey: privatekey });
     } else {
@@ -139,10 +140,14 @@ export function AddProfileDialog(props: Props) {
             pt: 3,
           }}
         >
-          <SaveButtonEx
+          <Button
+            variant="contained"
             disabled={username == "" || error !== ""}
             onClick={onSaveClick}
-          />
+            sx={{ width: "100px" }}
+          >
+            Add
+          </Button>
 
           <Button
             onClick={() => {
@@ -153,10 +158,17 @@ export function AddProfileDialog(props: Props) {
             cancel
           </Button>
         </Box>
+        <Box pt={1}>
+          {adding && (
+            <Typography variant="body1" fontStyle="italic" textAlign="center">
+              Adding...
+            </Typography>
+          )}
+        </Box>
         <Box>
           <Button
             size="small"
-            sx={{ textAlign: "left" }}
+            sx={{ textAlign: "left", pt: 2 }}
             onClick={() => {
               setShowNostr(!showNostr);
             }}
