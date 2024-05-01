@@ -59,7 +59,7 @@ export const NavMenu = ({
               }}
             >
               <Typography
-                variant="body2"
+                variant="body1"
                 fontWeight={item.isSelected ? 800 : 500}
               >
                 {item.name}
