@@ -93,9 +93,6 @@ export default function ProfilePage() {
     >
       <Stack width="400px" minWidth="300px" pt={4} spacing={2}>
         <CardHeading>Edit Profile</CardHeading>
-        <Section id="hi" edit={!edittingHi} onEdit={handleOnEdit}>
-          Hi
-        </Section>
         <Section id="profile" edit={!edittingProfile} onEdit={handleOnEdit}>
           {loading && (
             <Box

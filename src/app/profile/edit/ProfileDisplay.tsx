@@ -48,15 +48,14 @@ export const ProfileDisplay = ({ profile }: { profile: Profile }) => {
                 fontWeight={600}
                 sx={{ minWidth: 0 }}
               >
-                {name}
+                {displayName != "" ? displayName : name}
               </Typography>
             </div>
-
             <Typography
               variant="body2"
               sx={{ whiteSpace: "pre-wrap", lineHeight: "1em" }}
             >
-              {displayName}
+              {displayName != "" ? name : ""}
             </Typography>
           </Stack>
         </Box>
