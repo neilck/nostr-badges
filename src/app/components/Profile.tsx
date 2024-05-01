@@ -12,6 +12,16 @@ export const Profile = () => {
   const accountContext = useAccountContext();
   const profile = accountContext.currentProfile;
 
+  let username = profile.name ?? "";
+  if (username.length > 20) {
+    username = username.substring(0, 17) + "...";
+  }
+
+  let displayName = profile.displayName ?? "";
+  if (displayName.length > 20) {
+    displayName = displayName.substring(0, 17) + "...";
+  }
+
   if (!profile) {
     return (
       <Box
@@ -45,14 +55,18 @@ export const Profile = () => {
         }}
       ></Avatar>
       <Typography
-        variant="h6"
+        variant="body1"
+        fontWeight="600"
         sx={{
           mt: 1.5,
         }}
       >
-        {profile.displayName}
+        {displayName != "" ? displayName : username}
       </Typography>
-      <Typography variant="body1">{profile.name}</Typography>
+
+      <Typography variant="body1">
+        {displayName != "" ? username : ""}
+      </Typography>
     </Box>
   );
 };
