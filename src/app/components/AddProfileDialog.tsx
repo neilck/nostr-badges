@@ -4,6 +4,9 @@ import theme from "./ThemeRegistry/theme";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import * as nip19 from "@/nostr-tools/nip19";
+import { getPublicKey } from "nostr-tools";
+
+import { loadProfile } from "@/data/profileLib";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
@@ -67,14 +70,21 @@ export function AddProfileDialog(props: Props) {
     return { success: true };
   };
 
-  const onBlurHandler = () => {
+  const onBlurHandler = async () => {
     if (isNsec) {
       const privateKey = isKeyValid(username);
       if (!privateKey) {
         setError("Not a valid nsec private key");
         setPrivateKey(null);
       } else {
-        setPrivateKey(privateKey);
+        const publickey = getPublicKey(privateKey);
+        const existing = await loadProfile(publickey);
+        if (existing) {
+          setError("Private key already associated with an existing account.");
+          setPrivateKey(null);
+        } else {
+          setPrivateKey(privateKey);
+        }
       }
     } else {
       if (username.length > 20) {
