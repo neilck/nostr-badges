@@ -1,12 +1,16 @@
-import { SxProps, Theme } from "@mui/material";
+"use client";
 
+import { SxProps, Theme } from "@mui/material";
+import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
+import Collapse from "@mui/material/Collapse";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Profile } from "@/data/profileLib";
 import { DisplayData } from "./DisplayData";
 
@@ -36,56 +40,71 @@ export const ProfileDisplay = ({
     p: 0,
   };
 
+  const [showMore, setShowMore] = useState(false);
+  const handleToggleCollapse = () => {
+    setShowMore((prev) => !prev); // Toggle the collapsed state
+  };
+
   return (
     <Card variant="outlined" sx={{ ...defaultSx }}>
-      <Box sx={{ display: "flex" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Avatar
           src={image}
           sx={{
-            width: 38,
-            height: 38,
+            width: 120,
+            height: 120,
             mt: 0.5,
           }}
         ></Avatar>
 
-        <Box sx={{ width: "100%", ml: 2, maxHeight: 80 }}>
-          <Stack direction="column" justifyContent="left" alignItems="left">
-            <div
-              style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                width: "16rem",
-              }}
-            >
-              <Typography
-                noWrap
-                variant="body1"
-                fontWeight={600}
-                sx={{ minWidth: 0 }}
-              >
-                {displayName != "" ? displayName : name}
-              </Typography>
-            </div>
-            <Typography
-              variant="body2"
-              sx={{ whiteSpace: "pre-wrap", lineHeight: "1em" }}
-            >
-              {displayName != "" ? name : ""}
-            </Typography>
-          </Stack>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+
+            pb: 1,
+            pl: 2,
+            pr: 2,
+          }}
+        >
+          <Typography
+            noWrap
+            variant="body1"
+            fontWeight={600}
+            sx={{ minWidth: 0, pt: 2 }}
+          >
+            {displayName != "" ? displayName : name}
+          </Typography>
+
+          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+            {displayName != "" ? name : ""}
+          </Typography>
         </Box>
       </Box>
+      <Typography pt={1}>About me:</Typography>
       <Typography
-        variant="subtitle2"
+        variant="body1"
         sx={{ whiteSpace: "pre-wrap", lineHeight: "1.2em", pt: 1 }}
       >
         {about}
       </Typography>
+
       {extra && (
         <>
-          <Typography>pubkey</Typography>
-          <Typography>{profile.publickey}</Typography>
-          <DisplayData data={profile} keysToShow={keyList} />
+          <Button onClick={handleToggleCollapse} endIcon={<ExpandMoreIcon />}>
+            {showMore ? "show less" : "show more..."}
+          </Button>
+          <Collapse in={showMore}>
+            <DisplayData data={profile} keysToShow={keyList} />
+          </Collapse>
         </>
       )}
     </Card>

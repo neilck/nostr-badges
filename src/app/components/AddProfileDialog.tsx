@@ -193,8 +193,12 @@ export function AddProfileDialog(props: Props) {
           </Button>
           <Collapse in={showNostr} sx={{ pl: 0.5, pr: 0.5 }}>
             <Typography variant="subtitle2">
-              To create a new profile linked to an existing Nostr account, paste
-              the private key (nsec format) in username field above.
+              To link an existing Nostr profile, paste a nsec private key into
+              the username field above.
+            </Typography>
+            <Typography variant="subtitle2">
+              WARNING: Owners of this private key will be able to log into this
+              account.
             </Typography>
           </Collapse>
         </Box>

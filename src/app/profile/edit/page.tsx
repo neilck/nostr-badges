@@ -22,7 +22,7 @@ import { ProfileRowSmall } from "@/app/components/ProfileRowSmall";
 import { ProfileDisplay } from "../ProfileDisplay";
 import { ProfileEdit } from "./ProfileEdit";
 
-export default function ProfilePage() {
+export default function EditProfilePage() {
   const accountContext = useAccountContext();
   let numProfiles = 0;
   if (accountContext.state.profiles) {
@@ -34,12 +34,7 @@ export default function ProfilePage() {
   const router = useRouter();
   let profile = accountContext.currentProfile;
 
-  const [edittingHi, setEdittingHi] = useState(false);
-  const [edittingProfile, setEditingProfile] = useState(false);
-
-  const handleProfileSave = (profile: Profile) => {
-    setEditingProfile(false);
-  };
+  const handleProfileSave = (profile: Profile) => {};
 
   const handleAddClose = async (
     data: { username?: string; privatekey?: string } | null
@@ -69,11 +64,8 @@ export default function ProfilePage() {
 
   const handleOnEdit = (id: string) => {
     switch (id) {
-      case "hi":
-        setEdittingHi(!edittingHi);
-        break;
       case "profile":
-        setEditingProfile(!edittingProfile);
+        router.push("/profile");
         break;
     }
   };
@@ -100,8 +92,7 @@ export default function ProfilePage() {
       bgColor={theme.palette.background.paper}
     >
       <Stack width="400px" minWidth="300px" pt={4} spacing={2}>
-        <CardHeading>Edit Profile</CardHeading>
-        <Section id="profile" edit={!edittingProfile} onEdit={handleOnEdit}>
+        <Section id="profile" onEdit={handleOnEdit}>
           {loading && (
             <Box
               sx={{
@@ -114,24 +105,20 @@ export default function ProfilePage() {
               <CircularProgress />
             </Box>
           )}
-          {!loading && edittingProfile && (
-            <ProfileEdit profile={profile} onSave={handleProfileSave} />
+          {!loading && (
+            <ProfileEdit
+              profile={profile}
+              onSave={handleProfileSave}
+              onDelete={handleOpenDialog}
+            />
           )}
-          {!loading && !edittingProfile && <ProfileDisplay profile={profile} />}
         </Section>
         {numProfiles > 1 && (
           <Box pt={4} display="flex" justifyContent="end" width="100%">
-            <Button
-              variant="contained"
-              size="small"
-              color="error"
-              onClick={handleOpenDialog}
-            >
-              Delete
-            </Button>
             <ConfirmationDialog
               title="Delete Profile"
               prompt="Delete this profile and related badges?"
+              buttonLabel="Delete"
               open={deleteDialogOpen}
               onClose={handleCloseDialog}
               onConfirm={handleDeleteProfile}

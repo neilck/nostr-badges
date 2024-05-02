@@ -7,7 +7,10 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Tooltip from "@mui/material/Tooltip";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-export const DeleteButton = (props: { onClick?: () => void }) => {
+export const DeleteButton = (props: {
+  onClick?: () => void;
+  single?: boolean;
+}) => {
   const [secondClick, setSecondClick] = useState(false);
   const [color, setColor] = useState<
     | "primary"
@@ -26,12 +29,16 @@ export const DeleteButton = (props: { onClick?: () => void }) => {
   }, [secondClick]);
 
   const onClick = () => {
-    if (!secondClick) {
-      setSecondClick(true);
-      handleTooltipOpen();
-      return;
+    if (props.single) {
+      if (props.onClick) props.onClick();
+    } else {
+      if (!secondClick) {
+        setSecondClick(true);
+        handleTooltipOpen();
+        return;
+      }
+      if (props.onClick) props.onClick();
     }
-    if (props.onClick) props.onClick();
   };
 
   const handleTooltipClose = () => {

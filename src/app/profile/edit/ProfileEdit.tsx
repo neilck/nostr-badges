@@ -12,10 +12,11 @@ import Stack from "@mui/material/Stack";
 import { DisplayEditProfile } from "@/app/components/DisplayEditProfile";
 import { Loading } from "@/app/components/items/Loading";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
-
+import { DeleteButton } from "@/app/components/items/DeleteButton";
 export const ProfileEdit = (props: {
   profile: Profile;
   onSave: (profile: Profile) => void;
+  onDelete: (profile: Profile) => void;
 }) => {
   const accountContext = useAccountContext();
   const router = useRouter();
@@ -72,6 +73,10 @@ export const ProfileEdit = (props: {
       }
       return { success: true };
     }
+  };
+
+  const onDeleteClick = async () => {
+    props.onDelete(profile);
   };
 
   // DislayEdit handlers
@@ -143,12 +148,21 @@ export const ProfileEdit = (props: {
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "space-evenly",
-                width: "100%",
+                justifyContent: "space-between",
+                width: "90%",
                 pt: 2,
               }}
             >
-              <SaveButtonEx onClick={onSaveClick}></SaveButtonEx>
+              <Box width="40px">&nbsp;</Box>
+              <SaveButtonEx
+                onClick={onSaveClick}
+                refId={profile.publickey}
+              ></SaveButtonEx>
+              <Box width="40px">
+                <Box>
+                  <DeleteButton onClick={onDeleteClick} single={true} />
+                </Box>
+              </Box>
             </Box>
           </>
         )}

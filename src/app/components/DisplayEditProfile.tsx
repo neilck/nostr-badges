@@ -119,7 +119,7 @@ export const DisplayEditProfile = (props: Item) => {
             initValue={about}
             placeHolder="About me (optional)"
             onBlur={handleAboutBlur}
-            variant="body2"
+            variant="body1"
             fontWeight={500}
           />
         </Box>
