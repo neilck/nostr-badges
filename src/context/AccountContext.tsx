@@ -96,6 +96,10 @@ export const AccountProvider = (props: AccountProviderProps) => {
     getEmptyProfile()
   );
 
+  useEffect(() => {
+    nostrContext.init(currentProfile);
+  }, [currentProfile]);
+
   const loadProfilesInternal = async (uid: string) => {
     let profiles: Record<string, Profile> = {};
     const loaded = await loadProfiles(uid).catch((error) => {
@@ -162,7 +166,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
   const updateProfileFromRelays = async (profile: Profile) => {
     const publickey = profile.publickey;
     contextDebug(`checking relays for profile ${publickey}`);
-    const ndkProfile = await nostrContext.fetchProfile(publickey);
+    const ndkProfile = await nostrContext.fetchProfile();
     contextDebug(`got profile ${ndkProfile?.name}`);
     if (ndkProfile) {
       const result = updateProfile(profile, ndkProfile);

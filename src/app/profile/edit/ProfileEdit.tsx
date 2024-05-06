@@ -2,29 +2,38 @@
 
 import { useEffect, useState } from "react";
 import { useAccountContext } from "@/context/AccountContext";
+import { useNostrContext } from "@/context/NostrContext";
 import { useRouter } from "next/navigation";
 import { Profile, getEmptyProfile } from "@/data/profileLib";
 import { DEFAULT_PROFILE_THUMB, saveImageToCloud } from "@/data/firestoreLib";
 
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
 import { DisplayEditProfile } from "@/app/components/DisplayEditProfile";
 import { Loading } from "@/app/components/items/Loading";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { DeleteButton } from "@/app/components/items/DeleteButton";
+
 export const ProfileEdit = (props: {
   profile: Profile;
+  showDelete?: boolean;
   onSave: (profile: Profile) => void;
   onDelete: (profile: Profile) => void;
 }) => {
   const accountContext = useAccountContext();
+  const nostrContext = useNostrContext();
+
   const router = useRouter();
 
   const uid = accountContext.state.account?.uid;
   const onSave = props.onSave;
+  const showDelete = props.showDelete == undefined ? true : props.showDelete;
 
   const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
+  const [checkingText, setCheckingText] = useState("Update from relays");
   const [profile, setProfile] = useState(getEmptyProfile());
 
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
@@ -33,6 +42,12 @@ export const ProfileEdit = (props: {
     setProfile(props.profile);
     setLoading(false);
   }, [props.profile.publickey]);
+
+  useEffect(() => {
+    setCheckingText(
+      checking ? "Checking relays for updates..." : "Update from relays"
+    );
+  }, [checking]);
 
   const onSaveClick = async () => {
     const docId = profile.publickey;
@@ -76,6 +91,7 @@ export const ProfileEdit = (props: {
   };
 
   const onDeleteClick = async () => {
+    console.log("onDeleteClick called");
     props.onDelete(profile);
   };
 
@@ -119,6 +135,24 @@ export const ProfileEdit = (props: {
     setProfile(updated);
   };
 
+  const handleCheckRelays = () => {
+    setChecking(true);
+    doCheck();
+  };
+
+  const doCheck = async () => {
+    const ndkProfile = await nostrContext.fetchProfile();
+    if (ndkProfile) {
+      console.log(`ndkProfile: ${JSON.stringify(ndkProfile)}`);
+      profile.name = ndkProfile.name;
+      profile.displayName = ndkProfile.displayName;
+      profile.image = ndkProfile.image;
+      profile.about = ndkProfile.about;
+    }
+
+    setChecking(false);
+  };
+
   return (
     <>
       <Stack
@@ -143,6 +177,9 @@ export const ProfileEdit = (props: {
                 onChangeImage={handleImageChange}
                 onDeleteImage={handleImageDelete}
               />
+              <Box sx={{ pl: 1 }}>
+                <Button onClick={handleCheckRelays}>{checkingText}</Button>
+              </Box>
             </Box>
 
             <Box
@@ -160,7 +197,9 @@ export const ProfileEdit = (props: {
               ></SaveButtonEx>
               <Box width="40px">
                 <Box>
-                  <DeleteButton onClick={onDeleteClick} single={true} />
+                  {showDelete && (
+                    <DeleteButton onClick={onDeleteClick} single={true} />
+                  )}
                 </Box>
               </Box>
             </Box>

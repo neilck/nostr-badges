@@ -1,7 +1,8 @@
 "use client";
 
 import debug from "debug";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
+
 import NDK, {
   NDKUserProfile,
   NDKEvent,
@@ -9,14 +10,16 @@ import NDK, {
   NDKRelaySet,
   NDKRelay,
   NDKPrivateKeySigner,
+  NDKNip07Signer,
+  NDKSigner,
 } from "@nostr-dev-kit/ndk";
 import { getProfileRelays } from "@/data/relays";
+import { Profile } from "@/data/profileLib";
+import { getPrivateKey } from "@/data/keyPairLib";
 
 const profileRelays = getProfileRelays();
 
-// global ndk instances
-const _signer = NDKPrivateKeySigner.generate();
-const _ndk = new NDK({
+export const _ndk = new NDK({
   autoConnectUserRelays: false,
   enableOutboxModel: false,
   explicitRelayUrls: profileRelays,
@@ -24,17 +27,25 @@ const _ndk = new NDK({
 
 _ndk.connect(5000);
 
-export const _publishNdk = new NDK({
-  autoConnectUserRelays: false,
-  enableOutboxModel: false,
-  signer: _signer,
-});
-
 type NostrProviderProps = { children: React.ReactNode };
 
 const NostrContext = createContext<
   | {
-      fetchProfile: (pubkey: string) => Promise<NDKUserProfile | null>;
+      init: (profile: Profile) => Promise<void>;
+      fetchProfile: () => Promise<NDKUserProfile | undefined>;
+      updateProfile: ({
+        publickey,
+        name,
+        displayName,
+        image,
+        about,
+      }: {
+        publickey: string;
+        name: string;
+        displayName: string;
+        image: string;
+        about: string;
+      }) => Promise<void>;
       publish: (
         event: NostrEvent,
         relays: string[]
@@ -46,28 +57,64 @@ const NostrContext = createContext<
 function NostrProvider({ children }: NostrProviderProps) {
   const contextDebug = debug("aka:nostrContext");
 
-  const fetchProfile = async (pubkey: string) => {
-    contextDebug(`fetch profile called for ${pubkey}`);
-    contextDebug(`_ndk connect status ${JSON.stringify(_ndk.pool.stats())}`);
-    const user = _ndk.getUser({ pubkey: pubkey });
+  const init = async (profile: Profile) => {
+    if (profile.hasPrivateKey) {
+      const privatekey = await getPrivateKey(profile.publickey);
+      if (privatekey != "") {
+        _ndk.signer = new NDKPrivateKeySigner(privatekey);
+      }
+    } else {
+      const signer = (_ndk.signer = new NDKNip07Signer());
+    }
+  };
+
+  const fetchProfile = async () => {
+    if (_ndk.activeUser) {
+      const profile = await _ndk.activeUser?.fetchProfile();
+      return profile ? profile : undefined;
+    }
+    return undefined;
+  };
+
+  const updateProfile = async ({
+    publickey,
+    name,
+    displayName,
+    image,
+    about,
+  }: {
+    publickey: string;
+    name: string;
+    displayName: string;
+    image: string;
+    about: string;
+  }) => {
+    const user = _ndk.getUser({ pubkey: publickey });
     const profile = await user.fetchProfile();
-    contextDebug(`profile found: ${JSON.stringify(profile)}`);
-    return profile;
+
+    if (profile == null) return;
+
+    profile.name = name;
+    profile.displayName = displayName;
+    profile.image = image;
+    profile.about = about;
+
+    return user.publish();
   };
 
   const publish = async (event: NostrEvent, relays: string[]) => {
     contextDebug(
       `publish event called: ${JSON.stringify(event)} ${JSON.stringify(relays)}`
     );
-    const relaySet = NDKRelaySet.fromRelayUrls(relays, _publishNdk);
+    const relaySet = NDKRelaySet.fromRelayUrls(relays, _ndk);
 
-    const ndkEvent = new NDKEvent(_publishNdk, event);
+    const ndkEvent = new NDKEvent(_ndk, event);
     const result = await relaySet.publish(ndkEvent, 10000);
     contextDebug(`publish sent to ${result.size} relays`);
     return result;
   };
 
-  const value = { fetchProfile, publish };
+  const value = { init, fetchProfile, updateProfile, publish };
   return (
     <NostrContext.Provider value={value}>{children}</NostrContext.Provider>
   );

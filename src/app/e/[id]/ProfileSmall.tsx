@@ -11,7 +11,6 @@ import * as nip19 from "@/nostr-tools/nip19";
 import { useNostrContext } from "@/context/NostrContext";
 import { shortenDesc } from "@/app/utils/utils";
 import { useEffect, useState } from "react";
-import { basename } from "path/win32";
 
 type WidthOption = "normal" | "wide";
 
@@ -53,7 +52,7 @@ export const ProfileSmall = (item: Item) => {
       let description = "";
 
       if (pubkey != "") {
-        const profile = await nostrContext.fetchProfile(pubkey);
+        const profile = await nostrContext.fetchProfile();
         if (!isCancelled && profile) {
           if (name == "" && profile.displayName) name = profile.displayName;
 

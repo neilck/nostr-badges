@@ -125,22 +125,26 @@ function BadgeProvider(props: BadgeProviderProps) {
         .badge;
       setBadge(badgeId, savedBadge);
 
-      // call server-side event creation with callback
-      const createEvent = async (badgeId: string, badge: Badge) => {
-        const event = await createBadgeEvent(badgeId);
-        if (event) {
-          const nostrEvent = toNostrEvent(event);
-          const account = accountContext.state.account;
-          if (account) {
-            const relays = accountContext.getRelays();
-            // publish event
-            publishEvent(nostrEvent, relays);
+      if (accountContext.currentProfile.hasPrivateKey) {
+        // call server-side event creation with callback
+        const createEvent = async (badgeId: string, badge: Badge) => {
+          const event = await createBadgeEvent(badgeId);
+          if (event) {
+            const nostrEvent = toNostrEvent(event);
+            const account = accountContext.state.account;
+            if (account) {
+              const relays = accountContext.getRelays();
+              // publish event
+              publishEvent(nostrEvent, relays);
+            }
           }
-        }
-      };
+        };
 
-      // async call with callback to return event for publishing
-      await createEvent(badgeId, savedBadge);
+        // async call with callback to return event for publishing
+        await createEvent(badgeId, savedBadge);
+      } else {
+        // TODO: create event for signing
+      }
     }
 
     return saveResult;

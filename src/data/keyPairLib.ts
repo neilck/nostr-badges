@@ -1,5 +1,8 @@
+import { loadItem } from "./firestoreLib";
+
 import {
   getFirestore,
+  doc,
   collection,
   getDocs,
   query,
@@ -12,6 +15,23 @@ export enum KeyPairType {
   Issuer = "ISSUER",
   Profile = "PROFILE",
 }
+
+type KeyPair = {
+  privatekey: string;
+  type: KeyPairType;
+  uid: string;
+};
+
+export const getPrivateKey = async (publickey: string) => {
+  try {
+    const item = await loadItem(publickey, "keypairs");
+    const keypair = item as KeyPair;
+    return keypair.privatekey;
+  } catch (error) {
+    console.log(error);
+    return "";
+  }
+};
 
 export const loadIssuerPublicKey = async (uid: string): Promise<string> => {
   const db = getFirestore();

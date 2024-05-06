@@ -11,7 +11,7 @@ import {
   NDKSubscriptionCacheUsage,
   NostrEvent,
 } from "@nostr-dev-kit/ndk";
-import { _publishNdk } from "@/context/NostrContext";
+import { _ndk } from "@/context/NostrContext";
 import { Grid, Typography } from "@mui/material";
 
 export const BadgeStatus = (props: {
@@ -82,8 +82,8 @@ export const BadgeStatus = (props: {
     });
     setStatuses(statuses);
 
-    const relaySet = NDKRelaySet.fromRelayUrls(relays, _publishNdk);
-    const newSub = _publishNdk.subscribe(filter, subOpts, relaySet);
+    const relaySet = NDKRelaySet.fromRelayUrls(relays, _ndk);
+    const newSub = _ndk.subscribe(filter, subOpts, relaySet);
 
     newSub.on("event", onEventListener);
     newSub.on("event:dup", onEventListener);

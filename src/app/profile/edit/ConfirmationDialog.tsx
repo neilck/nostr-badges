@@ -27,6 +27,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   buttonLabel,
   children,
 }) => {
+  console.log(`ConfirmationDialog open: ${open}`);
   const label = buttonLabel ?? "Confirm";
   return (
     <Dialog open={open} onClose={onClose}>

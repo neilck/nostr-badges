@@ -181,7 +181,8 @@ export const loadItem = async <Type>(
     return undefined;
   });
   if (docSnap && docSnap.exists()) {
-    contextDebug(`loadItem: ${JSON.stringify(docSnap.data())}`);
+    if (colPath != "keypairs")
+      contextDebug(`loadItem: ${JSON.stringify(docSnap.data())}`);
     return docSnap.data() as Type;
   }
 

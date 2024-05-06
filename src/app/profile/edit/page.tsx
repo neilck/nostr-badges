@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useAccountContext } from "@/context/AccountContext";
+import { useNostrContext } from "@/context/NostrContext";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -19,11 +20,12 @@ import { ConfirmationDialog } from "./ConfirmationDialog";
 import { Profile, deleteProfile } from "@/data/profileLib";
 import { Section } from "./Section";
 import { ProfileRowSmall } from "@/app/components/ProfileRowSmall";
-import { ProfileDisplay } from "../ProfileDisplay";
 import { ProfileEdit } from "./ProfileEdit";
 
 export default function EditProfilePage() {
   const accountContext = useAccountContext();
+  const nostrContext = useNostrContext();
+
   let numProfiles = 0;
   if (accountContext.state.profiles) {
     numProfiles = Object.keys(accountContext.state.profiles).length;
@@ -34,7 +36,15 @@ export default function EditProfilePage() {
   const router = useRouter();
   let profile = accountContext.currentProfile;
 
-  const handleProfileSave = (profile: Profile) => {};
+  const handleProfileSave = async (profile: Profile) => {
+    await nostrContext.updateProfile({
+      publickey: profile.publickey,
+      name: profile.name ?? "",
+      displayName: profile.displayName ?? "",
+      image: profile.image ?? "",
+      about: profile.about ?? "",
+    });
+  };
 
   const handleAddClose = async (
     data: { username?: string; privatekey?: string } | null
@@ -73,10 +83,12 @@ export default function EditProfilePage() {
   // Delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const handleOpenDialog = () => {
+    console.log("handleOpenDialog called");
     setDeleteDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
+    console.log("handleCloseDialog called");
     setDeleteDialogOpen(false);
   };
 
@@ -92,7 +104,7 @@ export default function EditProfilePage() {
       bgColor={theme.palette.background.paper}
     >
       <Stack width="400px" minWidth="300px" pt={4} spacing={2}>
-        <Section id="profile" onEdit={handleOnEdit}>
+        <Section id="profile" edit={true} onEdit={handleOnEdit}>
           {loading && (
             <Box
               sx={{
@@ -108,6 +120,7 @@ export default function EditProfilePage() {
           {!loading && (
             <ProfileEdit
               profile={profile}
+              showDelete={numProfiles > 1}
               onSave={handleProfileSave}
               onDelete={handleOpenDialog}
             />

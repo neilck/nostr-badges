@@ -2,6 +2,7 @@ import theme from "@/app/components/ThemeRegistry/theme";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 export const Section = (props: {
   id: string;
@@ -10,7 +11,7 @@ export const Section = (props: {
   onEdit?: (id: string) => void;
 }) => {
   const { id, children, onEdit } = props;
-  const edit = props.edit == undefined ? true : props.edit;
+  const edit = props.edit == undefined ? false : props.edit;
 
   return (
     <div id={id} style={{ position: "relative", width: "100%" }}>
@@ -30,7 +31,6 @@ export const Section = (props: {
         {children}
 
         {/* Edit icon positioned on top right */}
-
         <IconButton
           sx={{
             position: "absolute",
@@ -45,7 +45,8 @@ export const Section = (props: {
             }
           }}
         >
-          <EditIcon />
+          {!edit && <EditIcon />}
+          {edit && <CancelIcon />}
         </IconButton>
       </Box>
     </div>
