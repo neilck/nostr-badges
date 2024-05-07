@@ -106,8 +106,8 @@ export function AddProfileDialog(props: Props) {
         }
       }
     } else {
-      if (username.length > 20) {
-        setError("Username must be less than 20 characters.");
+      if (username.length > 30) {
+        setError("Username must be less than 30 characters.");
         return "";
       } else {
         setError("");
