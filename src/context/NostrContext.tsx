@@ -58,6 +58,10 @@ function NostrProvider({ children }: NostrProviderProps) {
   const contextDebug = debug("aka:nostrContext");
 
   const init = async (profile: Profile) => {
+    if (profile.publickey == "") {
+      return;
+    }
+
     if (profile.hasPrivateKey) {
       const privatekey = await getPrivateKey(profile.publickey);
       if (privatekey != "") {
@@ -66,8 +70,6 @@ function NostrProvider({ children }: NostrProviderProps) {
     } else {
       _ndk.signer = new NDKNip07Signer();
     }
-
-    console.log(`_ndk.activeUser: ${JSON.stringify(_ndk.activeUser)}`);
   };
 
   const fetchProfile = async (pubkey: string) => {
