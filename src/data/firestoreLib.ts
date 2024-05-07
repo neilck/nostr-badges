@@ -111,7 +111,6 @@ export const loadProfileItems = async <Type>(
       where("publickey", "==", publickey)
     );
 
-  console.log(`loadProfileItems uid: ${uid} publickey: ${publickey}`);
   const querySnapshot = await getDocs(q);
 
   querySnapshot.docs.forEach((doc) => {

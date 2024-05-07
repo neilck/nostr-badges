@@ -1,5 +1,5 @@
-import { loadItem } from "./firestoreLib";
-
+import { loadItem, saveItem } from "./firestoreLib";
+import { getPublicKey } from "nostr-tools";
 import {
   getFirestore,
   doc,
@@ -30,6 +30,22 @@ export const getPrivateKey = async (publickey: string) => {
   } catch (error) {
     console.log(error);
     return "";
+  }
+};
+
+export const savePrivateKey = async (privatekey: string) => {
+  const publickey = getPublicKey(privatekey);
+  const item = await loadItem(publickey, "keypairs");
+  if (!item) return undefined;
+
+  const keypair = item as KeyPair;
+  keypair.privatekey = privatekey;
+  try {
+    await saveItem(publickey, keypair, "keypairs");
+    return keypair;
+  } catch (error) {
+    console.log(error);
+    return undefined;
   }
 };
 

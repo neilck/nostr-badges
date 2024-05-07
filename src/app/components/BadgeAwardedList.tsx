@@ -147,7 +147,7 @@ export const BadgeAwardedList = (props: {}) => {
   }, [sessionContext.state.isUpdating]);
 
   const handleClick: OnBadgeSelectedHandler = (url: string) => {
-    console.log("Reidrecting to : " + url);
+    console.log("Redirecting to : " + url);
   };
 
   return (

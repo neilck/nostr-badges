@@ -15,6 +15,7 @@ import { DisplayEditProfile } from "@/app/components/DisplayEditProfile";
 import { Loading } from "@/app/components/items/Loading";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { DeleteButton } from "@/app/components/items/DeleteButton";
+import { savePrivateKey } from "@/data/keyPairLib";
 
 export const ProfileEdit = (props: {
   profile: Profile;
@@ -35,6 +36,7 @@ export const ProfileEdit = (props: {
   const [checking, setChecking] = useState(false);
   const [checkingText, setCheckingText] = useState("Update from relays");
   const [profile, setProfile] = useState(getEmptyProfile());
+  const [hex, setHex] = useState("");
 
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 
@@ -68,6 +70,20 @@ export const ProfileEdit = (props: {
       };
     }
 
+    if (hex != "") {
+      if (profile.hasPrivateKey) {
+        return {
+          success: false,
+          mesg: "Profile already has saved private key.",
+        };
+      }
+
+      // save private key
+      await savePrivateKey(hex);
+
+      // update profile
+      profile.hasPrivateKey = true;
+    }
     // try save image first
     if (imageFile) {
       const saveImageResult = await saveImageToCloud(docId, imageFile);
@@ -91,7 +107,6 @@ export const ProfileEdit = (props: {
   };
 
   const onDeleteClick = async () => {
-    console.log("onDeleteClick called");
     props.onDelete(profile);
   };
 
@@ -126,6 +141,10 @@ export const ProfileEdit = (props: {
     setProfile(updated);
   };
 
+  const handlePrivateKeyChange = (id: string, privateKey: string) => {
+    setHex(privateKey);
+  };
+
   const handleImageDelete = (id: string) => {
     if (!profile) return;
     const url = "";
@@ -141,9 +160,8 @@ export const ProfileEdit = (props: {
   };
 
   const doCheck = async () => {
-    const ndkProfile = await nostrContext.fetchProfile();
+    const ndkProfile = await nostrContext.fetchProfile(profile.publickey);
     if (ndkProfile) {
-      console.log(`ndkProfile: ${JSON.stringify(ndkProfile)}`);
       profile.name = ndkProfile.name;
       profile.displayName = ndkProfile.displayName;
       profile.image = ndkProfile.image;
@@ -171,9 +189,15 @@ export const ProfileEdit = (props: {
                 displayName={profile.displayName ?? ""}
                 about={profile.about ?? ""}
                 image={profile.image ?? ""}
+                addPrivateKey={
+                  profile.hasPrivateKey == undefined
+                    ? false
+                    : !profile.hasPrivateKey
+                }
                 onChangeName={handleNameChange}
                 onChangeDisplayName={handleDisplayNameChange}
                 onChangeAbout={handleAboutChange}
+                onChangePrivateKey={handlePrivateKeyChange}
                 onChangeImage={handleImageChange}
                 onDeleteImage={handleImageDelete}
               />

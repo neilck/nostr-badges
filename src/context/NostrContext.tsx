@@ -32,7 +32,7 @@ type NostrProviderProps = { children: React.ReactNode };
 const NostrContext = createContext<
   | {
       init: (profile: Profile) => Promise<void>;
-      fetchProfile: () => Promise<NDKUserProfile | undefined>;
+      fetchProfile: (pubkey: string) => Promise<NDKUserProfile | undefined>;
       updateProfile: ({
         publickey,
         name,
@@ -64,16 +64,20 @@ function NostrProvider({ children }: NostrProviderProps) {
         _ndk.signer = new NDKPrivateKeySigner(privatekey);
       }
     } else {
-      const signer = (_ndk.signer = new NDKNip07Signer());
+      _ndk.signer = new NDKNip07Signer();
     }
+
+    console.log(`_ndk.activeUser: ${JSON.stringify(_ndk.activeUser)}`);
   };
 
-  const fetchProfile = async () => {
-    if (_ndk.activeUser) {
-      const profile = await _ndk.activeUser?.fetchProfile();
-      return profile ? profile : undefined;
-    }
-    return undefined;
+  const fetchProfile = async (pubkey: string) => {
+    const user = _ndk.getUser({ pubkey });
+    const profile = await user.fetchProfile();
+    console.log(
+      `fetchProfile ${JSON.stringify(user)} ${JSON.stringify(profile)}`
+    );
+    console.log(`relays: ${JSON.stringify(_ndk.explicitRelayUrls)}`);
+    return profile ? profile : undefined;
   };
 
   const updateProfile = async ({

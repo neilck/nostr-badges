@@ -17,7 +17,7 @@ import { CommonLayout } from "@/app/components/ComonLayout";
 import { CardHeading } from "@/app/components/items/CardHeadings";
 import { AddProfileDialog } from "@/app/components/AddProfileDialog";
 import { ConfirmationDialog } from "./ConfirmationDialog";
-import { Profile, deleteProfile } from "@/data/profileLib";
+import { Profile, deleteProfile, saveProfile } from "@/data/profileLib";
 import { Section } from "./Section";
 import { ProfileRowSmall } from "@/app/components/ProfileRowSmall";
 import { ProfileEdit } from "./ProfileEdit";
@@ -56,15 +56,25 @@ export default function EditProfilePage() {
       if (username) {
         const result = await createProfile({ username: username });
         const data: any = result.data;
-        const profile: Profile = data;
-        accountContext.setCurrentProfile(profile);
+        const newProfile: Profile = data;
+        accountContext.setCurrentProfile(newProfile);
+        profile = accountContext.currentProfile;
       } else {
         if (privatekey) {
           const result = await createProfile({ privatekey: privatekey });
           const data: any = result.data;
-          const profile: Profile = data;
-          await accountContext.updateProfileFromRelays(profile);
-          accountContext.reloadProfiles(profile.publickey);
+          let newProfile: Profile = data;
+          const updateResult = await accountContext.updateProfileFromRelays(
+            newProfile
+          );
+
+          if (updateResult.updated) {
+            newProfile = updateResult.profile;
+            saveProfile(profile);
+          }
+
+          accountContext.setCurrentProfile(newProfile);
+          profile = accountContext.currentProfile;
         }
       }
     }
@@ -83,12 +93,10 @@ export default function EditProfilePage() {
   // Delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const handleOpenDialog = () => {
-    console.log("handleOpenDialog called");
     setDeleteDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
-    console.log("handleCloseDialog called");
     setDeleteDialogOpen(false);
   };
 

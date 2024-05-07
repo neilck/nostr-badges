@@ -98,8 +98,22 @@ export const AccountProvider = (props: AccountProviderProps) => {
 
   useEffect(() => {
     nostrContext.init(currentProfile);
+    console.log(`useEffect currentProfile ${JSON.stringify(currentProfile)}`);
   }, [currentProfile]);
 
+  /********** internal functions **********/
+
+  const addProfileInternal = (profile: Profile) => {
+    let updatedProfiles: Record<string, Profile> = {};
+    if (state.profiles) {
+      updatedProfiles = { ...state.profiles };
+    }
+
+    updatedProfiles[profile.publickey] = profile;
+    dispatch({ type: "setProfiles", profiles: updatedProfiles });
+  };
+
+  // load profiles from db and update state
   const loadProfilesInternal = async (uid: string) => {
     let profiles: Record<string, Profile> = {};
     const loaded = await loadProfiles(uid).catch((error) => {
@@ -117,8 +131,60 @@ export const AccountProvider = (props: AccountProviderProps) => {
     return profiles;
   };
 
+  // called to load from db, usually after server-side
+  // isNew triggers update from relays
+  const initProfilesFromAccount = async (
+    account: Account | null,
+    isNew: boolean = false,
+    currentPubkey: string = ""
+  ) => {
+    contextDebug(
+      `initProfilesFromAccount called with account: ${JSON.stringify(
+        account
+      )}, isNew: ${isNew}}`
+    );
+    contextDebug("loading profiles for " + account?.uid);
+
+    if (account == null) {
+      setCurrentProfile(getEmptyProfile());
+      dispatch({ type: "setProfiles", profiles: {} });
+      return null;
+    }
+
+    let profiles: Record<string, Profile> = {};
+    if (account && account.uid) {
+      profiles = await loadProfilesInternal(account.uid);
+    }
+
+    let current: Profile | undefined = undefined;
+    const pubkeys = Object.keys(profiles);
+    if (currentPubkey != "" && pubkeys.includes(currentPubkey)) {
+      current = profiles[currentPubkey];
+      setCurrentProfileInternal(current);
+    } else {
+      // set default profile
+      if (Object.keys(profiles).length > 0) {
+        const key = Object.keys(profiles)[0];
+        current = profiles[key];
+        contextDebug("settting profile " + JSON.stringify(current));
+        setCurrentProfileInternal(current);
+      }
+    }
+
+    // check for profile updates
+    if (isNew && current) {
+      const result = await updateProfileFromRelays(current);
+      if (result && result.updated) {
+        fsSaveProfile(result.profile);
+        setCurrentProfile(result.profile);
+      }
+    }
+  };
+
+  /********** context functions **********/
+
   const setCurrentProfile = async (profile: Profile) => {
-    loadProfilesInternal(profile.uid);
+    addProfileInternal(profile);
     setCurrentProfileInternal(profile);
   };
 
@@ -163,88 +229,17 @@ export const AccountProvider = (props: AccountProviderProps) => {
     initProfilesFromAccount(state.account, false, currentPubkey);
   };
 
+  // returns profile updated from relays
   const updateProfileFromRelays = async (profile: Profile) => {
     const publickey = profile.publickey;
     contextDebug(`checking relays for profile ${publickey}`);
-    const ndkProfile = await nostrContext.fetchProfile();
+    const ndkProfile = await nostrContext.fetchProfile(publickey);
     contextDebug(`got profile ${ndkProfile?.name}`);
-    if (ndkProfile) {
-      const result = updateProfile(profile, ndkProfile);
-      if (result.updated) {
-        const updatedProfile = result.profile;
-        // update currrent profile
-        if (currentProfile.publickey == updatedProfile.publickey) {
-          setCurrentProfile(updatedProfile);
-        }
 
-        // update item in list of profiles
-        let numProfiles = 0;
-        if (state.profiles) {
-          const profiles = { ...state.profiles };
-          // update context
-          numProfiles = Object.keys(profiles).length;
-          for (let i = 0; i < numProfiles; i++) {
-            const key = Object.keys(profiles)[i];
-            const profile = profiles[key];
-            if (profile.publickey == updatedProfile.publickey) {
-              profiles[key] = updatedProfile;
-              break;
-            }
-          }
-          dispatch({ type: "setProfiles", profiles: profiles });
-        }
-      }
-      return result;
+    if (ndkProfile) {
+      return updateProfile(profile, ndkProfile);
     } else {
       return { updated: false, profile: profile };
-    }
-  };
-
-  const initProfilesFromAccount = async (
-    account: Account | null,
-    isNew: boolean = false,
-    currentPubkey: string = ""
-  ) => {
-    contextDebug(
-      `initProfilesFromAccount called with account: ${JSON.stringify(
-        account
-      )}, isNew: ${isNew}}`
-    );
-    contextDebug("loading profiles for " + account?.uid);
-
-    if (account == null) {
-      setCurrentProfile(getEmptyProfile());
-      dispatch({ type: "setProfiles", profiles: {} });
-      return null;
-    }
-
-    let profiles: Record<string, Profile> = {};
-    if (account && account.uid) {
-      profiles = await loadProfilesInternal(account.uid);
-    }
-
-    let current: Profile | undefined = undefined;
-    const pubkeys = Object.keys(profiles);
-    if (currentPubkey != "" && pubkeys.includes(currentPubkey)) {
-      current = profiles[currentPubkey];
-      setCurrentProfileInternal(current);
-    } else {
-      // set default profile
-      if (Object.keys(profiles).length > 0) {
-        const key = Object.keys(profiles)[0];
-        current = profiles[key];
-        contextDebug("settting profile " + JSON.stringify(current));
-        setCurrentProfileInternal(current);
-      }
-    }
-
-    // check for profile updates
-    if (isNew && current) {
-      const result = await updateProfileFromRelays(current);
-      if (result && result.updated) {
-        contextDebug("Updated profile based on Nostr events");
-        setCurrentProfile(result.profile);
-      }
     }
   };
 

@@ -83,9 +83,7 @@ export const updateProfile = (current: Profile, profile: NDKUserProfile) => {
       }
     }
   });
-  if (hasChanges) {
-    saveProfile(full);
-  }
+
   return { updated: hasChanges, profile: full };
 };
 

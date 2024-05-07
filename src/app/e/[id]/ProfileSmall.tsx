@@ -52,7 +52,7 @@ export const ProfileSmall = (item: Item) => {
       let description = "";
 
       if (pubkey != "") {
-        const profile = await nostrContext.fetchProfile();
+        const profile = await nostrContext.fetchProfile(pubkey);
         if (!isCancelled && profile) {
           if (name == "" && profile.displayName) name = profile.displayName;
 

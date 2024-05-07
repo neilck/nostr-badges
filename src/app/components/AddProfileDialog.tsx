@@ -52,6 +52,17 @@ export function AddProfileDialog(props: Props) {
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
+    if (open) {
+      setShowNostr(false);
+      setAdding(false);
+      setPrivateKey(null);
+      setUsername(randomName());
+      setError("");
+      setIsNsec(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (isNsec) {
       setLabelname("nsec private key");
     } else {
@@ -60,11 +71,16 @@ export function AddProfileDialog(props: Props) {
   }, [isNsec]);
 
   const onSaveClick = async () => {
+    const value = await onBlurHandler();
+    if (value == "") {
+      return;
+    }
+
     setAdding(true);
-    if (isNsec && privatekey) {
-      onClose({ privatekey: privatekey });
+    if (isNsec && value) {
+      onClose({ privatekey: value });
     } else {
-      onClose({ username: username });
+      onClose({ username: value });
     }
 
     return { success: true };
@@ -76,21 +92,26 @@ export function AddProfileDialog(props: Props) {
       if (!privateKey) {
         setError("Not a valid nsec private key");
         setPrivateKey(null);
+        return "";
       } else {
         const publickey = getPublicKey(privateKey);
         const existing = await loadProfile(publickey);
         if (existing) {
           setError("Private key already associated with an existing account.");
           setPrivateKey(null);
+          return "";
         } else {
           setPrivateKey(privateKey);
+          return privateKey;
         }
       }
     } else {
       if (username.length > 20) {
         setError("Username must be less than 20 characters.");
+        return "";
       } else {
         setError("");
+        return username;
       }
     }
   };
@@ -146,34 +167,35 @@ export function AddProfileDialog(props: Props) {
             </Box>
           )}
         </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-evenly",
-            alignItems: "center",
-            width: "100%",
-            pt: 3,
-          }}
-        >
-          <Button
-            variant="contained"
-            disabled={username == "" || error !== ""}
-            onClick={onSaveClick}
-            sx={{ width: "100px" }}
-          >
-            Add
-          </Button>
-
-          <Button
-            onClick={() => {
-              onClose(null);
+        {!adding && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-evenly",
+              alignItems: "center",
+              width: "100%",
+              pt: 3,
             }}
-            sx={{ pb: 2 }}
           >
-            cancel
-          </Button>
-        </Box>
+            <Button
+              variant="contained"
+              disabled={username == "" || error !== ""}
+              onClick={onSaveClick}
+              sx={{ width: "100px" }}
+            >
+              Add
+            </Button>
+
+            <Button
+              onClick={() => {
+                onClose(null);
+              }}
+              sx={{ pb: 2 }}
+            >
+              cancel
+            </Button>
+          </Box>
+        )}
         <Box pt={1}>
           {adding && (
             <Typography variant="body1" fontStyle="italic" textAlign="center">
