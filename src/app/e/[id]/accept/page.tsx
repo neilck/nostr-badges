@@ -12,6 +12,7 @@ export default async function AcceptPage({
   params: { id: string };
   searchParams: { session?: string };
 }) {
+  const naddr = params.id;
   const sessionId = searchParams.session ? searchParams.session : "";
 
   const [session, eventResult] = await Promise.all([
@@ -63,7 +64,7 @@ export default async function AcceptPage({
           />
         )}
       </Box>
-      <SessionController />
+      <SessionController naddr={naddr} />
     </Box>
   );
 }

@@ -12,7 +12,7 @@ export const SessionController = (props: {
 }) => {
   const sessionContext = useSessionContext();
 
-  const { badgeId, state, pubkey, isGroup } = props;
+  const { badgeId, naddr, state, pubkey, isGroup } = props;
 
   const effectRan = useRef(false);
   useEffect(() => {
@@ -31,9 +31,9 @@ export const SessionController = (props: {
   }, []);
 
   const init = async () => {
-    const exists = await sessionContext.resumeSession();
+    const exists = await sessionContext.resumeSession(naddr);
     if (!exists) {
-      const result = await sessionContext.startSession({
+      const result = await sessionContext.startSession(naddr, {
         type: isGroup ? "GROUP" : "BADGE",
         docId: badgeId,
         state: state,

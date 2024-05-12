@@ -25,7 +25,7 @@ import { Badge, loadBadge as fsLoadBadge } from "@/data/badgeLib";
 import { loadGroup as fsLoadGroup } from "@/data/groupLib";
 import { sessionCreateBadgeAwards } from "@/data/serverActions";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
-import { Event, toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
+import { toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
 
 const contextDebug = debug("aka:sessionContext");
 const getURL = process.env.NEXT_PUBLIC_AKA_GET;
@@ -73,9 +73,10 @@ const SessionContext = createContext<
       dispatch: Dispatch;
       getSessionState: () => SessionState;
       startSession: (
+        naddr: string,
         params: CreateSessionParams
       ) => Promise<CreateSessionResult>;
-      resumeSession: () => Promise<boolean>;
+      resumeSession: (naddr: string) => Promise<boolean>;
       redirectToLogin: (naddr: string) => void;
       changePubkey: (pubkey: string) => Promise<boolean>;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
@@ -226,7 +227,7 @@ function SessionProvider(props: SessionProviderProps) {
     return state.sessionState;
   };
 
-  const startSession = async (params: CreateSessionParams) => {
+  const startSession = async (naddr: string, params: CreateSessionParams) => {
     contextDebug(`startSession called ${JSON.stringify(params)}`);
     // createSession creates session in DB
     const result = await createSession(params);
@@ -238,14 +239,14 @@ function SessionProvider(props: SessionProviderProps) {
       updateFromSession(result.sessionId, result.session);
 
       // save session Id to sessionStorage
-      sessionStorage.setItem("session", result.sessionId);
+      sessionStorage.setItem(naddr, result.sessionId);
     }
     return result;
   };
 
-  const resumeSession = async () => {
-    const sessionId = sessionStorage.getItem("session");
-    contextDebug(`resumeSession called, sessionId ${sessionId}`);
+  const resumeSession = async (naddr: string) => {
+    const sessionId = sessionStorage.getItem(naddr);
+    contextDebug(`resumeSession called for ${naddr}: sessionId ${sessionId}`);
 
     if (sessionId) {
       const session = await getSession(sessionId);

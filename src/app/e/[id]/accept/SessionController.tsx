@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { useSessionContext } from "@/context/SessionContext";
 
-export const SessionController = () => {
+export const SessionController = (props: { naddr: string }) => {
+  const naddr = props.naddr;
   const sessionContext = useSessionContext();
 
   const session = sessionContext.state.session;
@@ -24,7 +25,7 @@ export const SessionController = () => {
   }, []);
 
   const init = async () => {
-    await sessionContext.resumeSession();
+    await sessionContext.resumeSession(naddr);
   };
 
   // Since there's no UI to return, you can return null
