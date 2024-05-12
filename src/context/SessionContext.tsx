@@ -30,6 +30,8 @@ import { toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
 const contextDebug = debug("aka:sessionContext");
 const getURL = process.env.NEXT_PUBLIC_AKA_GET;
 
+export type ProfileSourceType = "EXTENSION" | "DIRECT" | "AKA";
+
 export enum SessionState {
   Initial = "Initial",
   InProgress = "InProgress",

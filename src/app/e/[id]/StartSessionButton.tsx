@@ -7,7 +7,11 @@ import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 
-import { SessionState, useSessionContext } from "@/context/SessionContext";
+import {
+  ProfileSourceType,
+  SessionState,
+  useSessionContext,
+} from "@/context/SessionContext";
 import Link from "next/link";
 import { ProfileSmall } from "./ProfileSmall";
 import { PubkeyDialog } from "./PubkeyDialog";
@@ -25,6 +29,7 @@ export const StartSessionButton = (props: {
   const instructions = ".";
 
   const [pubkey, setPubkey] = useState("");
+  const [source, setSource] = useState<ProfileSourceType>("DIRECT");
   const [isLoading, setIsLoading] = useState(true);
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
   const [disabled, setDisabled] = useState(false);
@@ -84,10 +89,11 @@ export const StartSessionButton = (props: {
     setShowDialog(true);
   };
 
-  const handleDialogClose = (pubkey: string) => {
+  const handleDialogClose = (pubkey: string, source: ProfileSourceType) => {
     setShowDialog(false);
     sessionContext.changePubkey(pubkey);
     setPubkey(pubkey);
+    setSource(source);
   };
 
   const onSwitchAccount = () => {
@@ -165,6 +171,7 @@ export const StartSessionButton = (props: {
         show={showDialog}
         onClose={handleDialogClose}
         pubkey={pubkey}
+        source={source}
       />
     </>
   );

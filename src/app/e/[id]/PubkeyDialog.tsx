@@ -7,6 +7,7 @@ import { auth } from "@/firebase-config";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 import { Profile } from "@/data/profileLib";
+import { ProfileSourceType } from "@/context/SessionContext";
 
 import styles from "./styles.module.css";
 import Alert from "@mui/material/Alert";
@@ -29,7 +30,8 @@ const provider = new GoogleAuthProvider();
 export const PubkeyDialog = (props: {
   show: boolean;
   pubkey: string;
-  onClose: (pubkey: string) => void;
+  source: ProfileSourceType;
+  onClose: (pubkey: string, source: ProfileSourceType) => void;
 }) => {
   const defaultHelperText = "Paste a hex public key or npub";
   const { show, onClose } = props;
@@ -37,6 +39,9 @@ export const PubkeyDialog = (props: {
   const [usePublicKey, setUsePublicKey] = useState(false);
   const [googleError, setGoogleError] = useState("");
   const [pubkey, setPubkey] = useState(props.pubkey);
+  const [pubkeySource, setPubkeySource] = useState<ProfileSourceType>(
+    props.source
+  );
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [textPubkey, setTextPubkey] = useState("");
   const [helperText, setHelperText] = useState(defaultHelperText);
@@ -48,6 +53,7 @@ export const PubkeyDialog = (props: {
       setUsePublicKey(false);
       setGoogleError("");
       setPubkey(props.pubkey);
+      setPubkeySource(props.source);
       setProfiles([]);
       setTextPubkey("");
       setHelperText(defaultHelperText);
@@ -91,7 +97,7 @@ export const PubkeyDialog = (props: {
     }
   }
   const onCloseClick = () => {
-    onClose("");
+    onClose("", "DIRECT");
   };
 
   const onNostrClick = async () => {
@@ -103,6 +109,7 @@ export const PubkeyDialog = (props: {
     });
     if (hexPubkey && hexPubkey != "") {
       setPubkey(hexPubkey);
+      setPubkeySource("EXTENSION");
     }
   };
 
@@ -120,6 +127,7 @@ export const PubkeyDialog = (props: {
       setHelperText(result.mesg);
     } else {
       setPubkey(result.key);
+      setPubkeySource("DIRECT");
     }
   };
 
@@ -146,6 +154,7 @@ export const PubkeyDialog = (props: {
 
         if (profiles.length == 1) {
           setPubkey(profiles[0].publickey);
+          setPubkeySource("AKA");
         }
 
         if (profiles.length > 1) {
@@ -160,6 +169,7 @@ export const PubkeyDialog = (props: {
 
   const onProfileClick = (publickey: string) => {
     setPubkey(publickey);
+    setPubkeySource("AKA");
     setProfileSelect(false);
   };
 
@@ -285,8 +295,9 @@ export const PubkeyDialog = (props: {
               <Box>
                 <Button
                   onClick={() => {
-                    onClose(pubkey);
+                    onClose(pubkey, pubkeySource);
                     setPubkey("");
+                    setPubkeySource("DIRECT");
                   }}
                 >
                   <Typography variant="body1" align="center" fontWeight={600}>
@@ -296,6 +307,7 @@ export const PubkeyDialog = (props: {
                 <Button
                   onClick={() => {
                     setPubkey("");
+                    setPubkeySource("DIRECT");
                   }}
                 >
                   <Typography variant="body1" align="center">
