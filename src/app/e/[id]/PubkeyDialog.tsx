@@ -318,6 +318,7 @@ export const PubkeyDialog = (props: {
               <Box sx={{ mb: 1, height: "250px", overflowY: "auto" }}>
                 {profiles.map((profile) => (
                   <Box
+                    key={profile.publickey}
                     width="auto"
                     border={1}
                     borderColor="grey.300"
