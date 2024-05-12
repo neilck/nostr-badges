@@ -11,17 +11,19 @@ import * as nip19 from "@/nostr-tools/nip19";
 import { useNostrContext } from "@/context/NostrContext";
 import { shortenDesc } from "@/app/utils/utils";
 import { useEffect, useState } from "react";
+import { Profile } from "@/data/profileLib";
 
 type WidthOption = "normal" | "wide";
 
 export type Item = {
   pubkey: string;
+  profile?: Profile;
   widthOption?: WidthOption;
   sx?: SxProps<Theme> | undefined;
 };
 
 export const ProfileSmall = (item: Item) => {
-  const { pubkey, widthOption, sx } = item;
+  const { profile, pubkey, widthOption, sx } = item;
   const nostrContext = useNostrContext();
 
   const [name, setName] = useState("");
@@ -75,8 +77,19 @@ export const ProfileSmall = (item: Item) => {
       setImage(image);
     };
 
-    if (pubkey != "") {
-      getProfile(pubkey);
+    if (profile) {
+      let name = profile.displayName ?? "";
+      if (name == "") {
+        name = profile.name ?? "";
+      }
+      const desc = shortenDesc(profile.about ?? "", truncateLength);
+      setName(name);
+      setDescription(description);
+      setImage(profile.image ?? "");
+    } else {
+      if (pubkey != "") {
+        getProfile(pubkey);
+      }
     }
 
     return () => {
