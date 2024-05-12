@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
 
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
@@ -60,7 +61,9 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
-              <Profile />
+              <Link href="/profile">
+                <Profile />
+              </Link>
               <NavMenu developerMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
