@@ -1,10 +1,9 @@
 /***
  * Handles state during user applicaton for group / badge
- * Id written to sessionStorage to persist over refreshes
  *
  * state.session corresponds to session record stored in database
  * (all other fields used by client UI)
- * database session is updated 3rd party badge apply pages, requiring reload when iframe dialog closed
+ * database session is updated 3rd party badge apply pages, requiring reload
  *
  */
 "use client";
@@ -146,25 +145,20 @@ function SessionProvider(props: SessionProviderProps) {
       dispatch({ type: "setSessionId", sessionId: result.sessionId });
       dispatch({ type: "setSession", session: result.session });
       updateFromSession(result.sessionId, result.session);
-
-      // save session Id to sessionStorage
-      sessionStorage.setItem(naddr, result.sessionId);
+      return result;
     }
-    return result;
+    return undefined;
   };
 
-  const resumeSession = async (naddr: string) => {
-    const sessionId = sessionStorage.getItem(naddr);
-    contextDebug(`resumeSession called for ${naddr}: sessionId ${sessionId}`);
+  const resumeSession = async (sessionId: string) => {
+    contextDebug(`resumeSession called for sessionId ${sessionId}`);
 
-    if (sessionId) {
-      const session = await getSession(sessionId);
-      if (session) {
-        dispatch({ type: "setSessionId", sessionId: sessionId });
-        dispatch({ type: "setSession", session: session });
-        updateFromSession(sessionId, session);
-        return true;
-      }
+    const session = await getSession(sessionId);
+    if (session) {
+      dispatch({ type: "setSessionId", sessionId: sessionId });
+      dispatch({ type: "setSession", session: session });
+      updateFromSession(sessionId, session);
+      return true;
     }
 
     return false;

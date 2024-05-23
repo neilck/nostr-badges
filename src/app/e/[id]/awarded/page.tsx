@@ -2,12 +2,12 @@ import Box from "@mui/material/Box";
 import { Badge } from "@/data/badgeLib";
 import { toNostrEvent } from "@/data/eventLib";
 import { getBadge, getEvent, getSession } from "@/data/serverActions";
-import { Accept } from "./Accept";
-import { SessionController } from "../../SessionController";
+
 import { getSessionState } from "@/context/SessionHelper";
 import EventFrame from "../EventFrame";
+import { SessionController } from "../../SessionController";
 
-export default async function AcceptPage({
+export default async function AwardedPage({
   params,
   searchParams,
 }: {
@@ -48,7 +48,7 @@ export default async function AcceptPage({
   }
 
   return (
-    <EventFrame event={event} header="Save Credentials">
+    <EventFrame event={event} header="Awarded">
       <Box
         minHeight={320}
         maxWidth={360}
@@ -58,18 +58,7 @@ export default async function AcceptPage({
         pl={2}
         pr={2}
       >
-        <Box pt={2}>
-          {session && (
-            <Accept
-              id={id}
-              type={session.type}
-              pubkey={session.pubkey}
-              nostrEvent={nostrEvent}
-              badgeItems={badgeItems}
-              sessionState={sessionState}
-            />
-          )}
-        </Box>
+        <Box pt={2}></Box>
         <SessionController />
       </Box>
     </EventFrame>

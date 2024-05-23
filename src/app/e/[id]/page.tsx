@@ -6,7 +6,7 @@ import { Event, toNostrEvent } from "@/data/eventLib";
 import { NostrEvent } from "@/data/ndk-lite";
 
 import { StartSessionButton } from "./StartSessionButton";
-import { SessionController } from "./SessionController";
+import { SessionController } from "../SessionController";
 import EventFrame from "./EventFrame";
 import { BadgeAwardedList } from "@/app/components/BadgeAwardedList";
 const BadgeDefinitionKind = 30009;
@@ -81,13 +81,7 @@ export default async function ViewEventPage({
           <p>{event && JSON.stringify(event.tags)}</p>
         </Stack>
       )}
-      <SessionController
-        badgeId={id}
-        naddr={naddr}
-        state={state}
-        pubkey={pubkey}
-        isGroup={isGroup}
-      />
+      <SessionController badgeId={id} isGroup={isGroup} />
     </EventFrame>
   );
 }
