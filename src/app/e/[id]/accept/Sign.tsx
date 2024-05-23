@@ -130,7 +130,7 @@ export const Sign = (props: {
             </Typography>
           </Box>
           <Box width="100%">
-            <ProfileSmall key="selectedProfile" pubkey={pubkey} />
+            {/* <ProfileSmall key="selectedProfile" pubkey={pubkey} /> */}
           </Box>
 
           <Box
@@ -168,7 +168,7 @@ export const Sign = (props: {
             {reqPubkey != "" && (
               <>
                 <Box width="100%" pt={2}>
-                  <ProfileSmall key="selectedProfile" pubkey={reqPubkey} />
+                  {/* <ProfileSmall key="selectedProfile" pubkey={reqPubkey} /> */}
                 </Box>
                 <Collapse in={alertError != ""}>
                   <Alert
