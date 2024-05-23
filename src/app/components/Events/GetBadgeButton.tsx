@@ -16,14 +16,14 @@ export const GetBadgeButton = (props: { buttonLabel: string; url: string }) => {
     <Button
       onClick={onClick}
       variant="contained"
-      color="secondary"
+      color="primary"
       sx={{
         width: "80%",
         color: theme.palette.grey[200],
-        backgroundColor: theme.palette.orange.main,
+        backgroundColor: theme.palette.blue.main,
         "&:hover": {
           color: theme.palette.grey[100],
-          backgroundColor: theme.palette.orange.dark,
+          backgroundColor: theme.palette.blue.dark,
         },
       }}
     >
