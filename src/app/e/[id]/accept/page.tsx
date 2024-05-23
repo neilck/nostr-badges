@@ -4,6 +4,8 @@ import { toNostrEvent } from "@/data/eventLib";
 import { getBadge, getEvent, getSession } from "@/data/serverActions";
 import { Accept } from "./Accept";
 import { SessionController } from "./SessionController";
+import { getSessionState } from "@/context/SessionHelper";
+import EventFrame from "../EventFrame";
 
 export default async function AcceptPage({
   params,
@@ -20,7 +22,9 @@ export default async function AcceptPage({
     getEvent(params.id),
   ]);
 
-  const nostrEvent = toNostrEvent(eventResult.event);
+  const sessionState = getSessionState(session);
+  const event = eventResult.event;
+  const nostrEvent = toNostrEvent(event);
   const id = eventResult.id;
 
   let badges: Badge[] = [];
@@ -44,27 +48,30 @@ export default async function AcceptPage({
   }
 
   return (
-    <Box
-      minHeight={320}
-      maxWidth={360}
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      pl={2}
-      pr={2}
-    >
-      <Box pt={2}>
-        {session && (
-          <Accept
-            id={id}
-            type={session.type}
-            pubkey={session.pubkey}
-            nostrEvent={nostrEvent}
-            badgeItems={badgeItems}
-          />
-        )}
+    <EventFrame event={event} header="Save Credentials">
+      <Box
+        minHeight={320}
+        maxWidth={360}
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        pl={2}
+        pr={2}
+      >
+        <Box pt={2}>
+          {session && (
+            <Accept
+              id={id}
+              type={session.type}
+              pubkey={session.pubkey}
+              nostrEvent={nostrEvent}
+              badgeItems={badgeItems}
+              sessionState={sessionState}
+            />
+          )}
+        </Box>
+        <SessionController naddr={naddr} />
       </Box>
-      <SessionController naddr={naddr} />
-    </Box>
+    </EventFrame>
   );
 }

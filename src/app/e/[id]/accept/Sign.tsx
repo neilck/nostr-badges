@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { UserCredential } from "firebase/auth";
 
+import { SessionState } from "@/context/SessionHelper";
 import { useAccountContext } from "@/context/AccountContext";
-import { useSessionContext, SessionState } from "@/context/SessionContext";
+import { useSessionContext } from "@/context/SessionContext";
 import { useNostrContext } from "@/context/NostrContext";
 
 import { getDefaultRelays } from "@/data/relays";
@@ -76,11 +77,7 @@ export const Sign = (props: {
     if (!sessionContext.state.session) return { success: false };
 
     const state = sessionContext.getSessionState();
-    if (
-      state != SessionState.ReadyToAward &&
-      state != SessionState.BadgeAwardsCreated
-    )
-      return { success: false };
+    if (state != SessionState.ReadyToAward) return { success: false };
 
     if (state == SessionState.ReadyToAward) {
       await sessionContext.createBadgeAwards("", pubkey);

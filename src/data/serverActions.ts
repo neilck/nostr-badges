@@ -191,13 +191,10 @@ export async function createSession(params: CreateSessionParams) {
 
 export async function changeSessionPubkey(
   session: string,
-  pubkey: string
+  pubkey: string,
+  pubkeySource: string
 ): Promise<{ success: boolean; message: string }> {
-  const postData = {
-    session: session,
-    pubkey: pubkey,
-  };
-
+  const postData = { session, pubkey, pubkeySource };
   const url = `https://changesessionpubkey-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/changeSessionPubkey`;
 
   const response = await fetch(url, {

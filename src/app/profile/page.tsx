@@ -13,6 +13,8 @@ import { Section } from "./edit/Section";
 
 import Link from "next/link";
 import { ProfileDisplay } from "./ProfileDisplay";
+import { BadgesDisplay } from "./BadgesDisplay";
+import { Typography } from "@mui/material";
 
 export default function ProfilePage() {
   const accountContext = useAccountContext();
@@ -27,10 +29,10 @@ export default function ProfilePage() {
   return (
     <CommonLayout
       developerMode={false}
-      bgColor={theme.palette.background.paper}
+      bgColor={theme.palette.background.default}
     >
-      <Stack width="400px" minWidth="300px" pt={4} spacing={2}>
-        {loading && (
+      {loading && (
+        <Stack maxWidth="800px" minWidth="300px" pt={4} spacing={2}>
           <Box
             sx={{
               display: "flex",
@@ -41,13 +43,27 @@ export default function ProfilePage() {
           >
             <CircularProgress />
           </Box>
-        )}
-        {!loading && (
-          <Section id="profile" onEdit={handleEdit}>
-            <ProfileDisplay profile={profile} extra={true} />
-          </Section>
-        )}
-      </Stack>
+        </Stack>
+      )}
+      {!loading && (
+        <Stack maxWidth="800px" minWidth="300px" pt={4} spacing={2}>
+          <Box p={1}>
+            <Typography variant="h6" pb={1}>
+              Profile
+            </Typography>
+            <Section id="profile" onEdit={handleEdit}>
+              <ProfileDisplay profile={profile} extra={true} />
+            </Section>
+          </Box>
+          <Box p={1}>
+            <Typography variant="h6" pb={1}>
+              Badges
+            </Typography>
+
+            <BadgesDisplay uid={profile.uid} pubkey={profile.publickey} />
+          </Box>
+        </Stack>
+      )}
     </CommonLayout>
   );
 }

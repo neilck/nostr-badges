@@ -19,6 +19,7 @@ export const Section = (props: {
       <Box
         sx={{
           border: 1,
+          backgroundColor: theme.palette.background.paper,
           borderColor: theme.palette.grey[400],
           borderRadius: 2,
           padding: 1,
@@ -31,23 +32,27 @@ export const Section = (props: {
         {children}
 
         {/* Edit icon positioned on top right */}
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: theme.spacing(0),
-            right: theme.spacing(0),
-            backgroundColor: "rgba(255, 255, 255, 0.8)", // Optional: semi-transparent background
-          }}
-          aria-label="edit"
-          onClick={() => {
-            if (onEdit) {
-              onEdit(id);
-            }
-          }}
-        >
-          {!edit && <EditIcon />}
-          {edit && <CancelIcon />}
-        </IconButton>
+        {onEdit && (
+          <>
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: theme.spacing(0),
+                right: theme.spacing(0),
+                backgroundColor: "rgba(255, 255, 255, 0.8)", // Optional: semi-transparent background
+              }}
+              aria-label="edit"
+              onClick={() => {
+                if (onEdit) {
+                  onEdit(id);
+                }
+              }}
+            >
+              {!edit && <EditIcon />}
+              {edit && <CancelIcon />}
+            </IconButton>
+          </>
+        )}
       </Box>
     </div>
   );

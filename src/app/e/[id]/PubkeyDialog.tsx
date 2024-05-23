@@ -1,64 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import * as nip19 from "@/nostr-tools/nip19";
-import { auth } from "@/firebase-config";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-
-import { Profile } from "@/data/profileLib";
-import { ProfileSourceType } from "@/context/SessionContext";
+import { useEffect } from "react";
+import { PubkeySourceType } from "@/data/sessionLib";
+import { Profile, getEmptyProfile } from "@/data/profileLib";
 
 import styles from "./styles.module.css";
-import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Collapse from "@mui/material/Collapse";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import {
-  CardHeading,
-  CardSubHeading,
-} from "@/app/components/items/CardHeadings";
-import { ProfileSmall } from "./ProfileSmall";
-import GoogleButton from "@/app/components/items/GoogleButton";
 import { CapIcon } from "@/app/components/items/CapIcon";
 
-const provider = new GoogleAuthProvider();
+import { SignIn } from "./SignIn";
 
 export const PubkeyDialog = (props: {
   show: boolean;
   pubkey: string;
-  source: ProfileSourceType;
-  onClose: (pubkey: string, source: ProfileSourceType) => void;
+  source: PubkeySourceType;
+  onClose: (profile: Profile, pubkeySource: PubkeySourceType) => void;
 }) => {
-  const defaultHelperText = "Paste a hex public key or npub";
-  const { show, onClose } = props;
-  const [profileSelect, setProfileSelect] = useState(false);
-  const [usePublicKey, setUsePublicKey] = useState(false);
-  const [googleError, setGoogleError] = useState("");
-  const [pubkey, setPubkey] = useState(props.pubkey);
-  const [pubkeySource, setPubkeySource] = useState<ProfileSourceType>(
-    props.source
-  );
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [textPubkey, setTextPubkey] = useState("");
-  const [helperText, setHelperText] = useState(defaultHelperText);
-  const [textError, setTextError] = useState(false);
+  const { show, pubkey, source, onClose } = props;
+
+  const onSignIn = (profile: Profile, source: PubkeySourceType) => {
+    onClose(profile, source);
+  };
 
   useEffect(() => {
     if (show) {
-      setProfileSelect(false);
-      setUsePublicKey(false);
-      setGoogleError("");
-      setPubkey(props.pubkey);
-      setPubkeySource(props.source);
-      setProfiles([]);
-      setTextPubkey("");
-      setHelperText(defaultHelperText);
-      setTextError(false);
-
       // @ts-ignore
       document.getElementById("pubkeydialog").showModal();
     } else {
@@ -67,300 +35,41 @@ export const PubkeyDialog = (props: {
     }
   }, [show]);
 
-  function validateKey(key: string): {
-    valid: boolean;
-    key: string;
-    mesg: string;
-  } {
-    const clean = key.trim();
-    if (key.startsWith("npub")) {
-      try {
-        const result = nip19.decode(clean);
-        if (
-          result.type != "npub" ||
-          typeof result.data != "string" ||
-          result.data == ""
-        ) {
-          return { valid: false, key: "", mesg: "not a valid npub" };
-        }
-        return { valid: true, key: result.data, mesg: "" };
-      } catch {
-        return { valid: false, key: "", mesg: "not a valid npub" };
-      }
-    } else {
-      const hexRegex = /^[0-9a-fA-F]+$/;
-      if (!hexRegex.test(clean) || clean.length != 64)
-        return { valid: false, key: "", mesg: "not a valid public key" };
-      else {
-        return { valid: true, key: clean, mesg: "" };
-      }
-    }
-  }
-  const onCloseClick = () => {
-    onClose("", "DIRECT");
-  };
-
-  const onNostrClick = async () => {
-    // @ts-ignore Error in NDK global interface declaration
-    setTextPubkey("");
-    setTextError(false);
-    const hexPubkey = await window.nostr?.getPublicKey().catch((error) => {
-      return;
-    });
-    if (hexPubkey && hexPubkey != "") {
-      setPubkey(hexPubkey);
-      setPubkeySource("EXTENSION");
-    }
-  };
-
-  const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTextError(false);
-    setHelperText(defaultHelperText);
-    const updated = event.currentTarget.value;
-    setTextPubkey(updated);
-  };
-
-  const onSubmitClick = () => {
-    const result = validateKey(textPubkey);
-    if (!result.valid) {
-      setTextError(true);
-      setHelperText(result.mesg);
-    } else {
-      setPubkey(result.key);
-      setPubkeySource("DIRECT");
-    }
-  };
-
-  const onGoogleClick = async () => {
-    provider.setCustomParameters({
-      prompt: "select_account",
-    });
-    const userCredential = await signInWithPopup(auth, provider).catch(
-      (error) => {
-        // swallow error
-        console.log("google sign-in cancelled");
-        return;
-      }
-    );
-
-    let found = false;
-    if (userCredential) {
-      const functions = getFunctions();
-      const getProfiles = httpsCallable(functions, "getProfiles");
-      const result = await getProfiles();
-      if (result.data) {
-        const profiles = result.data as Profile[];
-        found = profiles.length > 0;
-
-        if (profiles.length == 1) {
-          setPubkey(profiles[0].publickey);
-          setPubkeySource("AKA");
-        }
-
-        if (profiles.length > 1) {
-          setProfiles(profiles);
-          setProfileSelect(true);
-        }
-      }
-    }
-    if (!found) setGoogleError("Account not setup.");
-    auth.signOut();
-  };
-
-  const onProfileClick = (publickey: string) => {
-    setPubkey(publickey);
-    setPubkeySource("AKA");
-    setProfileSelect(false);
+  const onCancelClick = () => {
+    const profile = getEmptyProfile();
+    onClose(profile, "DIRECT");
   };
 
   return (
     <dialog id="pubkeydialog" className={styles.customdialog}>
       <Box id="pubkeydialogcontent" className={styles.customdialogcontent}>
-        <Stack direction="column" alignItems="center" columnGap="10px">
-          <CapIcon fontSize="large" sx={{ color: "orange.main" }} />
-          {/* display at sm and smaller */}
+        <Stack direction="column" alignItems="center" alignContent="center">
+          <Stack direction="column" alignItems="center" columnGap="10px">
+            <CapIcon fontSize="large" sx={{ color: "orange.main" }} />
+            {/* display at sm and smaller */}
 
-          <Typography
-            variant="body1"
-            fontWeight={500}
-            sx={{
-              color: "grey.800",
-            }}
-          >
-            AKA Profiles
-          </Typography>
-        </Stack>
-        <Stack
-          direction="column"
-          alignItems="center"
-          width="100%"
-          height="100%"
-        >
-          <Box width="auto" pt={1}>
-            <CardHeading>Apply with Existing Account</CardHeading>
-          </Box>
-          <Typography>Sign in to apply with an existing account</Typography>
-          {pubkey == "" && !profileSelect && (
-            <Stack direction="column" pt={2} spacing={2} alignItems="center">
-              <Box display="flex" flexDirection="column">
-                <GoogleButton disabled={false} onClick={onGoogleClick} />
-                {googleError != "" && (
-                  <Typography variant="subtitle2">{googleError}</Typography>
-                )}
-              </Box>
-
-              <Button
-                variant="contained"
-                onClick={onNostrClick}
-                sx={{
-                  backgroundColor: "#8e30eb", // nostr purple
-                  "&:hover": { backgroundColor: "#a915ff" },
-                  width: "191px",
-                  height: "40px",
-                }}
-              >
-                <Typography variant="body1" fontWeight={600}>
-                  Nostr Extension
-                </Typography>
-              </Button>
-
-              {!usePublicKey && (
-                <>
-                  <Typography>or use public key</Typography>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "grey.600",
-                      "&:hover": { backgroundColor: "grey.500" },
-                      width: "191px",
-                      height: "40px",
-                    }}
-                    onClick={() => {
-                      setUsePublicKey(true);
-                    }}
-                  >
-                    <Typography variant="body1" fontWeight={500}>
-                      Public Key
-                    </Typography>
-                  </Button>
-                </>
-              )}
-              {usePublicKey && (
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  width="auto"
-                  p={1}
-                  border={1}
-                  borderColor="grey.300"
-                >
-                  <Box width="auto">
-                    <CardSubHeading>Public Key</CardSubHeading>
-                  </Box>
-                  <Box pt={1}>
-                    <TextField
-                      id="pubkey"
-                      value={textPubkey}
-                      onChange={onChangeHandler}
-                      size="small"
-                      helperText={helperText}
-                      error={textError}
-                    />
-                    <Button variant="text" size="small" onClick={onSubmitClick}>
-                      submit
-                    </Button>
-                  </Box>
-                </Box>
-              )}
-              <Button onClick={onCloseClick} sx={{ width: "160px", pt: 3 }}>
-                <Typography variant="body1" align="center" fontWeight="600">
-                  cancel
-                </Typography>
-              </Button>
-            </Stack>
-          )}
-          {pubkey != "" && (
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              pt={1}
+            <Typography
+              variant="body1"
+              fontWeight={500}
+              sx={{
+                color: "grey.800",
+              }}
             >
-              <Box width="auto" border={1} borderColor="grey.300" pb={0.5}>
-                <ProfileSmall widthOption="wide" pubkey={pubkey} />
-              </Box>
-              <Box pt={1} pb={1}>
-                Use this profile?
-              </Box>
-              <Box>
-                <Button
-                  onClick={() => {
-                    onClose(pubkey, pubkeySource);
-                    setPubkey("");
-                    setPubkeySource("DIRECT");
-                  }}
-                >
-                  <Typography variant="body1" align="center" fontWeight={600}>
-                    yes
-                  </Typography>
-                </Button>
-                <Button
-                  onClick={() => {
-                    setPubkey("");
-                    setPubkeySource("DIRECT");
-                  }}
-                >
-                  <Typography variant="body1" align="center">
-                    no
-                  </Typography>
-                </Button>
-              </Box>
-            </Box>
-          )}
-          {profileSelect && (
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              pt={1}
-            >
-              <Box pt={1} pb={1}>
-                Choose a profile
-              </Box>
-              <Box sx={{ mb: 1, height: "250px", overflowY: "auto" }}>
-                {profiles.map((profile) => (
-                  <Box
-                    key={profile.publickey}
-                    width="auto"
-                    border={1}
-                    borderColor="grey.300"
-                    pb={0.5}
-                    onClick={() => {
-                      onProfileClick(profile.publickey);
-                    }}
-                  >
-                    <ProfileSmall
-                      widthOption="wide"
-                      pubkey={profile.publickey}
-                      profile={profile}
-                    />
-                  </Box>
-                ))}
-              </Box>
+              AKA Profiles
+            </Typography>
+          </Stack>
+          <SignIn
+            isVisible={show}
+            pubkey={pubkey}
+            source={source}
+            onSignIn={onSignIn}
+          />
 
-              <Box>
-                <Button
-                  onClick={() => {
-                    setProfileSelect(false);
-                  }}
-                >
-                  <Typography variant="body1" align="center">
-                    cancel
-                  </Typography>
-                </Button>
-              </Box>
-            </Box>
-          )}
+          <Button onClick={onCancelClick} sx={{ width: "160px", pt: 3 }}>
+            <Typography variant="body1" align="center" fontWeight="600">
+              cancel
+            </Typography>
+          </Button>
         </Stack>
       </Box>
     </dialog>

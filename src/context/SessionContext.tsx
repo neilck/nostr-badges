@@ -15,6 +15,10 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Session, ItemState } from "@/data/sessionLib";
 import {
+  SessionState,
+  getSessionState as getSessionStateHelper,
+} from "./SessionHelper";
+import {
   getSession,
   createSession,
   changeSessionPubkey,
@@ -30,15 +34,6 @@ import { toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
 const contextDebug = debug("aka:sessionContext");
 const getURL = process.env.NEXT_PUBLIC_AKA_GET;
 
-export type ProfileSourceType = "EXTENSION" | "DIRECT" | "AKA";
-
-export enum SessionState {
-  Initial = "Initial",
-  InProgress = "InProgress",
-  ReadyToAward = "ReadyToAward",
-  BadgeAwardsCreated = "BadgeAwardsCreated",
-}
-
 export type Display = {
   title: string;
   description: string;
@@ -51,7 +46,6 @@ type Action =
   | { type: "setSession"; session: Session | null }
   | { type: "setDisplay"; display: Display | null }
   | { type: "setBadges"; badges: Record<string, Badge> | null }
-  | { type: "setSessionState"; sessionState: SessionState }
   | { type: "setIsUpdating"; isUpdating: boolean };
 
 type Dispatch = (action: Action) => void;
@@ -59,7 +53,6 @@ type Dispatch = (action: Action) => void;
 type State = {
   sessionId: string | null;
   session: Session | null;
-  sessionState: SessionState;
   display: Display | null;
   badges: Record<string, Badge> | null;
   isUpdating: boolean;
@@ -80,7 +73,7 @@ const SessionContext = createContext<
       ) => Promise<CreateSessionResult>;
       resumeSession: (naddr: string) => Promise<boolean>;
       redirectToLogin: (naddr: string) => void;
-      changePubkey: (pubkey: string) => Promise<boolean>;
+      changePubkey: (pubkey: string, pubkeySource: string) => Promise<boolean>;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
       getSignedEvents: () => Promise<NostrEvent[]>;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
@@ -104,12 +97,6 @@ function reducer(state: State, action: Action) {
     case "setBadges": {
       return { ...state, badges: action.badges };
     }
-    case "setSessionState": {
-      contextDebug(
-        `SessionState change ${state.sessionState} => ${action.sessionState}`
-      );
-      return { ...state, sessionState: action.sessionState };
-    }
     case "setIsUpdating": {
       return { ...state, isUpdating: action.isUpdating };
     }
@@ -122,7 +109,6 @@ function SessionProvider(props: SessionProviderProps) {
   const [state, dispatch] = useReducer(reducer, {
     sessionId: null,
     session: null,
-    sessionState: SessionState.Initial,
     display: null,
     badges: null,
     isUpdating: false,
@@ -146,87 +132,8 @@ function SessionProvider(props: SessionProviderProps) {
     }
   }, [state.sessionId]);
 
-  // returns true is all required badges are awarded.
-  const readyToAward = (session: Session) => {
-    if (!session) {
-      return false;
-    }
-
-    if (!(session.itemState.isAwarded || session.itemState.prevAward)) {
-      return false;
-    }
-
-    if (session.requiredBadges) {
-      session.requiredBadges.forEach((badge) => {
-        if (!(badge.itemState.isAwarded || badge.itemState.prevAward)) {
-          return false;
-        }
-      });
-    }
-
-    if (session.requiredGroups) {
-      session.requiredGroups.forEach((group) => {
-        if (!(group.itemState.isAwarded || group.itemState.prevAward)) {
-          return false;
-        }
-      });
-    }
-
-    return true;
-  };
-
-  // set SessionState based on loaded session
-  const updateSessionState = (session: Session | undefined) => {
-    if (!session) {
-      dispatch({ type: "setSessionState", sessionState: SessionState.Initial });
-      return;
-    }
-
-    let testItemState: ItemState | undefined = undefined;
-    if (session.type == "BADGE" || session.type == "GROUP") {
-      testItemState = session.itemState;
-    } else {
-      if (session.requiredGroups && session.requiredGroups.length > 0) {
-        testItemState = session.requiredGroups[0].itemState;
-      } else if (session.requiredBadges && session.requiredBadges.length > 0) {
-        testItemState = session.requiredBadges[0].itemState;
-      }
-    }
-
-    contextDebug(`updateSessionState testItemState: ${testItemState}`);
-
-    if (!testItemState) {
-      dispatch({ type: "setSessionState", sessionState: SessionState.Initial });
-      return;
-    }
-
-    if (testItemState.event && testItemState.event != "") {
-      dispatch({
-        type: "setSessionState",
-        sessionState: SessionState.BadgeAwardsCreated,
-      });
-      return;
-    }
-
-    // if ready for award
-    if (readyToAward(session)) {
-      dispatch({
-        type: "setSessionState",
-        sessionState: SessionState.ReadyToAward,
-      });
-      return;
-    }
-
-    // else set in progress
-    dispatch({
-      type: "setSessionState",
-      sessionState: SessionState.InProgress,
-    });
-    return;
-  };
-
   const getSessionState = () => {
-    return state.sessionState;
+    return getSessionStateHelper(state.session);
   };
 
   const startSession = async (naddr: string, params: CreateSessionParams) => {
@@ -290,8 +197,6 @@ function SessionProvider(props: SessionProviderProps) {
     }
 
     dispatch({ type: "setDisplay", display: display });
-
-    updateSessionState(session);
     dispatch({ type: "setIsUpdating", isUpdating: false });
   };
 
@@ -304,9 +209,13 @@ function SessionProvider(props: SessionProviderProps) {
     }
   };
 
-  const changePubkey = async (pubkey: string) => {
+  const changePubkey = async (pubkey: string, pubkeySource: string) => {
     if (state.sessionId) {
-      const result = await changeSessionPubkey(state.sessionId, pubkey);
+      const result = await changeSessionPubkey(
+        state.sessionId,
+        pubkey,
+        pubkeySource
+      );
       return reload();
     }
     return false;

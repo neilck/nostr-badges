@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
+import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { getEvent } from "@/data/serverActions";
 import { Event, toNostrEvent } from "@/data/eventLib";
 import { NostrEvent } from "@/data/ndk-lite";
 
-import { ViewBadgeEventSession } from "@/app/components/Events/ViewBadgeEventSession";
 import { StartSessionButton } from "./StartSessionButton";
 import { SessionController } from "./SessionController";
+import EventFrame from "./EventFrame";
+import { BadgeAwardedList } from "@/app/components/BadgeAwardedList";
 const BadgeDefinitionKind = 30009;
 const ClassifiedListingKind = 30402;
 
@@ -53,16 +55,24 @@ export default async function ViewEventPage({
   }
 
   return (
-    <>
+    <EventFrame event={event} header="Eligibility Check">
       {isBadge && (
-        <ViewBadgeEventSession
-          id={id}
-          naddr={naddr}
-          e={nostrEvent!}
-          isGroup={isGroup}
-        >
-          <StartSessionButton badgeId={id} naddr={naddr} isGroup={isGroup} />
-        </ViewBadgeEventSession>
+        <Box display="flex" flexDirection="column" sx={{ minHeight: "260px" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              flexGrow: 1,
+            }}
+          >
+            <BadgeAwardedList />
+          </Box>
+          {/* This is a spacer to push the last item down */}
+          <Box sx={{ padding: 2 }}>
+            <StartSessionButton badgeId={id} naddr={naddr} isGroup={isGroup} />
+          </Box>
+        </Box>
       )}
       {!isBadge && !isOffer && (
         <Stack direction="column">
@@ -78,6 +88,6 @@ export default async function ViewEventPage({
         pubkey={pubkey}
         isGroup={isGroup}
       />
-    </>
+    </EventFrame>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import * as nip19 from "@/nostr-tools/nip19";
 import { SxProps, Theme } from "@mui/material";
 
 import Box from "@mui/material/Box";
@@ -7,7 +8,6 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import * as nip19 from "@/nostr-tools/nip19";
 import { useNostrContext } from "@/context/NostrContext";
 import { shortenDesc } from "@/app/utils/utils";
 import { useEffect, useState } from "react";
@@ -16,14 +16,18 @@ import { Profile } from "@/data/profileLib";
 type WidthOption = "normal" | "wide";
 
 export type Item = {
-  pubkey: string;
-  profile?: Profile;
+  profile: Profile;
   widthOption?: WidthOption;
   sx?: SxProps<Theme> | undefined;
 };
 
+const shortNpub = (pubkey: string) => {
+  const long = nip19.npubEncode(pubkey);
+  return long.substring(0, 16) + "...";
+};
+
 export const ProfileSmall = (item: Item) => {
-  const { profile, pubkey, widthOption, sx } = item;
+  const { profile, widthOption, sx } = item;
   const nostrContext = useNostrContext();
 
   const [name, setName] = useState("");
@@ -42,60 +46,18 @@ export const ProfileSmall = (item: Item) => {
   };
 
   useEffect(() => {
-    let isCancelled = false;
-    const shortNpub = (pubkey: string) => {
-      const long = nip19.npubEncode(pubkey);
-      return long.substring(0, 16) + "...";
-    };
-
-    const getProfile = async (pubkey: string) => {
-      let name = "";
-      let image = "";
-      let description = "";
-
-      if (pubkey != "") {
-        const profile = await nostrContext.fetchProfile(pubkey);
-        if (!isCancelled && profile) {
-          if (name == "" && profile.displayName) name = profile.displayName;
-
-          if (name == "" && profile.name) name = profile.name;
-
-          if (description == "" && profile.about)
-            description = shortenDesc(profile.about, truncateLength);
-
-          if (description == "" && profile.bio)
-            description = shortenDesc(profile.bio, truncateLength);
-
-          if (profile.image) image = profile.image;
-        }
-      }
-      if (name == "") name = shortNpub(pubkey);
-      if (image == "") image = "/default/profile.png";
-
-      setName(name);
-      setDescription(description);
-      setImage(image);
-    };
-
-    if (profile) {
-      let name = profile.displayName ?? "";
-      if (name == "") {
-        name = profile.name ?? "";
-      }
-      const desc = shortenDesc(profile.about ?? "", truncateLength);
-      setName(name);
-      setDescription(description);
-      setImage(profile.image ?? "");
-    } else {
-      if (pubkey != "") {
-        getProfile(pubkey);
-      }
+    let name = profile.displayName ?? "";
+    if (name == "") {
+      name = profile.name ?? "";
     }
+    let desc = shortenDesc(profile.about ?? "", truncateLength);
+    if (desc == "") desc = shortenDesc(profile.bio ?? "", truncateLength);
+    if (desc == "") desc = shortNpub(profile.publickey);
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [pubkey, nostrContext, truncateLength]);
+    setName(name);
+    setDescription(desc);
+    setImage(profile.image ?? "/default/profile.png");
+  }, [profile, truncateLength]);
 
   return (
     <Card variant="outlined" sx={{ ...defaultSx, ...sx }}>

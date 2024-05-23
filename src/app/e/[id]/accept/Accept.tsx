@@ -2,13 +2,14 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
 import { parseEventTags } from "@/app/utils/parseEvent";
-
+import { SessionState } from "@/context/SessionHelper";
 import { BadgeAwardedRow } from "@/app/components/BadgeAwardedRow";
 import { BadgeRowSmall } from "@/app/components/BadgeRowSmall";
 import { CardTitle } from "@/app/components/items/CardHeadings";
 import { NostrEvent } from "@/data/ndk-lite";
 import { Badge } from "@/data/badgeLib";
 import { Sign } from "./Sign";
+import { ContextSwitch } from "./ContextSwitch";
 
 export const Accept = (props: {
   id: string;
@@ -19,8 +20,9 @@ export const Accept = (props: {
     badge: Badge;
     awardData?: { [key: string]: string } | undefined;
   }[];
+  sessionState: SessionState;
 }) => {
-  const { id, type, pubkey, nostrEvent, badgeItems } = props;
+  const { id, type, pubkey, nostrEvent, badgeItems, sessionState } = props;
   const recordTags = parseEventTags(nostrEvent);
 
   let name = "";
@@ -32,17 +34,6 @@ export const Accept = (props: {
   if (recordTags["description"]) description = recordTags["description"][0];
   if (recordTags["image"]) image = recordTags["image"][0];
   if (recordTags["thumb"]) thumb = recordTags["thumb"][0];
-
-  const getTitle = (type: string) => {
-    switch (type) {
-      case "BADGE":
-        return "Ready to Issue";
-      case "GROUP":
-        return "Ready to Issue";
-      default:
-        return "Approved";
-    }
-  };
 
   const getHeader = (type: string) => {
     switch (type) {
@@ -77,20 +68,14 @@ export const Accept = (props: {
     }
   };
 
-  const title = getTitle(type);
   const header = getHeader(type);
   const instructions = getInstructions(type, pubkey != "");
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
-      <Box>
-        <CardTitle>{title}</CardTitle>
-      </Box>
-
       <Box
         width="100%"
         sx={{
-          mt: 2,
           p: 1,
           display: "flex",
           flexDirection: "column",
@@ -123,10 +108,7 @@ export const Accept = (props: {
           </Stack>
         )}
       </Box>
-
-      <Box pt={2} pb={3} width="100%">
-        <Sign header={header} instructions={instructions} reqPubkey={pubkey} />
-      </Box>
+      <ContextSwitch />
     </Box>
   );
 };
