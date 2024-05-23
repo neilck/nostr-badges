@@ -10,6 +10,7 @@ export interface GoogleButtonProps {
 }
 
 export const GoogleButton = (props: GoogleButtonProps) => {
+  const { disabled } = props;
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
@@ -32,7 +33,14 @@ export const GoogleButton = (props: GoogleButtonProps) => {
         height: "46px",
       }}
     >
-      {isHovered ? (
+      {disabled ? (
+        <Image
+          src="/btn_google_signin_dark_disabled_web.png"
+          width={191}
+          height={46}
+          alt="Hovered Image"
+        />
+      ) : isHovered ? (
         <Image
           src="/btn_google_signin_dark_focus_web.png"
           width={191}
