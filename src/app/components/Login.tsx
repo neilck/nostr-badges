@@ -60,8 +60,11 @@ const onNostrClick = async () => {
   // @ts-ignore Error in NDK global interface declaration
   const signedEvent = await window.nostr?.signEvent(event).catch((error) => {
     loginDebug("Sign event error: %o", error);
-    return;
   });
+
+  if (!signedEvent) {
+    return;
+  }
 
   loginDebug("signedEvent: %o", signedEvent);
 
