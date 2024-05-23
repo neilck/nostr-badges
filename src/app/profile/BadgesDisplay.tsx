@@ -67,7 +67,7 @@ export const BadgesDisplay = ({
         const formatted = created.toDate().toLocaleString();
         const lines = objectToKeyValueArray(badgeAward);
         return (
-          <Card>
+          <Card key={id}>
             <BadgeAwardItem id={id} badgeAward={badgeAward} badge={badge} />
           </Card>
         );
