@@ -1,3 +1,4 @@
+import { FieldValue } from "firebase/firestore";
 import {
   SaveResult,
   AddResult,
@@ -6,6 +7,7 @@ import {
   saveItem,
   deleteItem,
   addItem,
+  loadPubkeyItems,
 } from "./firestoreLib";
 
 export enum BadgeAwardType {
@@ -14,12 +16,14 @@ export enum BadgeAwardType {
 }
 
 export type BadgeAward = {
+  created: FieldValue;
   uid: string; // publisher uid
   badge: string; // badge id
   awardedTo: string; // awardee uid
   publickey: string;
   type: BadgeAwardType;
   event: string;
+  data?: object;
 };
 
 // loads badge awards by publisher
@@ -28,6 +32,14 @@ export const loadBadgeAwards = async (
   colPath: string = "badgeawards"
 ): Promise<Record<string, BadgeAward>> => {
   return loadItems(uid, colPath, true);
+};
+
+// loads badge awards by publisher
+export const loadBadgeAwardsByPubkey = async (
+  publickey: string,
+  colPath: string = "badgeawards"
+): Promise<Record<string, BadgeAward>> => {
+  return loadPubkeyItems(publickey, colPath, true);
 };
 
 // load badge award by id
@@ -49,20 +61,6 @@ export const saveBadgeAward = async (
     colPath
   );
   return saveResult;
-
-  // TODO: create badge award event if awardee not anonymous
-  // const functions = getFunctions();
-  // const createBadgeAwardEvent = httpsCallable(functions, "createBadgeAwardEvent");
-  //   const createBadgeAwardResult = await createBadgeAwardEvent({
-  //     badgeId: docId,
-  //     badgeAward: badgeAward,
-  //   });
-
-  //   // @ts-ignore
-  //   const { naddr, addressPointer, event, attestation } = createBadgeResult.data;
-  //   saveResult.event = event;
-  //   saveResult.attestation = attestation;
-  //   return saveResult;
 };
 
 export const addBadgeAward = async (
@@ -72,18 +70,6 @@ export const addBadgeAward = async (
   const addResult: AddResult = await addItem<BadgeAward>(badgeAward, colPath);
 
   return addResult;
-  // TODO: add badge award event if awardee is not anonymous
-  //   const functions = getFunctions();
-
-  //   const createBadgeAwardEvent = httpsCallable(functions, "createBadgeAwardEvent");
-  //   const createBadgeResult = await createBadgeAwardEvent({
-  //     badgeId: addResult.id,
-  //     badgeAward: badgeAward,
-  //   });
-
-  //   // @ts-ignore
-  //   const { naddr, addressPointer, event } = createBadgeResult.data;
-  //   addResult.event = event;
 };
 
 export const deleteBadgeAward = async (
