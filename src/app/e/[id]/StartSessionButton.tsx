@@ -51,15 +51,12 @@ export const StartSessionButton = (props: {
         if (isGroup) {
           setButtonLabel("Join Group");
           setDisabled(false);
+          break;
         } else {
           setButtonLabel(awardedLabel);
           setDisabled(true);
-          sessionContext.redirectToLogin(naddr);
-          return;
+          break;
         }
-      case SessionState.Awarded:
-        sessionContext.redirectToLogin(naddr);
-        return;
     }
   }, [
     sessionState,
@@ -80,9 +77,6 @@ export const StartSessionButton = (props: {
 
   const onClick = async () => {
     if (isGroup) {
-      // button only enabled after all badges awarded
-      // manual click to advance
-      sessionContext.redirectToLogin(naddr);
     }
   };
 

@@ -71,7 +71,6 @@ const SessionContext = createContext<
         params: CreateSessionParams
       ) => Promise<CreateSessionResult>;
       resumeSession: (naddr: string) => Promise<boolean>;
-      redirectToLogin: (naddr: string) => void;
       changePubkey: (pubkey: string, pubkeySource: string) => Promise<boolean>;
       createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
       getSignedEvents: () => Promise<NostrEvent[]>;
@@ -194,15 +193,6 @@ function SessionProvider(props: SessionProviderProps) {
     dispatch({ type: "setIsUpdating", isUpdating: false });
   };
 
-  const redirectToLogin = (naddr: string) => {
-    if (state.sessionId) {
-      const searchParams = new URLSearchParams();
-      searchParams.set("session", state.sessionId);
-      const updatedURL = `${getURL}/e/${naddr}/accept?${searchParams.toString()}`;
-      router.push(updatedURL);
-    }
-  };
-
   const changePubkey = async (pubkey: string, pubkeySource: string) => {
     if (state.sessionId) {
       const result = await changeSessionPubkey(
@@ -311,7 +301,6 @@ function SessionProvider(props: SessionProviderProps) {
     getSessionState: getSessionState,
     startSession: startSession,
     resumeSession: resumeSession,
-    redirectToLogin: redirectToLogin,
     changePubkey: changePubkey,
     createBadgeAwards: createBadgeAwards,
     getSignedEvents: getSignedEvents,

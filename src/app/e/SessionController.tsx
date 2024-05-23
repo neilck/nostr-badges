@@ -8,9 +8,7 @@ import {
   usePathname,
 } from "next/navigation";
 import { useSessionContext } from "@/context/SessionContext";
-
-const PATH_ACCEPT = "/accept";
-const PATH_AWARDED = "/awarded";
+import { SessionState } from "@/context/SessionHelper";
 
 export const SessionController = (props: {
   badgeId?: string;
@@ -29,8 +27,8 @@ export const SessionController = (props: {
   let pubkey = searchParams.get("pubkey") ?? undefined;
 
   const startUrl = `/e/${naddr}`;
-  const awardedUrl = `/e/${naddr}/awarded`;
   const [acceptUrl, setAcceptUrl] = useState("");
+  const [awardedUrl, setAwardedUrl] = useState("");
 
   console.log({
     badgeId,
@@ -63,7 +61,7 @@ export const SessionController = (props: {
 
   const init = async () => {
     let exists = false;
-    const sessionId = sessionStorage.getItem(naddr);
+    let sessionId = sessionStorage.getItem(naddr);
     if (sessionId) {
       exists = await sessionContext.resumeSession(sessionId);
     }
@@ -79,15 +77,36 @@ export const SessionController = (props: {
         if (result) {
           // save session Id to sessionStorage
           sessionStorage.setItem(naddr, result.sessionId);
+          sessionId = result.sessionId;
         }
       }
     }
 
     const sParams = new URLSearchParams();
-    sParams.set("session", sessionContext.state.sessionId ?? "error");
-    const acceptUrl = `/e/${naddr}/accept?${searchParams.toString()}`;
-    setAcceptUrl(acceptUrl);
+    sParams.set("session", sessionId ?? "error");
+    setAcceptUrl(`/e/${naddr}/accept?${sParams.toString()}`);
+    setAwardedUrl(`/e/${naddr}/awarded?${sParams.toString()}`);
   };
+
+  useEffect(() => {
+    const state = sessionContext.getSessionState();
+    switch (state) {
+      case SessionState.ReadyToAward: {
+        if (!pathname.startsWith(acceptUrl)) {
+          console.log(`SessionController push ${acceptUrl}`);
+          router.push(acceptUrl);
+          break;
+        }
+      }
+      case SessionState.Awarded: {
+        if (!pathname.startsWith(awardedUrl)) {
+          console.log(`SessionController push ${awardedUrl}`);
+          router.push(awardedUrl);
+        }
+      }
+    }
+    console.log(`SessionState: ${state}`);
+  }, [sessionContext.state]);
 
   // Since there's no UI to return, you can return null
   return null;
