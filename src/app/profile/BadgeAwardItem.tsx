@@ -50,8 +50,12 @@ export const BadgeAwardItem = ({
           {formatted}
         </Typography>
         {dataLines.length > 1 &&
-          dataLines.map((line) => (
-            <Typography variant="body2" sx={{ overflowWrap: "break-word" }}>
+          dataLines.map((line, index) => (
+            <Typography
+              key={index}
+              variant="body2"
+              sx={{ overflowWrap: "break-word" }}
+            >
               {line}
             </Typography>
           ))}
