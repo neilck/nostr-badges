@@ -1,22 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import theme from "../ThemeRegistry/theme";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
-export const GetBadgeButton = (props: { buttonLabel: string; url: string }) => {
+export const PrimaryButton = (props: { buttonLabel: string; url: string }) => {
   const { buttonLabel, url } = props;
-  const router = useRouter();
-  const onClick = async () => {
-    router.push(url);
-  };
 
   return (
     <Button
-      onClick={onClick}
       variant="contained"
       color="primary"
+      href={url}
       sx={{
         width: "80%",
         color: theme.palette.grey[200],

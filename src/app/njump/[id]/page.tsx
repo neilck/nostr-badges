@@ -7,7 +7,7 @@ import { NostrEvent } from "@/data/ndk-lite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ViewBadgeEvent } from "@/app/components/Events/ViewBadgeEvent";
-import { GetBadgeButton } from "@/app/components/Events/GetBadgeButton";
+import { PrimaryButton } from "@/app/components/Events/PrimaryButton";
 import { parseEventTags } from "../../utils/parseEvent";
 
 type Props = {
@@ -130,7 +130,7 @@ export default async function Njump({
     <>
       {isBadge && (
         <ViewBadgeEvent id={id} naddr={naddr} e={nostrEvent!} isGroup={isGroup}>
-          <GetBadgeButton
+          <PrimaryButton
             buttonLabel={isGroup ? "Apply" : "Get Badge"}
             url={url}
           />
