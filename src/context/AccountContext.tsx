@@ -49,6 +49,7 @@ const AccountContext = createContext<
       state: State;
       currentProfile: Profile;
       dispatch: Dispatch;
+      selectCurrentProfile: (pubkey: string) => Profile | undefined;
       setCurrentProfile: (profile: Profile) => void;
       saveProfile: (profile: Profile) => Promise<{
         success: boolean;
@@ -182,6 +183,15 @@ export const AccountProvider = (props: AccountProviderProps) => {
   };
 
   /********** context functions **********/
+  const selectCurrentProfile = (pubkey: string) => {
+    const profiles = state.profiles;
+    if (profiles && profiles.hasOwnProperty(pubkey)) {
+      setCurrentProfileInternal(profiles[pubkey]);
+      return profiles[pubkey];
+    }
+
+    return undefined;
+  };
 
   const setCurrentProfile = async (profile: Profile) => {
     addProfileInternal(profile);
@@ -321,6 +331,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
     state,
     dispatch,
     currentProfile,
+    selectCurrentProfile,
     setCurrentProfile,
     saveProfile,
     signOut,
