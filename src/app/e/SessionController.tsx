@@ -30,18 +30,6 @@ export const SessionController = (props: {
   const [acceptUrl, setAcceptUrl] = useState("");
   const [awardedUrl, setAwardedUrl] = useState("");
 
-  console.log({
-    badgeId,
-    isGroup,
-    naddr,
-    state,
-    pubkey,
-    pathname,
-    startUrl,
-    acceptUrl,
-    awardedUrl,
-  });
-
   const effectRan = useRef(false);
 
   useEffect(() => {
@@ -93,19 +81,16 @@ export const SessionController = (props: {
     switch (state) {
       case SessionState.ReadyToAward: {
         if (!pathname.startsWith(acceptUrl)) {
-          console.log(`SessionController push ${acceptUrl}`);
           router.push(acceptUrl);
           break;
         }
       }
       case SessionState.Awarded: {
         if (!pathname.startsWith(awardedUrl)) {
-          console.log(`SessionController push ${awardedUrl}`);
           router.push(awardedUrl);
         }
       }
     }
-    console.log(`SessionState: ${state}`);
   }, [sessionContext.state]);
 
   // Since there's no UI to return, you can return null

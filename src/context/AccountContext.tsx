@@ -99,7 +99,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
 
   useEffect(() => {
     nostrContext.init(currentProfile);
-    console.log(`useEffect currentProfile ${JSON.stringify(currentProfile)}`);
   }, [currentProfile]);
 
   /********** internal functions **********/
@@ -195,7 +194,6 @@ export const AccountProvider = (props: AccountProviderProps) => {
 
   /********** context functions **********/
   const selectCurrentProfile = (pubkey: string) => {
-    console.log(`selectcurrentProfile called ${pubkey}`);
     const profiles = state.profiles;
     if (profiles && profiles.hasOwnProperty(pubkey)) {
       localStorage.setItem("currentPubkey", pubkey);

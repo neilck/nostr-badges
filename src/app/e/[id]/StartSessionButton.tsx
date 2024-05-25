@@ -37,7 +37,6 @@ export const StartSessionButton = (props: {
   useEffect(() => {
     setIsLoading(sessionState == SessionState.Initial);
 
-    console.log("SessionState " + sessionState);
     switch (sessionState) {
       case SessionState.Initial:
         setButtonLabel(defaultLabel);

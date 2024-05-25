@@ -88,8 +88,6 @@ export const ContextSwitch = () => {
     }
   }, [stage]);
 
-  console.log(`pubkeyverified: ${pubkeyVerified.toString()} Stage: ${stage}`);
-
   const onSignIn = (profile: Profile, source: PubkeySourceType) => {
     const pubkey = profile.publickey;
     sessionContext.changePubkey(pubkey, pubkeySource);

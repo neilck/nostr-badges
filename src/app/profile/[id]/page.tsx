@@ -8,8 +8,6 @@ export default function ProfileIdPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const accountContext = useAccountContext();
   const profiles = accountContext.state.profiles;
-  console.log(`profiles ${JSON.stringify(profiles)}`);
-  console.log(`id ${id}`);
 
   useEffect(() => {
     if (profiles && profiles.hasOwnProperty(id)) {

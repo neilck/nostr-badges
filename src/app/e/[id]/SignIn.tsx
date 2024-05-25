@@ -89,7 +89,6 @@ export const SignIn = (props: {
   }, [profiles]);
 
   useEffect(() => {
-    console.log(`useEffect() [pubkey]: ${pubkey}`);
     if (pubkey == "") {
       const profile = getEmptyProfile();
       profile.publickey = pubkey;
@@ -99,11 +98,7 @@ export const SignIn = (props: {
 
     if (profiles) {
       const pubkeys = Object.keys(profiles);
-      console.log(`useEffect() [pubkey]: pubkeys ${JSON.stringify(pubkeys)}`);
       if (pubkeys.includes(pubkey)) {
-        console.log(
-          `useEffect() [pubkey]: setProfile ${JSON.stringify(profiles[pubkey])}`
-        );
         setProfile(profiles[pubkey]);
         return;
       }
@@ -186,8 +181,6 @@ export const SignIn = (props: {
     });
     const userCredential = await signInWithPopup(auth, provider).catch(
       (error) => {
-        // swallow error
-        console.log("google sign-in cancelled");
         setDisabled(false);
         return;
       }

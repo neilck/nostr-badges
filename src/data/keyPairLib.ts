@@ -28,7 +28,6 @@ export const getPrivateKey = async (publickey: string) => {
     const keypair = item as KeyPair;
     return keypair.privatekey;
   } catch (error) {
-    console.log(error);
     return "";
   }
 };
@@ -44,7 +43,6 @@ export const savePrivateKey = async (privatekey: string) => {
     await saveItem(publickey, keypair, "keypairs");
     return keypair;
   } catch (error) {
-    console.log(error);
     return undefined;
   }
 };

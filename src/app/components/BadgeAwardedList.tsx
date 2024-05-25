@@ -23,7 +23,7 @@ type Item = {
 
 export type OnBadgeSelectedHandler = (url: string) => void;
 
-export function renderBadge(item: Item, handler: OnBadgeSelectedHandler) {
+export function renderBadge(item: Item) {
   const { badge, isAwarded, url } = item;
   const image = badge.thumbnail != "" ? badge.thumbnail : badge.image;
 
@@ -146,10 +146,6 @@ export const BadgeAwardedList = (props: {}) => {
     }
   }, [sessionContext.state.isUpdating]);
 
-  const handleClick: OnBadgeSelectedHandler = (url: string) => {
-    console.log("Redirecting to : " + url);
-  };
-
   return (
     <Stack
       direction="column"
@@ -161,9 +157,7 @@ export const BadgeAwardedList = (props: {}) => {
       {isLoading && <CircularProgress />}
 
       {!isLoading &&
-        items.map((item) => (
-          <div key={item.docId}>{renderBadge(item, handleClick)}</div>
-        ))}
+        items.map((item) => <div key={item.docId}>{renderBadge(item)}</div>)}
       {!isLoading && (isUpdating || timerRunning) && (
         <Box
           display="flex"
