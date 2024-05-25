@@ -93,7 +93,7 @@ export const AkaAppBar = ({
   };
 
   const handleProfileClick = (profile: Profile) => {
-    accountContext.setCurrentProfile(profile);
+    accountContext.selectCurrentProfile(profile.publickey);
     handleClose2();
   };
 

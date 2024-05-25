@@ -157,35 +157,48 @@ export const AccountProvider = (props: AccountProviderProps) => {
       profiles = await loadProfilesInternal(account.uid);
     }
 
-    let current: Profile | undefined = undefined;
-    const pubkeys = Object.keys(profiles);
-    if (currentPubkey != "" && pubkeys.includes(currentPubkey)) {
-      current = profiles[currentPubkey];
-      setCurrentProfileInternal(current);
-    } else {
-      // set default profile
-      if (Object.keys(profiles).length > 0) {
-        const key = Object.keys(profiles)[0];
-        current = profiles[key];
-        contextDebug("settting profile " + JSON.stringify(current));
-        setCurrentProfileInternal(current);
+    if (currentPubkey == "") {
+      // if no pubkey sepecified, try load from session
+      const sessionPubkey = localStorage.getItem("currentPubkey");
+      if (sessionPubkey) {
+        currentPubkey = sessionPubkey;
       }
     }
 
-    // check for profile updates
-    if (isNew && current) {
-      const result = await updateProfileFromRelays(current);
-      if (result && result.updated) {
-        fsSaveProfile(result.profile);
-        setCurrentProfile(result.profile);
+    // dicard pubkey if not in profiles
+    const pubkeys = Object.keys(profiles);
+    if (!pubkeys.includes(currentPubkey)) {
+      currentPubkey = "";
+    }
+
+    // fallback to first profile
+    if (currentPubkey == "" && Object.keys(profiles).length > 0) {
+      currentPubkey = Object.keys(profiles)[0];
+    }
+
+    // remember pubkey
+    if (currentPubkey != "") {
+      localStorage.setItem("currentPubkey", currentPubkey);
+      const currentProfile = profiles[currentPubkey];
+      setCurrentProfileInternal(currentProfile);
+
+      // check for profile updates
+      if (isNew) {
+        const result = await updateProfileFromRelays(currentProfile);
+        if (result && result.updated) {
+          fsSaveProfile(result.profile);
+          setCurrentProfile(result.profile);
+        }
       }
     }
   };
 
   /********** context functions **********/
   const selectCurrentProfile = (pubkey: string) => {
+    console.log(`selectcurrentProfile called ${pubkey}`);
     const profiles = state.profiles;
     if (profiles && profiles.hasOwnProperty(pubkey)) {
+      localStorage.setItem("currentPubkey", pubkey);
       setCurrentProfileInternal(profiles[pubkey]);
       return profiles[pubkey];
     }
@@ -194,6 +207,7 @@ export const AccountProvider = (props: AccountProviderProps) => {
   };
 
   const setCurrentProfile = async (profile: Profile) => {
+    localStorage.setItem("currentPubkey", profile.publickey);
     addProfileInternal(profile);
     setCurrentProfileInternal(profile);
   };
