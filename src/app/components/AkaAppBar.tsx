@@ -95,6 +95,7 @@ export const AkaAppBar = ({
   const handleProfileClick = (profile: Profile) => {
     accountContext.selectCurrentProfile(profile.publickey);
     handleClose2();
+    router.push("/profile");
   };
 
   const handleClickLogout = () => {
