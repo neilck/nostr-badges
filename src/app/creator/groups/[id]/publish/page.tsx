@@ -18,11 +18,9 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { EditCardFrame } from "@/app/components/EditCardFrame";
-import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { BadgeStatus } from "@/app/components/BadgeStatus";
 import { ViewRawEvent } from "@/app/components/ViewRawEvent";
 import { PrimaryButton } from "@/app/components/items/PrimaryButton";
-import { NostrSnackbar } from "@/app/components/items/NostrSnackbar";
 
 export default function PublishGroup({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -94,7 +92,6 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
       instructions="Re-publish group badge to your configured relays.."
       docLink="help-pages/badge-publish"
     >
-      <NostrSnackbar />
       <Stack
         direction="column"
         alignItems="center"

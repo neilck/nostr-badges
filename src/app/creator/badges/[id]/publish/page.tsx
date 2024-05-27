@@ -25,6 +25,7 @@ import { BadgeStatus } from "@/app/components/BadgeStatus";
 import { ViewRawEvent } from "@/app/components/ViewRawEvent";
 import { PrimaryButton } from "@/app/components/items/PrimaryButton";
 import { NostrSnackbar } from "@/app/components/items/NostrSnackbar";
+import { ProfileSnackbar } from "@/app/components/items/ProfileSnackbar";
 
 export default function PublishPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -99,6 +100,7 @@ export default function PublishPage({ params }: { params: { id: string } }) {
       docLink="help-pages/badge-publish"
     >
       <NostrSnackbar />
+      <ProfileSnackbar />
       <Stack
         direction="column"
         alignItems="center"
