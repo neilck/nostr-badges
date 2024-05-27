@@ -160,16 +160,21 @@ function NostrProvider({ children }: NostrProviderProps) {
     about: string;
   }) => {
     const user = _ndk.getUser({ pubkey: publickey });
-    const profile = await user.fetchProfile();
+    await user.fetchProfile();
 
-    if (profile == null) return;
+    if (!user.profile) {
+      contextDebug(`no profile found for contextDebug`);
+      return;
+    }
 
-    profile.name = name;
-    profile.displayName = displayName;
-    profile.image = image;
-    profile.about = about;
-
-    return user.publish();
+    if (user.profile) {
+      user.profile.name = name;
+      user.profile.displayName = displayName;
+      user.profile.image = image;
+      user.profile.about = about;
+      contextDebug(`publishing profile for ${publickey}`);
+      return user.publish();
+    }
   };
 
   const publish = (
@@ -243,6 +248,7 @@ function NostrProvider({ children }: NostrProviderProps) {
           const result = await relaySet.publish(ndkEvent, 10000);
           publishedCount = result.size;
         } catch (error) {
+          contextDebug(error);
           const errorStr =
             typeof error == "string" ? error : JSON.stringify(error);
           contextDebug(`error on publish: ${errorStr}`);
