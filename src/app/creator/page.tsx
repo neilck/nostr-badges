@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAccountContext } from "@/context/AccountContext";
 import theme from "@/app/components/ThemeRegistry/theme";
 import Box from "@mui/material/Box";
@@ -13,6 +14,20 @@ import { CardHeading, CardSubHeading } from "../components/items/CardHeadings";
 export default function CreatorHome() {
   const accountContext = useAccountContext();
   const profile = accountContext.currentProfile;
+
+  const [showRec, setShowRec] = useState(false);
+
+  useEffect(() => {
+    if (profile.publickey != "") {
+      let hasPrivateKey =
+        profile.hasPrivateKey == undefined ? true : profile.hasPrivateKey;
+      setShowRec(!hasPrivateKey);
+    } else {
+      setShowRec(false);
+    }
+  }, [profile]);
+
+  console.log(`/creator profile ${JSON.stringify(profile)}`);
 
   return (
     <CommonLayout developerMode={true}>
@@ -45,7 +60,7 @@ export default function CreatorHome() {
           </Typography>
           <Typography variant="body1" fontWeight={600}></Typography>
         </Box>
-        {profile.pubkey != "" && !profile.hasPrivateKey && (
+        {showRec && (
           <Box
             sx={{
               mt: 2,
