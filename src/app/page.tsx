@@ -4,6 +4,7 @@ import { Login } from "./components/Login";
 import Grid from "@mui/material/Grid";
 import ThemeRegistry from "./components/ThemeRegistry/ThemeRegistry";
 import { CapIcon } from "./components/items/CapIcon";
+import { useEffect } from "react";
 
 export default function Home() {
   return (
