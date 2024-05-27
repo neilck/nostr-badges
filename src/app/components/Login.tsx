@@ -130,9 +130,6 @@ export const Login = () => {
             signOut();
             const result = await onGoogleClick();
             setSigningIn(false);
-            if (result) {
-              router.push("/creator");
-            }
           }}
           disabled={signingIn}
         />
@@ -144,9 +141,6 @@ export const Login = () => {
             signOut();
             dispatch({ type: "setLoading", loading: true });
             const result = await onNostrClick();
-            if (result) {
-              router.push("/creator");
-            }
             setSigningIn(false);
           }}
           disabled={signingIn}
