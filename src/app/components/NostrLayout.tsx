@@ -12,7 +12,6 @@ import { NavMenu } from "./NavMenu";
 import { Tab, TabNav } from "@/app/components/TabNav";
 
 const tabs: Tab[] = [
-  { name: "ISSUER KEY", path: "/creator/developer/keypair" },
   { name: "RELAYS", path: "/creator/developer/relays" },
   { name: "API KEY", path: "/creator/developer/apikey" },
 ];

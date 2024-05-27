@@ -8,7 +8,6 @@ import {
   useRef,
   useCallback,
 } from "react";
-
 import NDK, {
   NDKUserProfile,
   NDKEvent,
@@ -191,6 +190,28 @@ function NostrProvider({ children }: NostrProviderProps) {
       relays: string[],
       callback?: PublishCallback
     ) => {
+      if (!event.sig || event.sig == "") {
+        if (callback) {
+          error = "event not signed";
+          callback(publishedCount, relayCount, error);
+        }
+        if (callbackRef.current) {
+          callbackRef.current(publishedCount, relayCount, error);
+        }
+        return;
+      }
+
+      if (!event.kind || event.kind == -1) {
+        if (callback) {
+          error = "event kind not set";
+          callback(publishedCount, relayCount, error);
+        }
+        if (callbackRef.current) {
+          callbackRef.current(publishedCount, relayCount, error);
+        }
+        return;
+      }
+
       console.log(`waitPublish typeof callback ${typeof callback}`);
       const relaySet = NDKRelaySet.fromRelayUrls(relays, _ndk);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNostrContext } from "@/context/NostrContext";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
@@ -56,7 +56,7 @@ export const NostrSnackbar = () => {
         severity={error != "" ? "error" : "success"}
         sx={{ width: "100%" }}
       >
-        {error == "" ? message : message}
+        {error == "" ? message : error}
       </Alert>
     </Snackbar>
   );

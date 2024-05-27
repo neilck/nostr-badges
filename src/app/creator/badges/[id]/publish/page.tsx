@@ -59,20 +59,22 @@ export default function PublishPage({ params }: { params: { id: string } }) {
     if (badge) {
       setBadge(badge);
 
-      const event = await loadBadgeEvent(badge.event);
-      if (event) {
-        setEvent(event);
+      if (badge.event != "") {
+        const event = await loadBadgeEvent(badge.event);
+        if (event) {
+          setEvent(event);
 
-        const nostrEvent = toNostrEvent(event);
-        setNostrEvent(nostrEvent);
+          const nostrEvent = toNostrEvent(event);
+          setNostrEvent(nostrEvent);
 
-        const filter: NDKFilter = {
-          authors: [event.pubkey],
-          kinds: [30009],
-          "#d": [badge.identifier],
-        };
+          const filter: NDKFilter = {
+            authors: [event.pubkey],
+            kinds: [30009],
+            "#d": [badge.identifier],
+          };
 
-        setFilter(filter);
+          setFilter(filter);
+        }
       }
     }
   };

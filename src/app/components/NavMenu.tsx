@@ -23,7 +23,7 @@ export const creatorNavItems: NavItem[] = [
   { name: "Hosted Badges", path: "/creator/badges", isSelected: false },
   {
     name: "Nostr Settings",
-    path: "/creator/developer/keypair",
+    path: "/creator/developer/relays",
     isSelected: false,
   },
   { name: "divider", path: "", isSelected: false },
