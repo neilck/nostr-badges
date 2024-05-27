@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSessionContext } from "@/context/SessionContext";
 import { useAccountContext } from "@/context/AccountContext";
-import { useNostrContext } from "@/context/NostrContext";
+import { PublishCallback, useNostrContext } from "@/context/NostrContext";
 
 import { SessionState } from "@/context/SessionHelper";
 import { Profile } from "@/data/profileLib";
@@ -88,6 +88,14 @@ export const ContextSwitch = () => {
     }
   }, [stage]);
 
+  const publishCallback: PublishCallback = (
+    publishedCount: number,
+    relayCount: number,
+    error?: string
+  ) => {
+    setStage("DONE");
+  };
+
   const onSignIn = (profile: Profile, source: PubkeySourceType) => {
     const pubkey = profile.publickey;
     sessionContext.changePubkey(pubkey, pubkeySource);
@@ -108,13 +116,9 @@ export const ContextSwitch = () => {
       relays = relays.concat(getDefaultRelays());
     }
 
-    const promises: Promise<any>[] = [];
     for (let i = 0; i < events.length; i++) {
-      promises.push(nostrContext.publish(events[i], relays));
+      nostrContext.publish(events[i], relays, publishCallback);
     }
-
-    await Promise.all(promises);
-    setStage("DONE");
   };
 
   if (sessionState != SessionState.ReadyToAward) {
@@ -157,22 +161,3 @@ export const ContextSwitch = () => {
     </>
   );
 };
-
-/*
-  <>
-      {stage == "LOADING" && <>loading</>}
-      {stage == "VERIFYING" && (
-        <>
-          <Box pt={2} pb={3} width="100%">
-            <Sign
-              header={header}
-              instructions={instructions}
-              reqPubkey={pubkey}
-            />
-          </Box>
-        </>
-      )}
-      {stage == "ACCEPTING" && <>saving...</>}
-      {stage == "DONE" && <>done...</>}
-    </>
-    */

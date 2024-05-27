@@ -8,7 +8,6 @@ import { BadgeRowSmall } from "@/app/components/BadgeRowSmall";
 import { CardTitle } from "@/app/components/items/CardHeadings";
 import { NostrEvent } from "@/data/ndk-lite";
 import { Badge } from "@/data/badgeLib";
-import { Sign } from "./Sign";
 import { ContextSwitch } from "./ContextSwitch";
 
 export const Accept = (props: {

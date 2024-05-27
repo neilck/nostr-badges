@@ -1,6 +1,6 @@
 import GroupProvider from "@/context/GroupContext";
 import { GroupLayout } from "./GroupLayout";
-
+import { NostrSnackbar } from "@/app/components/items/NostrSnackbar";
 export default function Layout({
   params,
   children,
@@ -10,6 +10,7 @@ export default function Layout({
 }) {
   return (
     <GroupProvider>
+      <NostrSnackbar />
       <GroupLayout id={params.id}>{children}</GroupLayout>
     </GroupProvider>
   );

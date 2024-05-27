@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
 } from "react";
+import { useNostrContext } from "./NostrContext";
 import { useAccountContext } from "./AccountContext";
 import {
   Badge,
@@ -15,7 +16,6 @@ import {
 } from "@/data/badgeLib";
 import { BadgeConfig, loadBadgeConfig } from "@/data/badgeConfigLib";
 import { createBadgeEvent, toNostrEvent } from "@/data/eventLib";
-import { publishEvent } from "@/data/publishEvent";
 
 // <---------- REDUCER ---------->
 type Action =
@@ -77,6 +77,7 @@ function reducer(state: State, action: Action) {
 function BadgeProvider(props: BadgeProviderProps) {
   const { children } = props;
   const accountContext = useAccountContext();
+  const nostrContext = useNostrContext();
 
   const [state, dispatch] = useReducer(reducer, {
     uid: undefined,
@@ -135,7 +136,7 @@ function BadgeProvider(props: BadgeProviderProps) {
             if (account) {
               const relays = accountContext.getRelays();
               // publish event
-              publishEvent(nostrEvent, relays);
+              nostrContext.publish(nostrEvent, relays);
             }
           }
         };

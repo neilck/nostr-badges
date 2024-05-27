@@ -2,6 +2,7 @@
 
 import { useContext, useReducer, createContext, useEffect } from "react";
 import { useAccountContext } from "./AccountContext";
+import { useNostrContext } from "./NostrContext";
 import {
   Group,
   loadGroup as fsLoadGroup,
@@ -10,7 +11,6 @@ import {
 import { loadBadge } from "@/data/badgeLib";
 import { RequiredBadge } from "./RequiredBadge";
 import { createGroupEvent, toNostrEvent } from "@/data/eventLib";
-import { publishEvent } from "@/data/publishEvent";
 
 // <---------- REDUCER ---------->
 type Action =
@@ -58,6 +58,7 @@ function reducer(state: State, action: Action) {
 function GroupProvider(props: GroupProviderProps) {
   const { children } = props;
   const accountContext = useAccountContext();
+  const nostrContext = useNostrContext();
 
   const [state, dispatch] = useReducer(reducer, {
     groupId: null,
@@ -112,7 +113,7 @@ function GroupProvider(props: GroupProviderProps) {
           if (account) {
             const relays = accountContext.getRelays();
             // publish event
-            publishEvent(nostrEvent, relays);
+            nostrContext.publish(nostrEvent, relays);
           }
         }
       };
