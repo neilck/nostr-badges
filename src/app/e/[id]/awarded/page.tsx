@@ -48,8 +48,14 @@ export default async function AwardedPage({
   const event = eventResult.event;
   let profile = getEmptyProfile();
   let lProfile = await loadProfile(session.pubkey);
-  if (lProfile) {
-    profile = lProfile;
+  if (lProfile != null) {
+    const keys = Object.keys(profile);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (Object.hasOwn(lProfile, key)) {
+        profile[key] = lProfile[key];
+      }
+    }
   }
 
   let title = "";
