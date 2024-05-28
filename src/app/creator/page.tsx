@@ -78,16 +78,16 @@ export default function CreatorHome() {
             <CardSubHeading>Create a new profile</CardSubHeading>
 
             <Typography variant="body1" pt={1}>
-              You're logged in using a Nostr signing extension without a saved
-              private key.
+              You&apos;re logged in using a Nostr signing extension without a
+              saved private key.
             </Typography>
             <Typography variant="body1" pt={1}>
               To automatically publish to relays, we recommend creating a
               separate profile for issuing badges and managing groups.
             </Typography>
             <Typography variant="body1" fontWeight={500} pt={1}>
-              To add a new profile slect "Add profile" from top right avatar
-              menu.
+              To add a new profile slect &quot;Add profile&quot; from top right
+              avatar menu.
             </Typography>
             <Typography pt={1}>
               Alternatively, you can choose to{" "}
