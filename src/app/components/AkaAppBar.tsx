@@ -41,9 +41,9 @@ export const AkaAppBar = ({
 
   const signOut = accountContext.signOut;
 
-  let name = "AKA Profiles (beta v0.3.0)";
+  let name = "AKA Profiles (beta v0.4.0)";
   if (developerMode) {
-    name = "Developer Mode (beta v0.3.0)";
+    name = "Developer Mode (beta v0.4.0)";
   }
   let username = profile?.displayName;
   if (!username || username == "") username = profile?.name;
