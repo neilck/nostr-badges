@@ -5,10 +5,19 @@ import Stack from "@mui/material/Stack";
 
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
-import { CreatorNavMenu } from "./NavMenu";
+import { NavMenu } from "./NavMenu";
 import { Footer } from "./Footer";
+import Link from "next/link";
 
-export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
+export const CommonLayout = ({
+  children,
+  developerMode = false,
+  bgColor = theme.palette.background.default,
+}: {
+  children: React.ReactNode;
+  developerMode: boolean;
+  bgColor?: string;
+}) => {
   return (
     <Box
       id="frame"
@@ -20,7 +29,7 @@ export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <Box id="header">
-        <AkaAppBar />
+        <AkaAppBar developerMode={developerMode} />
       </Box>
       <Box
         id="main"
@@ -52,8 +61,10 @@ export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
-              <Profile />
-              <CreatorNavMenu />
+              <Link href="/profile">
+                <Profile />
+              </Link>
+              <NavMenu developerMode={developerMode} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>
@@ -67,7 +78,7 @@ export const CommonLayout = ({ children }: { children: React.ReactNode }) => {
           sx={{
             flexGrow: 1,
             flexShrink: 1,
-            bgcolor: theme.palette.background.default,
+            bgcolor: bgColor,
           }}
         >
           {children}

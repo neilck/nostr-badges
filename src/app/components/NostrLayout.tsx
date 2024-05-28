@@ -4,14 +4,14 @@ import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
 
 import { AkaAppBar } from "@/app/components/AkaAppBar";
 import { Profile } from "@/app/components/Profile";
-import { CreatorNavMenu } from "./NavMenu";
+import { NavMenu } from "./NavMenu";
 import { Tab, TabNav } from "@/app/components/TabNav";
 
 const tabs: Tab[] = [
-  { name: "ISSUER KEY", path: "/creator/developer/keypair" },
   { name: "RELAYS", path: "/creator/developer/relays" },
   { name: "API KEY", path: "/creator/developer/apikey" },
 ];
@@ -28,7 +28,7 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <Box id="header">
-        <AkaAppBar />
+        <AkaAppBar developerMode={true} />
       </Box>
       <Box
         id="main"
@@ -60,8 +60,10 @@ export const NostrLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <Box id="spacer"></Box>
             <Stack id="leftMain" direction="column">
-              <Profile />
-              <CreatorNavMenu />
+              <Link href="/profile">
+                <Profile />
+              </Link>
+              <NavMenu developerMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

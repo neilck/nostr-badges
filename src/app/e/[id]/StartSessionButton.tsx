@@ -4,11 +4,12 @@ import theme from "@/app/components/ThemeRegistry/theme";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 
-import { SessionState, useSessionContext } from "@/context/SessionContext";
-import Link from "next/link";
+import { PubkeySourceType } from "@/data/sessionLib";
+import { Profile, getEmptyProfile } from "@/data/profileLib";
+import { useSessionContext } from "@/context/SessionContext";
+import { SessionState } from "@/context/SessionHelper";
 import { ProfileSmall } from "./ProfileSmall";
 import { PubkeyDialog } from "./PubkeyDialog";
 
@@ -19,20 +20,21 @@ export const StartSessionButton = (props: {
 }) => {
   const { badgeId, naddr, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
+  const sessionState = sessionContext.getSessionState();
 
   const defaultLabel = isGroup ? "Join Group" : "Get Badge";
   const awardedLabel = isGroup ? "Join Group" : "Badge Awarded";
   const instructions = ".";
 
   const [pubkey, setPubkey] = useState("");
+  const [profile, setProfile] = useState(getEmptyProfile());
+  const [source, setSource] = useState<PubkeySourceType>("DIRECT");
   const [isLoading, setIsLoading] = useState(true);
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
   const [disabled, setDisabled] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    const sessionState = sessionContext.state.sessionState;
-
     setIsLoading(sessionState == SessionState.Initial);
 
     switch (sessionState) {
@@ -48,15 +50,15 @@ export const StartSessionButton = (props: {
         if (isGroup) {
           setButtonLabel("Join Group");
           setDisabled(false);
+          break;
         } else {
           setButtonLabel(awardedLabel);
           setDisabled(true);
-          sessionContext.redirectToLogin(naddr);
-          return;
+          break;
         }
     }
   }, [
-    sessionContext.state.sessionState,
+    sessionState,
     awardedLabel,
     defaultLabel,
     isGroup,
@@ -74,9 +76,6 @@ export const StartSessionButton = (props: {
 
   const onClick = async () => {
     if (isGroup) {
-      // button only enabled after all badges awarded
-      // manual click to advance
-      sessionContext.redirectToLogin(naddr);
     }
   };
 
@@ -84,10 +83,18 @@ export const StartSessionButton = (props: {
     setShowDialog(true);
   };
 
-  const handleDialogClose = (pubkey: string) => {
+  const handleDialogClose = (
+    profile: Profile,
+    pubkeySource: PubkeySourceType
+  ) => {
     setShowDialog(false);
-    sessionContext.changePubkey(pubkey);
+
+    const pubkey = profile.publickey;
     setPubkey(pubkey);
+    setProfile(profile);
+    sessionContext.changePubkey(pubkey, pubkeySource);
+
+    setSource(source);
   };
 
   const onSwitchAccount = () => {
@@ -108,14 +115,20 @@ export const StartSessionButton = (props: {
             pr: 1,
           }}
         >
-          <Typography variant="body2" fontWeight={600}>
+          <Typography variant="body2" textAlign="center" fontWeight={600}>
             Click badges above to apply
           </Typography>
         </Box>
       )}
       {pubkey == "" && (
-        <Box display="Flex" flexDirection="row" alignItems="center" pt={0.5}>
-          <Typography variant="body2">Already have an account?</Typography>
+        <Box
+          display="Flex"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="center"
+          pt={0.5}
+        >
+          <Typography variant="body2">Use existing account</Typography>
           <Button variant="text" size="small" onClick={handleLoginClick}>
             <Typography
               variant="body2"
@@ -130,10 +143,10 @@ export const StartSessionButton = (props: {
       )}
       {pubkey != "" && (
         <Box display="flex" flexDirection="column">
-          <Typography variant="body1" fontWeight={600}>
+          <Typography variant="body2" fontWeight={400} pt={1}>
             Applying as
           </Typography>
-          <ProfileSmall pubkey={pubkey} widthOption="wide" />
+          <ProfileSmall profile={profile} widthOption="wide" />
           <Button variant="text" size="small" onClick={onSwitchAccount}>
             switch account...
           </Button>
@@ -144,14 +157,14 @@ export const StartSessionButton = (props: {
           onClick={onClick}
           disabled={disabled}
           variant="contained"
-          color="secondary"
+          color="primary"
           sx={{
             width: "80%",
             color: theme.palette.grey[200],
-            backgroundColor: theme.palette.orange.main,
+            backgroundColor: theme.palette.blue.main,
             "&:hover": {
               color: theme.palette.grey[100],
-              backgroundColor: theme.palette.orange.dark,
+              backgroundColor: theme.palette.blue.dark,
             },
           }}
         >
@@ -165,6 +178,7 @@ export const StartSessionButton = (props: {
         show={showDialog}
         onClose={handleDialogClose}
         pubkey={pubkey}
+        source={source}
       />
     </>
   );

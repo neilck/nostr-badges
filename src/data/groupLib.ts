@@ -2,7 +2,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   AddResult,
   SaveResult,
-  loadItems,
+  loadProfileItems,
   loadItem,
   saveItem,
   deleteItem,
@@ -11,6 +11,7 @@ import {
 
 export type Group = {
   uid: string;
+  publickey: string;
   name: string;
   image: string;
   description: string;
@@ -21,6 +22,7 @@ export type Group = {
 
 const emptyGroup: Group = {
   uid: "",
+  publickey: "",
   name: "",
   image: "",
   description: "",
@@ -35,9 +37,16 @@ export const getEmptyGroup = (): Group => {
 
 export const loadGroups = async (
   uid: string,
+  publickey: string,
   colPath: string = "groups"
 ): Promise<Record<string, Group>> => {
-  const loadedItems = await loadItems<Group>(uid, colPath, true);
+  const loadedItems = await loadProfileItems<Group>(
+    uid,
+    publickey,
+    colPath,
+    true
+  );
+
   const groups: Record<string, Group> = {};
   Object.keys(loadedItems).forEach((key) => {
     let group = getEmptyGroup();

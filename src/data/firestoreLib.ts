@@ -64,14 +64,78 @@ export type AddResult = {
 export const loadItems = async <Type>(
   uid: string,
   colPath: string,
-  orderByCreated?: boolean
+  orderByCreated?: boolean,
+  asc?: boolean
 ): Promise<Record<string, Type>> => {
   const items: Record<string, Type> = {};
   const colRef = collection(db, colPath);
   let q: any = undefined;
   if (orderByCreated != undefined && orderByCreated == true)
-    q = query(colRef, where("uid", "==", uid), orderBy("created", "desc"));
+    q = query(
+      colRef,
+      where("uid", "==", uid),
+      orderBy("created", asc ? "asc" : "desc")
+    );
   else q = query(colRef, where("uid", "==", uid));
+
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.docs.forEach((doc) => {
+    items[doc.id] = doc.data() as Type;
+  });
+  return items;
+};
+
+// must match uid and publickey
+export const loadProfileItems = async <Type>(
+  uid: string,
+  publickey: string,
+  colPath: string,
+  orderByCreated?: boolean,
+  asc?: boolean
+): Promise<Record<string, Type>> => {
+  const items: Record<string, Type> = {};
+  const colRef = collection(db, colPath);
+  let q: any = undefined;
+  if (orderByCreated != undefined && orderByCreated == true)
+    q = query(
+      colRef,
+      where("uid", "==", uid),
+      where("publickey", "==", publickey),
+      orderBy("created", asc ? "asc" : "desc")
+    );
+  else
+    q = query(
+      colRef,
+      where("uid", "==", uid),
+      where("publickey", "==", publickey)
+    );
+
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.docs.forEach((doc) => {
+    items[doc.id] = doc.data() as Type;
+  });
+  return items;
+};
+
+// must match publickey
+export const loadPubkeyItems = async <Type>(
+  publickey: string,
+  colPath: string,
+  orderByCreated?: boolean,
+  asc?: boolean
+): Promise<Record<string, Type>> => {
+  const items: Record<string, Type> = {};
+  const colRef = collection(db, colPath);
+  let q: any = undefined;
+  if (orderByCreated != undefined && orderByCreated == true)
+    q = query(
+      colRef,
+      where("publickey", "==", publickey),
+      orderBy("created", asc ? "asc" : "desc")
+    );
+  else q = query(colRef, where("publickey", "==", publickey));
 
   const querySnapshot = await getDocs(q);
 
@@ -142,7 +206,8 @@ export const loadItem = async <Type>(
     return undefined;
   });
   if (docSnap && docSnap.exists()) {
-    contextDebug(`loadItem: ${JSON.stringify(docSnap.data())}`);
+    if (colPath != "keypairs")
+      contextDebug(`loadItem: ${JSON.stringify(docSnap.data())}`);
     return docSnap.data() as Type;
   }
 

@@ -5,6 +5,8 @@ import debug from "debug";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccountContext } from "../../context/AccountContext";
+
+import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
@@ -15,29 +17,43 @@ import Typography from "@mui/material/Typography";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import { CapIcon } from "./items/CapIcon";
-import { auth } from "@/firebase-config";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { NavItem, creatorNavItems } from "./NavMenu";
+import { ProfileRowSmall } from "./ProfileRowSmall";
+import { GoogleAuthProvider } from "firebase/auth";
+import { NavItem, creatorNavItems, userNavItems } from "./NavMenu";
 
-export const AkaAppBar = (props: any) => {
+import { Profile } from "@/data/profileLib";
+
+export const AkaAppBar = ({
+  developerMode = false,
+}: {
+  developerMode: boolean;
+}) => {
   const appBarDebug = debug("aka:AkaAppBar");
   const router = useRouter();
   const accountContext = useAccountContext();
-  const profile = accountContext.state.currentProfile;
 
-  const { loading, account, creatorMode, currentProfile } =
-    accountContext.state;
+  const profile = accountContext.currentProfile;
+  const profiles = accountContext.state.profiles;
+  const navItems = developerMode ? creatorNavItems : userNavItems;
+  const homePath = developerMode ? "/creator" : "/profile";
+
+  const { account } = accountContext.state;
 
   const signOut = accountContext.signOut;
 
-  let name = "AKA Profiles (beta v0.3.0)";
+  let name = "AKA Profiles (beta v0.4.0)";
+  if (developerMode) {
+    name = "Developer Mode (beta v0.4.0)";
+  }
   let username = profile?.displayName;
   if (!username || username == "") username = profile?.name;
   if (!username || username == "") username = account?.uid;
   if (!username || username == "") username = "My Profile";
 
   let iconColor = theme.palette.orange.main;
-  let bgColor = theme.palette.grey[800];
+  let bgColor = developerMode
+    ? theme.palette.blue.dark
+    : theme.palette.grey[800];
 
   const hasAccount = account && account.uid != "";
 
@@ -46,18 +62,40 @@ export const AkaAppBar = (props: any) => {
 
   const homeClicked = () => {
     if (hasAccount) {
-      router.push("/creator");
+      router.push(homePath);
     }
   };
 
   // menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl2, setAnchorEl2] = useState<null | HTMLElement>(null);
+
   const open = Boolean(anchorEl);
+  const open2 = Boolean(anchorEl2);
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+    const id = event.currentTarget.id;
+    if (id == "menu-button") setAnchorEl(event.currentTarget);
+
+    if (id == "profile-button") setAnchorEl2(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleClose2 = () => {
+    setAnchorEl2(null);
+  };
+
+  const handleAddProfile = () => {
+    handleClose2();
+    router.push("/profile/edit/?add=true");
+  };
+
+  const handleProfileClick = (profile: Profile) => {
+    accountContext.selectCurrentProfile(profile.publickey);
+    handleClose2();
+    router.push("/profile");
   };
 
   const handleClickLogout = () => {
@@ -65,10 +103,10 @@ export const AkaAppBar = (props: any) => {
     handleClose();
   };
 
-  const signedInMenuItems = () => {
+  const leftMenuItems = () => {
     return (
       <>
-        {creatorNavItems.map((item: NavItem) =>
+        {navItems.map((item: NavItem) =>
           item.name == "divider" ? (
             <Divider key={"divider"} />
           ) : (
@@ -77,23 +115,41 @@ export const AkaAppBar = (props: any) => {
               onClick={() => {
                 router.push(item.path);
               }}
-              sx={{
-                display: { xs: "flex", sm: "none" },
-              }}
             >
-              {item.name}
+              <Typography variant="subtitle2"> {item.name}</Typography>
             </MenuItem>
           )
         )}
-        {creatorNavItems.length > 0 && (
-          <Divider
-            sx={{
-              display: { xs: "flex", sm: "none" },
-            }}
-          />
-        )}
+      </>
+    );
+  };
 
-        <MenuItem onClick={handleClickLogout}>log out</MenuItem>
+  const RightMenuItems = (props: { profiles: Record<string, Profile> }) => {
+    return (
+      <>
+        {/* Render MenuItem for each profile */}
+        {Object.values(props.profiles).map((profile: Profile) => (
+          <MenuItem
+            key={profile.publickey}
+            onClick={() => handleProfileClick(profile)}
+          >
+            <ProfileRowSmall
+              id={profile.publickey}
+              name={profile.name}
+              displayName={profile.displayName}
+              image={profile.image}
+            />
+          </MenuItem>
+        ))}
+
+        <Divider />
+        <MenuItem key="addprofile" onClick={handleAddProfile}>
+          <Typography variant="subtitle2">Add profile</Typography>
+        </MenuItem>
+
+        <MenuItem key="signout" onClick={handleClickLogout}>
+          <Typography variant="subtitle2">Sign out</Typography>
+        </MenuItem>
       </>
     );
   };
@@ -114,11 +170,52 @@ export const AkaAppBar = (props: any) => {
           pr: "10px",
         }}
       >
-        <Stack direction="row" alignItems="center" columnGap="10px">
+        <Stack direction="row" alignItems="center" columnGap="2px">
+          {hasAccount && (
+            <Box
+              sx={{
+                display: { xs: "flex", sm: "none" },
+              }}
+            >
+              <IconButton
+                size="large"
+                edge="start"
+                id="menu-button"
+                aria-label="leftMenu"
+                aria-controls={open ? "basic-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                onClick={handleClick}
+                sx={{ color: theme.palette.common.white }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="leftMenu"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                disableScrollLock={true}
+                open={open}
+                onClose={handleClose}
+                MenuListProps={{
+                  "aria-labelledby": "menu-button",
+                }}
+              >
+                {leftMenuItems().props.children}
+              </Menu>
+            </Box>
+          )}
           <CapIcon
             fontSize="medium"
             onClick={homeClicked}
-            sx={{ color: iconColor }}
+            sx={{ color: iconColor, mr: "6px" }}
           />
           {/* display at sm and smaller */}
           <Box
@@ -160,25 +257,30 @@ export const AkaAppBar = (props: any) => {
             </Typography>
           </Box>
         </Stack>
-
-        {hasAccount && (
+        {profile && (
           <>
             <IconButton
               size="large"
               edge="start"
-              id="menu-button"
-              aria-label="menu"
-              aria-controls={open ? "basic-menu" : undefined}
+              id="profile-button"
+              aria-label="rightMenu"
+              aria-controls={open2 ? "basic-menu" : undefined}
               aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
+              aria-expanded={open2 ? "true" : undefined}
               onClick={handleClick}
               sx={{ color: theme.palette.common.white }}
             >
-              <MenuIcon />
+              <Avatar
+                src={profile.image}
+                sx={{
+                  width: 34,
+                  height: 34,
+                }}
+              ></Avatar>
             </IconButton>
             <Menu
-              id="menu"
-              anchorEl={anchorEl}
+              id="rightMenu"
+              anchorEl={anchorEl2}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "right",
@@ -188,13 +290,13 @@ export const AkaAppBar = (props: any) => {
                 horizontal: "right",
               }}
               disableScrollLock={true}
-              open={open}
-              onClose={handleClose}
+              open={open2}
+              onClose={handleClose2}
               MenuListProps={{
-                "aria-labelledby": "menu-button",
+                "aria-labelledby": "profile-button",
               }}
             >
-              {signedInMenuItems().props.children}
+              <RightMenuItems profiles={profiles ?? {}} />
             </Menu>
           </>
         )}

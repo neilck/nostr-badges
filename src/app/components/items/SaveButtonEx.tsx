@@ -11,6 +11,7 @@ import SaveIcon from "@mui/icons-material/Save";
 
 export const SaveButtonEx = (props: {
   onClick: () => Promise<{ success: boolean; mesg?: string }>;
+  refId?: string;
   buttonLabel?: string;
   sx?: SxProps<Theme> | undefined;
   disabled?: boolean;
@@ -24,6 +25,14 @@ export const SaveButtonEx = (props: {
   const [showAlert, setShowAlert] = useState(false);
   const [isSaveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [alertMesg, setAlertMesg] = useState<string>("");
+
+  useEffect(() => {
+    setIsDisabled(false);
+    setIsSaving(false);
+    setShowAlert(false);
+    setSaveSuccess(false);
+    setAlertMesg("");
+  }, [props.refId]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     callOnSaving();

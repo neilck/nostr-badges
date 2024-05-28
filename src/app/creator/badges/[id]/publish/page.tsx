@@ -10,18 +10,22 @@ import {
   loadBadgeEvent,
   toNostrEvent,
 } from "@/data/eventLib";
-import { Badge, getEmptyBadge } from "@/data/badgeLib";
 
 import { useAccountContext } from "@/context/AccountContext";
-import { useNostrContext } from "@/context/NostrContext";
+import { PublishCallback, useNostrContext } from "@/context/NostrContext";
 import { useBadgeContext } from "@/context/BadgeContext";
+import { Badge, getEmptyBadge } from "@/data/badgeLib";
+
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+
 import { EditCardFrame } from "@/app/components/EditCardFrame";
-import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { BadgeStatus } from "@/app/components/BadgeStatus";
 import { ViewRawEvent } from "@/app/components/ViewRawEvent";
+import { PrimaryButton } from "@/app/components/items/PrimaryButton";
+import { NostrSnackbar } from "@/app/components/items/NostrSnackbar";
+import { ProfileSnackbar } from "@/app/components/items/ProfileSnackbar";
 
 export default function PublishPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -29,6 +33,7 @@ export default function PublishPage({ params }: { params: { id: string } }) {
   const accountContext = useAccountContext();
   const nostrContext = useNostrContext();
 
+  const [labelDisabled, setLabelDisabled] = useState("");
   const [relays, setRelays] = useState<string[]>([]);
   const [filter, setFilter] = useState<NDKFilter | undefined>(undefined);
   const [badge, setBadge] = useState<Badge>(getEmptyBadge());
@@ -55,28 +60,38 @@ export default function PublishPage({ params }: { params: { id: string } }) {
     if (badge) {
       setBadge(badge);
 
-      const event = await loadBadgeEvent(badge.event);
-      if (event) {
-        setEvent(event);
+      if (badge.event != "") {
+        const event = await loadBadgeEvent(badge.event);
+        if (event) {
+          setEvent(event);
 
-        const nostrEvent = toNostrEvent(event);
-        setNostrEvent(nostrEvent);
+          const nostrEvent = toNostrEvent(event);
+          setNostrEvent(nostrEvent);
 
-        const filter: NDKFilter = {
-          authors: [event.pubkey],
-          kinds: [30009],
-          "#d": [badge.identifier],
-        };
+          const filter: NDKFilter = {
+            authors: [event.pubkey],
+            kinds: [30009],
+            "#d": [badge.identifier],
+          };
 
-        setFilter(filter);
+          setFilter(filter);
+        }
       }
     }
   };
 
+  const publishCallback: PublishCallback = (
+    publishedCount: number,
+    relayCount: number,
+    error?: string
+  ) => {
+    setLabelDisabled("");
+  };
+
   const onSaveClick = async () => {
+    setLabelDisabled("publishing...");
     const relays = accountContext.getRelays();
-    nostrContext.publish(nostrEvent, relays);
-    return { success: true, mesg: "Badge sent to relays" };
+    nostrContext.publish(nostrEvent, relays, publishCallback);
   };
 
   return (
@@ -84,7 +99,16 @@ export default function PublishPage({ params }: { params: { id: string } }) {
       instructions="Re-publish badge to your configured relays.."
       docLink="help-pages/badge-publish"
     >
-      <Stack direction="column" pl={2} pr={2} maxWidth={600} spacing={2}>
+      <NostrSnackbar />
+      <ProfileSnackbar />
+      <Stack
+        direction="column"
+        alignItems="center"
+        pl={2}
+        pr={2}
+        maxWidth={600}
+        spacing={2}
+      >
         <Box>
           <h3>Badge {badge.name}</h3>
         </Box>
@@ -100,7 +124,11 @@ export default function PublishPage({ params }: { params: { id: string } }) {
           />
         </Box>
 
-        <SaveButtonEx onClick={onSaveClick} buttonLabel="Publish" />
+        <PrimaryButton
+          buttonLabel="Publish"
+          disabledLabel={labelDisabled}
+          onClick={onSaveClick}
+        />
         <ViewRawEvent event={event} />
       </Stack>
     </EditCardFrame>

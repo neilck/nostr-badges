@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 
 import { AkaAppBar } from "../../../components/AkaAppBar";
 import { GroupViewSmall } from "../../../components/GroupViewSmall";
-import { CreatorNavMenu } from "../../../components/NavMenu";
+import { NavMenu } from "../../../components/NavMenu";
 import { Tab, TabNav } from "../../../components/TabNav";
 
 const tabsTemplate: Tab[] = [
@@ -63,7 +63,7 @@ export const GroupLayout = (props: {
       }}
     >
       <Box id="header">
-        <AkaAppBar id={id} name={name} image={image} />
+        <AkaAppBar developerMode={true} />
       </Box>
       <Box
         id="main"
@@ -98,7 +98,7 @@ export const GroupLayout = (props: {
               {name && image && (
                 <GroupViewSmall name={name} image={image} event={event} />
               )}
-              <CreatorNavMenu />
+              <NavMenu developerMode={true} />
             </Stack>
             <Divider orientation="vertical" variant="middle" flexItem />
           </Box>

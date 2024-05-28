@@ -2,6 +2,7 @@
 
 import { useRef, ChangeEvent, useState, useEffect } from "react";
 
+import Avatar from "@mui/material/Avatar";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardMedia from "@mui/material/CardMedia";
 import Box from "@mui/material/Box";
@@ -13,10 +14,12 @@ import { Typography } from "@mui/material";
 
 export const ImageUpload2 = (props: {
   url: string;
+  avatar?: boolean;
   onChange?: (file: File) => void;
   onDelete?: () => void;
 }) => {
   let url = props.url;
+  const avatar = props.avatar ?? false;
   const context = useAccountContext();
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
 
@@ -67,7 +70,7 @@ export const ImageUpload2 = (props: {
           justifyContent: "center",
           alignItems: "center",
           width: "100%",
-          border: url != "" ? 1 : 0,
+          border: url != "" && !avatar ? 1 : 0,
           borderColor: grey[300],
         }}
       >
@@ -86,19 +89,33 @@ export const ImageUpload2 = (props: {
                 paddingTop: "100%",
               }}
             >
-              <CardMedia
-                component="img"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-                image={url}
-                alt="badge image"
-              />
+              {!avatar && (
+                <CardMedia
+                  component="img"
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  image={url}
+                  alt="badge image"
+                />
+              )}
+              {avatar && (
+                <Avatar
+                  src={url}
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
+                ></Avatar>
+              )}
             </CardActionArea>
             <Box
               component="button"
@@ -107,6 +124,7 @@ export const ImageUpload2 = (props: {
               }}
               sx={{
                 border: 0,
+                backgroundColor: "transparent",
                 "&:hover": {
                   fontWeight: 800,
                   cursor: "pointer",
@@ -115,7 +133,7 @@ export const ImageUpload2 = (props: {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ color: "blue", "&:hover": { fontWeight: 600 } }}
+                sx={{ pt: 1, color: "blue", "&:hover": { fontWeight: 600 } }}
               >
                 delete
               </Typography>

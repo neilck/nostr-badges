@@ -1,9 +1,10 @@
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+
 import Typography from "@mui/material/Typography";
 import MenuList from "@mui/material/MenuList";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
 
 export interface NavItem {
   name: string;
@@ -11,28 +12,42 @@ export interface NavItem {
   isSelected: boolean;
 }
 
+export const userNavItems: NavItem[] = [
+  { name: "My Profile", path: "/profile", isSelected: false },
+  { name: "divider", path: "", isSelected: false },
+  { name: "Developer Mode", path: "/creator", isSelected: false },
+];
+
 export const creatorNavItems: NavItem[] = [
   { name: "Group Badges", path: "/creator/groups", isSelected: false },
   { name: "Hosted Badges", path: "/creator/badges", isSelected: false },
   {
     name: "Nostr Settings",
-    path: "/creator/developer/keypair",
+    path: "/creator/developer/relays",
     isSelected: false,
   },
+  { name: "divider", path: "", isSelected: false },
+  { name: "Exit Developer Mode", path: "/profile", isSelected: false },
 ];
 
-export const CreatorNavMenu = () => {
+export const NavMenu = ({
+  developerMode = false,
+}: {
+  developerMode: boolean;
+}) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const length = creatorNavItems.map((item) => {
+  const navItems = developerMode ? creatorNavItems : userNavItems;
+
+  const length = navItems.map((item) => {
     item.isSelected = pathname.startsWith(item.path);
   });
 
   return (
     <>
       <MenuList>
-        {creatorNavItems.map((item) =>
+        {navItems.map((item) =>
           item.name == "divider" ? (
             <Divider key={"divider"} />
           ) : (
@@ -44,7 +59,7 @@ export const CreatorNavMenu = () => {
               }}
             >
               <Typography
-                variant="body2"
+                variant="body1"
                 fontWeight={item.isSelected ? 800 : 500}
               >
                 {item.name}

@@ -1,5 +1,7 @@
 import { FieldValue } from "firebase/firestore/lite";
 
+export type PubkeySourceType = "EXTENSION" | "DIRECT" | "AKA";
+
 // <---------- SESSION ---------->
 export type ItemState = {
   owner: string;
@@ -26,6 +28,7 @@ export type Session = {
   itemState: ItemState;
   state: string;
   pubkey: string;
+  pubkeySource: PubkeySourceType;
   requiredGroups?: SessionGroup[];
   requiredBadges?: SessionBadge[];
   lastUpdated?: FieldValue;
@@ -45,6 +48,7 @@ export const getEmptySession = (): Session => {
     },
     state: "",
     pubkey: "",
+    pubkeySource: "DIRECT",
     redirectUrl: "",
   };
 };

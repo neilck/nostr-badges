@@ -12,15 +12,15 @@ import {
 } from "@/data/eventLib";
 import { Group, getEmptyGroup } from "@/data/groupLib";
 import { useAccountContext } from "@/context/AccountContext";
-import { useNostrContext } from "@/context/NostrContext";
+import { PublishCallback, useNostrContext } from "@/context/NostrContext";
 import { useGroupContext } from "@/context/GroupContext";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { EditCardFrame } from "@/app/components/EditCardFrame";
-import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { BadgeStatus } from "@/app/components/BadgeStatus";
 import { ViewRawEvent } from "@/app/components/ViewRawEvent";
+import { PrimaryButton } from "@/app/components/items/PrimaryButton";
 
 export default function PublishGroup({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -28,6 +28,7 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
   const accountContext = useAccountContext();
   const nostrContext = useNostrContext();
 
+  const [labelDisabled, setLabelDisabled] = useState("");
   const [relays, setRelays] = useState<string[]>([]);
   const [filter, setFilter] = useState<NDKFilter | undefined>(undefined);
   const [group, setGroup] = useState<Group>(getEmptyGroup());
@@ -72,10 +73,18 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
     }
   };
 
+  const publishCallback: PublishCallback = (
+    publishedCount: number,
+    relayCount: number,
+    error?: string
+  ) => {
+    setLabelDisabled("");
+  };
+
   const onSaveClick = async () => {
+    setLabelDisabled("publishing...");
     const relays = accountContext.getRelays();
-    nostrContext.publish(nostrEvent, relays);
-    return { success: true, mesg: "Group's badge sent to relays" };
+    nostrContext.publish(nostrEvent, relays, publishCallback);
   };
 
   return (
@@ -83,7 +92,14 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
       instructions="Re-publish group badge to your configured relays.."
       docLink="help-pages/badge-publish"
     >
-      <Stack direction="column" pl={2} pr={2} maxWidth={600} spacing={2}>
+      <Stack
+        direction="column"
+        alignItems="center"
+        pl={2}
+        pr={2}
+        maxWidth={600}
+        spacing={2}
+      >
         <Box>
           <h3>Group {group.name}</h3>
         </Box>
@@ -99,7 +115,11 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
           />
         </Box>
 
-        <SaveButtonEx onClick={onSaveClick} buttonLabel="Publish" />
+        <PrimaryButton
+          buttonLabel="Publish"
+          disabledLabel={labelDisabled}
+          onClick={onSaveClick}
+        />
         <ViewRawEvent event={event} />
       </Stack>
     </EditCardFrame>

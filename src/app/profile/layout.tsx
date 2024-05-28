@@ -1,6 +1,6 @@
 import ThemeRegistry from "@/app/components/ThemeRegistry/ThemeRegistry";
 
-export default function CreatorLayout({
+export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;

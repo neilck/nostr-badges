@@ -25,8 +25,8 @@ import {
 
 export default function Groups() {
   const router = useRouter();
-  const { loading, account, creatorMode, currentProfile } =
-    useAccountContext().state;
+  const { account } = useAccountContext().state;
+  const profile = useAccountContext().currentProfile;
 
   const [groups, setGroups] = useState<Record<string, Group>>({});
   const [selectedGroup, setSelectedGroup] = useState<Group | undefined>(
@@ -39,7 +39,7 @@ export default function Groups() {
   }, [account]);
 
   async function loadGroups(uid: string) {
-    const groups = await fsLoadGroups(uid);
+    const groups = await fsLoadGroups(uid, profile.publickey);
     setGroups(groups);
   }
   const onAddHandler = async (name: string) => {
@@ -49,6 +49,7 @@ export default function Groups() {
     const newGroup = getEmptyGroup();
     newGroup.name = name;
     newGroup.uid = uid;
+    newGroup.publickey = profile.publickey;
     const addResult = await addGroup(newGroup);
     if (addResult.success) {
       loadGroups(account.uid);
@@ -78,7 +79,7 @@ export default function Groups() {
   };
 
   return (
-    <CommonLayout>
+    <CommonLayout developerMode={true}>
       <Box width="auto">
         <Stack direction="column" pt={1} pl={3} maxWidth={600}>
           <CardHeading>Group Badges</CardHeading>

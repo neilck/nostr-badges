@@ -1,48 +1,38 @@
 "use client";
 
-import { useAccountContext } from "@/context/AccountContext";
-import { Session } from "@/data/sessionLib";
-import { getSession } from "@/data/serverActions";
-import { Badge, loadBadge, getEmptyBadge } from "@/data/badgeLib";
-import { Group, loadGroup, getEmptyGroup } from "@/data/groupLib";
-
 import theme from "@/app/components/ThemeRegistry/theme";
+import { useRouter } from "next/navigation";
+import { useAccountContext } from "@/context/AccountContext";
+
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
-import { BadgeView } from "../components/BadgeView";
-import { BadgeAwardedRow } from "../components/BadgeAwardedRow";
+
 import { CommonLayout } from "../components/ComonLayout";
-import { useEffect, useState } from "react";
-import { SaveButtonEx } from "../components/items/SaveButtonEx";
+import { Section } from "./edit/Section";
 
-export default function Profile() {
+import Link from "next/link";
+import { ProfileDisplay } from "./ProfileDisplay";
+import { BadgesDisplay } from "./BadgesDisplay";
+import { Typography } from "@mui/material";
+
+export default function ProfilePage() {
   const accountContext = useAccountContext();
+  const loading = accountContext.state.loading;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [session, setSession] = useState<Session | undefined>(undefined);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [badges, setBadges] = useState<Badge[]>([]);
+  const router = useRouter();
+  const profile = accountContext.currentProfile;
 
-  const onClick = async () => {
-    return { success: true, mesg: "Added to profile" };
+  const handleEdit = (id: string) => {
+    router.push("/profile/edit");
   };
-
   return (
-    <CommonLayout>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "left",
-          rowGap: 2,
-          p: 2,
-          maxWidth: "360px",
-          backgroundColor: theme.palette.grey[100],
-        }}
-      >
-        <Typography variant="h6">Add to Profile</Typography>
-        {isLoading && (
+    <CommonLayout
+      developerMode={false}
+      bgColor={theme.palette.background.default}
+    >
+      {loading && (
+        <Stack maxWidth="800px" minWidth="300px" pt={4} spacing={2}>
           <Box
             sx={{
               display: "flex",
@@ -53,41 +43,27 @@ export default function Profile() {
           >
             <CircularProgress />
           </Box>
-        )}
-        {groups.length > 0 && (
-          <Typography variant="body1" fontWeight={600}>
-            New Group Memberships
-          </Typography>
-        )}
-        {groups.map((group, index) => {
-          return (
-            <BadgeAwardedRow
-              key={`${group.name}-${index.toString()}`}
-              name={group.name}
-              description={group.description}
-              image={group.image}
-              awarded={true}
-            />
-          );
-        })}
-        {badges.length > 0 && (
-          <Typography variant="body1" fontWeight={600}>
-            New Badges
-          </Typography>
-        )}
-        {badges.map((badge, index) => {
-          return (
-            <BadgeAwardedRow
-              key={`${badge.name}-${index.toString()}`}
-              name={badge.name}
-              description={badge.description}
-              image={badge.image}
-              awarded={true}
-            />
-          );
-        })}
-        <SaveButtonEx buttonLabel="Accept" onClick={onClick} />
-      </Box>
+        </Stack>
+      )}
+      {!loading && (
+        <Stack maxWidth="800px" minWidth="300px" pt={4} spacing={2}>
+          <Box p={1}>
+            <Typography variant="h6" pb={1}>
+              Profile
+            </Typography>
+            <Section id="profile" onEdit={handleEdit}>
+              <ProfileDisplay profile={profile} extra={true} />
+            </Section>
+          </Box>
+          <Box p={1}>
+            <Typography variant="h6" pb={1}>
+              Badges
+            </Typography>
+
+            <BadgesDisplay uid={profile.uid} pubkey={profile.publickey} />
+          </Box>
+        </Stack>
+      )}
     </CommonLayout>
   );
 }

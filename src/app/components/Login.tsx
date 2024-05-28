@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import debug from "debug";
 import theme from "@/app/components/ThemeRegistry/theme";
@@ -59,8 +60,11 @@ const onNostrClick = async () => {
   // @ts-ignore Error in NDK global interface declaration
   const signedEvent = await window.nostr?.signEvent(event).catch((error) => {
     loginDebug("Sign event error: %o", error);
-    return;
   });
+
+  if (!signedEvent) {
+    return;
+  }
 
   loginDebug("signedEvent: %o", signedEvent);
 
@@ -90,11 +94,13 @@ const onNostrClick = async () => {
 };
 
 export const Login = () => {
-  const { loading, account, creatorMode } = useAccountContext().state;
+  const { loading } = useAccountContext().state;
   const router = useRouter();
   const signOut = useAccountContext().signOut;
   const dispatch = useAccountContext().dispatch;
   const iconColor = theme.palette.orange.main;
+
+  const [signingIn, setSigningIn] = useState(false);
 
   return (
     <Box
@@ -120,26 +126,24 @@ export const Login = () => {
         </Typography>
         <GoogleButton
           onClick={async () => {
+            setSigningIn(true);
             signOut();
             const result = await onGoogleClick();
-            if (result) {
-              router.push("/creator");
-            }
+            setSigningIn(false);
           }}
-          disabled={loading}
+          disabled={signingIn}
         />
         <Typography variant="body1">or</Typography>
         <Button
           variant="contained"
           onClick={async () => {
+            setSigningIn(true);
             signOut();
             dispatch({ type: "setLoading", loading: true });
             const result = await onNostrClick();
-            if (result) {
-              router.push("/creator");
-            }
+            setSigningIn(false);
           }}
-          disabled={loading}
+          disabled={signingIn}
           sx={{
             backgroundColor: "#8e30eb", // nostr purple
             "&:hover": { backgroundColor: "#a915ff" },
@@ -149,6 +153,11 @@ export const Login = () => {
         >
           Nostr Extension
         </Button>
+        {signingIn && (
+          <Typography variant="body1" fontStyle="italic">
+            signing in...
+          </Typography>
+        )}
       </Stack>
     </Box>
   );

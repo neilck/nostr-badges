@@ -1,29 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import theme from "../ThemeRegistry/theme";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
-export const GetBadgeButton = (props: { buttonLabel: string; url: string }) => {
+export const PrimaryButton = (props: { buttonLabel: string; url: string }) => {
   const { buttonLabel, url } = props;
-  const router = useRouter();
-  const onClick = async () => {
-    router.push(url);
-  };
 
   return (
     <Button
-      onClick={onClick}
       variant="contained"
-      color="secondary"
+      color="primary"
+      href={url}
       sx={{
         width: "80%",
         color: theme.palette.grey[200],
-        backgroundColor: theme.palette.orange.main,
+        backgroundColor: theme.palette.blue.main,
         "&:hover": {
           color: theme.palette.grey[100],
-          backgroundColor: theme.palette.orange.dark,
+          backgroundColor: theme.palette.blue.dark,
         },
       }}
     >
