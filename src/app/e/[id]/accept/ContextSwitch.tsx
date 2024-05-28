@@ -83,7 +83,7 @@ export const ContextSwitch = () => {
   useEffect(() => {
     switch (stage) {
       case "ACCEPTING": {
-        createAndPublishEvents();
+        createAndPublishEvents().then(() => setStage("DONE"));
       }
     }
   }, [stage]);
