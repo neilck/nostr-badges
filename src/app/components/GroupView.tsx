@@ -48,7 +48,9 @@ export const GroupView = (props: { groupId: string; group: Group }) => {
     };
 
     loadBadges(uid);
-    loadEvent(group.event);
+    if (group.event != "") {
+      loadEvent(group.event);
+    }
   }, [uid, groupId, group]);
 
   return (

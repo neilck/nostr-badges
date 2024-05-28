@@ -27,7 +27,9 @@ export const BadgeViewEx = (props: {
       setEvent(event);
     };
 
-    loadEvent(eventId);
+    if (eventId != "") {
+      loadEvent(eventId);
+    }
   }, [eventId]);
 
   return (
