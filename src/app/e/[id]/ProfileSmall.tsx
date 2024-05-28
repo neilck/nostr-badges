@@ -8,7 +8,6 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useNostrContext } from "@/context/NostrContext";
 import { shortenDesc } from "@/app/utils/utils";
 import { useEffect, useState } from "react";
 import { Profile } from "@/data/profileLib";
@@ -28,7 +27,6 @@ const shortNpub = (pubkey: string) => {
 
 export const ProfileSmall = (item: Item) => {
   const { profile, widthOption, sx } = item;
-  const nostrContext = useNostrContext();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
