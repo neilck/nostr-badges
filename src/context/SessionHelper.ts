@@ -4,6 +4,7 @@ import { Session } from "@/data/sessionLib";
  * Initial: session undefined
  * InProgress: not ready to award
  * ReadyToAward: all requirements met, but not yet awarded
+ * PubkeyVerified: public key has been verified
  * Awarded: all badges / groups awarded
  */
 
@@ -11,11 +12,24 @@ export enum SessionState {
   Initial = "Initial",
   InProgress = "InProgress",
   ReadyToAward = "ReadyToAward",
+  PubkeyVerified = "PubkeyVerified",
   Awarded = "Awarded",
 }
 
 const awarded = (session: Session) => {
   return session.itemState.prevAward;
+};
+
+const pubkeyVerified = (session: Session) => {
+  if (!readyToAward(session)) return false;
+
+  if (
+    session.pubkey != "" &&
+    (session.pubkeySource == "AKA" || session.pubkeySource == "EXTENSION")
+  ) {
+    return true;
+  }
+  return false;
 };
 
 // returns true is all required badges are awarded.
@@ -51,10 +65,8 @@ export const getSessionState = (session: Session | null) => {
 
   // check for completeness in reverse order
   if (awarded(session)) return SessionState.Awarded;
-
-  if (readyToAward(session)) {
-    return SessionState.ReadyToAward;
-  }
+  if (pubkeyVerified(session)) return SessionState.PubkeyVerified;
+  if (readyToAward(session)) return SessionState.ReadyToAward;
 
   return SessionState.InProgress;
 };

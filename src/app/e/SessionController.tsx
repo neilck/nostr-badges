@@ -27,6 +27,7 @@ export const SessionController = (props: {
   let pubkey = searchParams.get("pubkey") ?? undefined;
 
   const startUrl = `/e/${naddr}`;
+  const [progressUrl, setProgressUrl] = useState(startUrl);
   const [acceptUrl, setAcceptUrl] = useState("");
   const [awardedUrl, setAwardedUrl] = useState("");
 
@@ -79,12 +80,17 @@ export const SessionController = (props: {
   useEffect(() => {
     const state = sessionContext.getSessionState();
     switch (state) {
-      case SessionState.ReadyToAward: {
+      case SessionState.InProgress:
+        router.push(progressUrl);
+        break;
+      case SessionState.ReadyToAward:
+      case SessionState.PubkeyVerified: {
         if (!pathname.startsWith(acceptUrl)) {
           router.push(acceptUrl);
           break;
         }
       }
+
       case SessionState.Awarded: {
         if (!pathname.startsWith(awardedUrl)) {
           router.push(awardedUrl);

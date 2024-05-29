@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSessionContext } from "@/context/SessionContext";
 import { useAccountContext } from "@/context/AccountContext";
-import { PublishCallback, useNostrContext } from "@/context/NostrContext";
+import { useNostrContext } from "@/context/NostrContext";
 
 import { SessionState } from "@/context/SessionHelper";
 import { Profile } from "@/data/profileLib";
@@ -17,7 +17,7 @@ import Typography from "@mui/material/Typography";
 
 import { SignIn } from "../SignIn";
 
-export type StageType = "LOADING" | "VERIFYING" | "ACCEPTING" | "DONE";
+export type StageType = "LOADING" | "VERIFYING" | "ACCEPTING";
 
 export const ContextSwitch = () => {
   const [stage, setStage] = useState<StageType>("LOADING");
@@ -32,12 +32,6 @@ export const ContextSwitch = () => {
 
   const accountContext = useAccountContext();
   const uid = accountContext.state.account?.uid ?? "";
-  const profiles = accountContext.state.profiles;
-
-  let pubkeyVerified = false;
-  if (pubkey != "" && (pubkeySource == "AKA" || pubkeySource == "EXTENSION")) {
-    pubkeyVerified = true;
-  }
 
   const getHeader = (type: string) => {
     switch (type) {
@@ -76,35 +70,30 @@ export const ContextSwitch = () => {
   const instructions = getInstructions(type, pubkey != "");
 
   useEffect(() => {
-    if (pubkeyVerified) setStage("ACCEPTING");
-    else setStage("VERIFYING");
-  }, [pubkeyVerified]);
+    const sessionStage = sessionContext.getSessionState();
+    console.log(`ContextSwitch ${sessionStage}`);
 
-  useEffect(() => {
-    switch (stage) {
-      case "ACCEPTING": {
-        createAndPublishEvents().then(() => setStage("DONE"));
-      }
+    if (sessionStage == SessionState.ReadyToAward) {
+      setStage("VERIFYING");
+      return;
     }
-  }, [stage]);
 
-  const publishCallback: PublishCallback = (
-    publishedCount: number,
-    relayCount: number,
-    error?: string
-  ) => {
-    setStage("DONE");
-  };
+    if (sessionStage == SessionState.PubkeyVerified) {
+      setStage("ACCEPTING");
+      createAndPublishEvents();
+      return;
+    }
+  }, [sessionContext.state]);
 
   const onSignIn = (profile: Profile, source: PubkeySourceType) => {
+    console.log(`onSignIn: ${JSON.stringify(profile)} ${source}`);
     const pubkey = profile.publickey;
-    sessionContext.changePubkey(pubkey, pubkeySource);
-    pubkeyVerified = true;
+    sessionContext.changePubkey(pubkey, source);
   };
 
   const createAndPublishEvents = async () => {
     const session = sessionContext.state.session;
-    if (!session || sessionState != SessionState.ReadyToAward) return;
+    if (!session || sessionState != SessionState.PubkeyVerified) return;
 
     await sessionContext.createBadgeAwards(uid, pubkey);
     const events = await sessionContext.getSignedEvents();
@@ -117,13 +106,9 @@ export const ContextSwitch = () => {
     }
 
     for (let i = 0; i < events.length; i++) {
-      nostrContext.publish(events[i], relays, publishCallback);
+      nostrContext.publish(events[i], relays);
     }
   };
-
-  if (sessionState != SessionState.ReadyToAward) {
-    return <>Not ready to save</>;
-  }
 
   return (
     <>
@@ -157,7 +142,6 @@ export const ContextSwitch = () => {
           </Typography>
         </Box>
       )}
-      {stage == "DONE" && <>done...</>}
     </>
   );
 };

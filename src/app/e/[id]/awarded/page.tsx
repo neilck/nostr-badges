@@ -44,16 +44,18 @@ export default async function AwardedPage({
     getEvent(params.id),
   ]);
 
-  const sessionState = getSessionState(session);
+  const sessionState = getSessionState(session == undefined ? null : session);
   const event = eventResult.event;
   let profile = getEmptyProfile();
-  let lProfile = await loadProfile(session.pubkey);
-  if (lProfile != null) {
-    const keys = Object.keys(profile);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (Object.hasOwn(lProfile, key)) {
-        profile[key] = lProfile[key];
+  if (session) {
+    let lProfile = await loadProfile(session.pubkey);
+    if (lProfile != null) {
+      const keys = Object.keys(profile);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (Object.hasOwn(lProfile, key)) {
+          profile[key] = lProfile[key];
+        }
       }
     }
   }
@@ -62,14 +64,18 @@ export default async function AwardedPage({
   let description = "";
   let image = "";
   let type = "";
+  let buttonLabel = "";
+  let url = "";
 
-  const hasRedirect = session.redirectUrl != "";
-  let url = `${process.env.NEXT_PUBLIC_AKA_APP}/profile/${session.pubkey}`;
-  let buttonLabel = "View in Profile";
+  if (session) {
+    const hasRedirect = session.redirectUrl != "";
+    url = `${process.env.NEXT_PUBLIC_AKA_APP}/profile/${session.pubkey}`;
+    buttonLabel = "View in Profile";
 
-  if (hasRedirect) {
-    url = session.redirectUrl;
-    buttonLabel = "Next";
+    if (hasRedirect) {
+      url = session.redirectUrl;
+      buttonLabel = "Next";
+    }
   }
 
   if (event) {

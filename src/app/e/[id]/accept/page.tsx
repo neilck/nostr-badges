@@ -22,7 +22,7 @@ export default async function AcceptPage({
     getEvent(params.id),
   ]);
 
-  const sessionState = getSessionState(session);
+  const sessionState = getSessionState(session == undefined ? null : session);
   const event = eventResult.event;
   const nostrEvent = toNostrEvent(event);
   const id = eventResult.id;
@@ -32,7 +32,7 @@ export default async function AcceptPage({
     badge: Badge;
     awardData?: { [key: string]: string } | undefined;
   }[] = [];
-  if (session.requiredBadges) {
+  if (session && session.requiredBadges) {
     const promises: Promise<Badge>[] = [];
     for (let i = 0; i < session.requiredBadges.length; i++) {
       const badge = await getBadge(session.requiredBadges[i].badgeId);

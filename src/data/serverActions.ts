@@ -59,7 +59,7 @@ export const getEventByAddress = async (
   return res.json();
 };
 
-export async function getSession(id: string): Promise<Session> {
+export async function getSession(id: string): Promise<Session | undefined> {
   const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
 
   const url = `https://getsession-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getSession?id=${id}`;
@@ -68,11 +68,11 @@ export async function getSession(id: string): Promise<Session> {
     cache: "no-store",
   });
 
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
+  if (res.ok && res.status == 200) {
+    return res.json();
   }
-  return res.json();
+
+  return undefined;
 }
 
 export async function getBadge(id: string): Promise<Badge> {

@@ -195,6 +195,7 @@ function SessionProvider(props: SessionProviderProps) {
 
   const changePubkey = async (pubkey: string, pubkeySource: string) => {
     if (state.sessionId) {
+      contextDebug(`changePubkey ${pubkey} ${pubkeySource}`);
       const result = await changeSessionPubkey(
         state.sessionId,
         pubkey,
@@ -277,6 +278,7 @@ function SessionProvider(props: SessionProviderProps) {
         dispatch({ type: "setSessionId", sessionId: sessionId });
         dispatch({ type: "setSession", session: session });
         await updateFromSession(sessionId, session);
+        contextDebug(`state after reloaded ${getSessionState()}`);
         return true;
       }
     }

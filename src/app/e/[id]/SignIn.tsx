@@ -72,6 +72,7 @@ export const SignIn = (props: {
       if (pubkeys.length == 1) {
         const singleKey = pubkeys[0];
         setPubkey(singleKey);
+        setPubkeySource("AKA");
         setProfile(profiles[singleKey]);
         return;
       }

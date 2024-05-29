@@ -105,7 +105,6 @@ function NostrProvider({ children }: NostrProviderProps) {
   const [signerType, setSignerType] = useState<SignerType>("UNSET");
 
   const init = async (profile: Profile) => {
-    console.log(`init ${JSON.stringify(profile)}`);
     setSignerType("LOADING");
     if (profile.publickey == "") {
       console.log("setSignerType(UNSET)");
