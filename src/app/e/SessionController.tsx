@@ -24,7 +24,6 @@ export const SessionController = (props: {
 
   const naddr = params.id;
   const state = searchParams.get("state") ?? undefined;
-  let pubkey = searchParams.get("pubkey") ?? undefined;
 
   const startUrl = `/e/${naddr}`;
   const [progressUrl, setProgressUrl] = useState(startUrl);
@@ -61,7 +60,6 @@ export const SessionController = (props: {
           type: isGroup ? "GROUP" : "BADGE",
           docId: badgeId,
           state: state,
-          pubkey: pubkey,
         });
         if (result) {
           // save session Id to sessionStorage
