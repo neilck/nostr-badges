@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { NostrLayout } from "@/app/components/NostrLayout";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -18,6 +17,8 @@ import { useAccountContext } from "@/context/AccountContext";
 import { SaveButtonEx } from "@/app/components/items/SaveButtonEx";
 import { getDefaultRelays } from "@/data/relays";
 import { loadAccount, saveAccount } from "@/data/accountLib";
+import { CommonLayout } from "@/app/components/ComonLayout";
+import Section from "../../Section";
 
 export default function Relays() {
   const accountContext = useAccountContext();
@@ -104,37 +105,44 @@ export default function Relays() {
   };
 
   return (
-    <NostrLayout>
-      <Stack direction="column" pl={3} maxWidth={400}>
-        <CardHeading>Relays</CardHeading>
-        <Typography variant="body2">
-          Relays for publishing badges and badge awards.
-        </Typography>
-        <DocLink doc="badge-integration/configuration">learn more...</DocLink>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox checked={useDefaults} onChange={onCheckChanged} />
-            }
-            label="Include default relays"
-          />
-        </FormGroup>
-        {useDefaults && renderDefaultRelays()}
-        <Box paddingTop={2} width="240px">
-          <CardHeading>Relays</CardHeading>
-          <TextField
-            multiline
-            fullWidth
-            rows={6}
-            value={relayValue}
-            onChange={onChangeHandler}
-            helperText="one relay per line, include 'wss://'"
-          ></TextField>
-        </Box>
-        <Stack width="240px" paddingTop={1} alignItems="center">
-          <SaveButtonEx onClick={onSaveClicked} />
-        </Stack>
-      </Stack>
-    </NostrLayout>
+    <CommonLayout developerMode={true}>
+      <Box maxWidth="100%">
+        <Section>
+          <Stack direction="column" pl={3} width="100%" maxWidth={400}>
+            <CardHeading>Relays</CardHeading>
+            <Typography variant="body2">
+              Relays for publishing badges and badge awards.
+            </Typography>
+            <DocLink doc="badge-integration/configuration">
+              learn more...
+            </DocLink>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox checked={useDefaults} onChange={onCheckChanged} />
+                }
+                label="Include default relays"
+              />
+            </FormGroup>
+            {useDefaults && renderDefaultRelays()}
+            <Box paddingTop={2} width="280px">
+              <CardHeading>Relays</CardHeading>
+
+              <TextField
+                multiline
+                fullWidth
+                rows={6}
+                value={relayValue}
+                onChange={onChangeHandler}
+                helperText="one relay per line, include 'wss://'"
+              ></TextField>
+            </Box>
+            <Stack width="100%" paddingTop={1} alignItems="center">
+              <SaveButtonEx onClick={onSaveClicked} />
+            </Stack>
+          </Stack>
+        </Section>
+      </Box>
+    </CommonLayout>
   );
 }

@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { useAccountContext } from "@/context/AccountContext";
 import theme from "@/app/components/ThemeRegistry/theme";
 import Box from "@mui/material/Box";
+import Section from "./Section";
 import Stack from "@mui/material/Stack";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import MuiNextLink from "../components/items/MuiNextLink";
 import { CommonLayout } from "../components/ComonLayout";
 import { CardHeading, CardSubHeading } from "../components/items/CardHeadings";
+import { ApiKeyEdit } from "./ApiKeyEdit";
 
 export default function CreatorHome() {
   const accountContext = useAccountContext();
@@ -37,16 +39,7 @@ export default function CreatorHome() {
           maxWidth: "600px",
         }}
       >
-        <Box
-          sx={{
-            p: 2,
-            width: "100%",
-            minHeight: "100px",
-            borderColor: theme.palette.grey[500],
-            borderRadius: "10px",
-            backgroundColor: theme.palette.background.paper,
-          }}
-        >
+        <Section>
           <Typography variant="h5">Welcome to AKA Profiles</Typography>
           <CardSubHeading>
             Self-issued badges for decentralized identities.
@@ -59,19 +52,9 @@ export default function CreatorHome() {
             </MuiNextLink>
           </Typography>
           <Typography variant="body1" fontWeight={600}></Typography>
-        </Box>
+        </Section>
         {showRec && (
-          <Box
-            sx={{
-              mt: 2,
-              p: 2,
-              width: "100%",
-              minHeight: "100px",
-              borderColor: theme.palette.grey[500],
-              borderRadius: "10px",
-              backgroundColor: theme.palette.background.paper,
-            }}
-          >
+          <Section>
             <Typography variant="h6" color="red">
               Recommendation
             </Typography>
@@ -94,8 +77,11 @@ export default function CreatorHome() {
               <Link href="/profile/edit">save the private key</Link> for this
               profile.
             </Typography>
-          </Box>
+          </Section>
         )}
+        <Section>
+          <ApiKeyEdit />
+        </Section>
       </Box>
     </CommonLayout>
   );
