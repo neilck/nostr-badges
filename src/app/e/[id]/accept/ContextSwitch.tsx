@@ -17,7 +17,11 @@ import Typography from "@mui/material/Typography";
 
 import { SignIn } from "../SignIn";
 
-export type StageType = "LOADING" | "VERIFYING" | "ACCEPTING";
+export type StageType =
+  | "LOADING"
+  | "VERIFYING"
+  | "CHANGING_PUBKEY"
+  | "ACCEPTING";
 
 export const ContextSwitch = () => {
   const [stage, setStage] = useState<StageType>("LOADING");
@@ -87,6 +91,7 @@ export const ContextSwitch = () => {
 
   const onSignIn = (profile: Profile, source: PubkeySourceType) => {
     console.log(`onSignIn: ${JSON.stringify(profile)} ${source}`);
+    setStage("CHANGING_PUBKEY");
     const pubkey = profile.publickey;
     sessionContext.changePubkey(pubkey, source);
   };
@@ -126,7 +131,7 @@ export const ContextSwitch = () => {
           </Box>
         </>
       )}
-      {stage == "ACCEPTING" && (
+      {(stage == "ACCEPTING" || stage == "CHANGING_PUBKEY") && (
         <Box
           sx={{
             width: "100%",
@@ -136,7 +141,9 @@ export const ContextSwitch = () => {
             justifyContent: "center",
           }}
         >
-          <CircularProgress />
+          <Box pt={1}>
+            <CircularProgress />
+          </Box>
           <Typography variant="body1" textAlign="center">
             saving...
           </Typography>
