@@ -20,8 +20,9 @@ export const userNavItems: NavItem[] = [
 
 export const creatorNavItems: NavItem[] = [
   { name: "Home", path: "/creator", isSelected: false },
-  { name: "Group Badges", path: "/creator/groups", isSelected: false },
   { name: "Hosted Badges", path: "/creator/badges", isSelected: false },
+  { name: "Group Badges", path: "/creator/groups", isSelected: false },
+
   {
     name: "Nostr Relays",
     path: "/creator/developer/relays",
@@ -42,7 +43,11 @@ export const NavMenu = ({
   const navItems = developerMode ? creatorNavItems : userNavItems;
 
   const length = navItems.map((item) => {
-    item.isSelected = pathname.startsWith(item.path);
+    if (item.path == "/creator") {
+      item.isSelected = pathname == item.path;
+    } else {
+      item.isSelected = pathname.startsWith(item.path);
+    }
   });
 
   return (
@@ -54,7 +59,7 @@ export const NavMenu = ({
           ) : (
             <MenuItem
               key={item.name}
-              selected={pathname.startsWith(item.path)}
+              selected={item.isSelected}
               onClick={() => {
                 router.push(item.path);
               }}
