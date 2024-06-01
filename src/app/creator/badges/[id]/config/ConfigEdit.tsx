@@ -20,6 +20,7 @@ import {
   addBadgeConfig,
 } from "@/data/badgeConfigLib";
 import { useBadgeContext } from "@/context/BadgeContext";
+import { CopiableTextSmall } from "@/app/components/items/CopiableTextSmall";
 
 export const ConfigEdit = (props: { docId: string }) => {
   const { docId } = props;
@@ -138,7 +139,7 @@ export const ConfigEdit = (props: { docId: string }) => {
             </Typography>
             <TextField
               id="applyURL"
-              label="Award Page URL"
+              label="Redirect URL"
               helperText="e.g. https://domain.com/path/badgeaward"
               value={badge.applyURL}
               onChange={onChangeHandler}
@@ -152,7 +153,21 @@ export const ConfigEdit = (props: { docId: string }) => {
               }}
             />
           </Box>
-
+          <Box sx={{ width: "100%" }}>
+            <Typography textAlign="left" fontWeight={600} variant="body1">
+              Get Badge Link
+            </Typography>
+            <CopiableTextSmall
+              copyText={`${process.env.NEXT_PUBLIC_AKA_GET}/njump/${badge.event}`}
+            >
+              <Typography
+                variant="body1"
+                sx={{ color: theme.palette.blue.dark }}
+              >
+                get badge link
+              </Typography>
+            </CopiableTextSmall>
+          </Box>
           <Box sx={{ width: "100%" }}>
             <Typography textAlign="left" fontWeight={600} variant="body1">
               Configuration Parameters
