@@ -113,9 +113,6 @@ export default function Relays() {
             <Typography variant="body2">
               Relays for publishing badges and badge awards.
             </Typography>
-            <DocLink doc="badge-integration/configuration">
-              learn more...
-            </DocLink>
             <FormGroup>
               <FormControlLabel
                 control={

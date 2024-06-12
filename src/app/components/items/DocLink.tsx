@@ -9,7 +9,7 @@ export const DocLink = (props: { doc: string; children: React.ReactNode }) => {
 
   return (
     <Link
-      href={`${host}/${props.doc}`}
+      href={`${host}/docs/${props.doc}`}
       rel="noopener noreferrer"
       target="_blank"
     >

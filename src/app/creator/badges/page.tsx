@@ -84,7 +84,7 @@ export default function Badges() {
     <CommonLayout developerMode={true}>
       <Box width="auto">
         <Stack direction="column" pt={1} pl={3} maxWidth={600}>
-          <CardHeading>Hosted Badges</CardHeading>
+          <CardHeading>Auto Badges</CardHeading>
           <Typography variant="body2">
             Users can apply for auto badges using AKA Profiles.
           </Typography>
