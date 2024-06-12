@@ -86,7 +86,7 @@ export default function Badges() {
         <Stack direction="column" pt={1} pl={3} maxWidth={600}>
           <CardHeading>Hosted Badges</CardHeading>
           <Typography variant="body2">
-            Users can apply for hosted badges using AKA Profiles.
+            Users can apply for auto badges using AKA Profiles.
           </Typography>
           <DocLink doc="intro">learn more...</DocLink>
         </Stack>

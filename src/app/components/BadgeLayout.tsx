@@ -107,7 +107,7 @@ export const BadgeLayout = (props: {
             maxWidth={theme.breakpoints.values.md}
           >
             <Box sx={{ pt: 1.5, pl: 3 }}>
-              <Typography variant="h6">Hosted Badge</Typography>
+              <Typography variant="h6">Auto Badge</Typography>
               <TabNav tabs={tabsFormatted} />
             </Box>
             {children}

@@ -20,7 +20,7 @@ export const userNavItems: NavItem[] = [
 
 export const creatorNavItems: NavItem[] = [
   { name: "Home", path: "/creator", isSelected: false },
-  { name: "Hosted Badges", path: "/creator/badges", isSelected: false },
+  { name: "Auto Badges", path: "/creator/badges", isSelected: false },
   { name: "Group Badges", path: "/creator/groups", isSelected: false },
 
   {
