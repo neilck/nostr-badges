@@ -51,5 +51,3 @@ Still in development.
 Live at [AKA Profiles App](https://app.akaprofiles.com)
 
 See [AKA Profiles Documentation](https://www.akaprofiles.com)
-
-.
