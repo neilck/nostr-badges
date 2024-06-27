@@ -29,8 +29,6 @@ export default function CreatorHome() {
     }
   }, [profile]);
 
-  console.log(`/creator profile ${JSON.stringify(profile)}`);
-
   return (
     <CommonLayout developerMode={true}>
       <Box
