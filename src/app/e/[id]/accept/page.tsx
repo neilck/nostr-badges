@@ -50,11 +50,12 @@ export default async function AcceptPage({
   return (
     <EventFrame event={event} header="Save Credentials">
       <Box
+        id="acceptContext"
         minHeight={320}
         maxWidth={360}
         display="flex"
         flexDirection="column"
-        justifyContent="center"
+        justifyContent="flex-start"
         pl={2}
         pr={2}
       >
