@@ -136,7 +136,7 @@ function BadgeProvider(props: BadgeProviderProps) {
             if (account) {
               const relays = accountContext.getRelays();
               // publish event
-              nostrContext.publish(nostrEvent, relays);
+              nostrContext.publishAsync(nostrEvent, relays);
             }
           }
         };

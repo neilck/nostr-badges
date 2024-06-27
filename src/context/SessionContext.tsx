@@ -9,12 +9,12 @@
 "use client";
 
 import debug from "debug";
-import { useEffect, useContext, useReducer, createContext } from "react";
-import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import { useContext, useReducer, createContext } from "react";
 import { useRouter } from "next/navigation";
 import { Session, ItemState } from "@/data/sessionLib";
 import {
   SessionState,
+  getSessionEventIds,
   getSessionState as getSessionStateHelper,
 } from "./SessionHelper";
 import {
@@ -27,6 +27,13 @@ import {
 import { Badge, loadBadge as fsLoadBadge } from "@/data/badgeLib";
 import { loadGroup as fsLoadGroup } from "@/data/groupLib";
 import { sessionCreateBadgeAwards } from "@/data/serverActions";
+import {
+  IsEventPublishedItem,
+  PublishedItem,
+  useNostrContext,
+} from "@/context/NostrContext";
+import { getRelays } from "@/data/serverActions";
+import { getDefaultRelays } from "@/data/relays";
 import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { toNostrEvent, loadBadgeEvent } from "@/data/eventLib";
 
@@ -43,6 +50,7 @@ export type Display = {
 type Action =
   | { type: "setSessionId"; sessionId: string | null }
   | { type: "setSession"; session: Session | null }
+  | { type: "setSessionState"; sessionState: SessionState }
   | { type: "setDisplay"; display: Display | null }
   | { type: "setBadges"; badges: Record<string, Badge> | null }
   | { type: "setIsUpdating"; isUpdating: boolean };
@@ -52,6 +60,7 @@ type Dispatch = (action: Action) => void;
 type State = {
   sessionId: string | null;
   session: Session | null;
+  sessionState: SessionState;
   display: Display | null;
   badges: Record<string, Badge> | null;
   isUpdating: boolean;
@@ -72,10 +81,11 @@ const SessionContext = createContext<
       ) => Promise<CreateSessionResult>;
       resumeSession: (naddr: string) => Promise<boolean>;
       changePubkey: (pubkey: string, pubkeySource: string) => Promise<boolean>;
-      createBadgeAwards: (uid: string, publickey: string) => Promise<boolean>;
+      createBadgeAwardEvents: (uid: string, publickey: string) => Promise<void>;
+      publishEvents: () => Promise<IsEventPublishedItem[]>;
       getSignedEvents: () => Promise<NostrEvent[]>;
       loadBadge: (badgeId: string) => Promise<Badge | undefined>;
-      reload: () => void;
+      reload: () => Promise<Session | null>;
       shouldAutoOpen: () => boolean;
     }
   | undefined
@@ -88,6 +98,9 @@ function reducer(state: State, action: Action) {
     }
     case "setSession": {
       return { ...state, session: action.session };
+    }
+    case "setSessionState": {
+      return { ...state, sessionState: action.sessionState };
     }
     case "setDisplay": {
       return { ...state, display: action.display };
@@ -107,112 +120,27 @@ function SessionProvider(props: SessionProviderProps) {
   const [state, dispatch] = useReducer(reducer, {
     sessionId: null,
     session: null,
+    sessionState: SessionState.start,
     display: null,
     badges: null,
     isUpdating: false,
   });
 
   const router = useRouter();
-
-  // setup listener for database change
-  useEffect(() => {
-    // Set up a listener for database changes
-    if (state.sessionId != null && state.sessionId != "") {
-      const db = getFirestore();
-      const unsub = onSnapshot(doc(db, "sessions", state.sessionId), (doc) => {
-        reload();
-      });
-
-      // Clean up listener when component unmounts
-      return () => {
-        unsub();
-      };
-    }
-  }, [state.sessionId]);
+  const nostrContext = useNostrContext();
 
   const getSessionState = () => {
     return getSessionStateHelper(state.session);
   };
 
-  const startSession = async (naddr: string, params: CreateSessionParams) => {
-    contextDebug(`startSession called ${JSON.stringify(params)}`);
-    // createSession creates session in DB
-    const result = await createSession(params);
-    contextDebug(`createSession result ${JSON.stringify(result)}`);
-    if (result) {
-      // update context with new session
-      dispatch({ type: "setSessionId", sessionId: result.sessionId });
-      dispatch({ type: "setSession", session: result.session });
-      updateFromSession(result.sessionId, result.session);
-      return result;
-    }
-    return undefined;
-  };
-
-  const resumeSession = async (sessionId: string) => {
-    contextDebug(`resumeSession called for sessionId ${sessionId}`);
-
-    const session = await getSession(sessionId);
-    if (session) {
-      dispatch({ type: "setSessionId", sessionId: sessionId });
-      dispatch({ type: "setSession", session: session });
-      updateFromSession(sessionId, session);
-      return true;
-    }
-
-    return false;
-  };
-
-  /***
-   * update client session properies when loaded from database
-   */
-  const updateFromSession = async (sessionId: string, session: Session) => {
-    dispatch({ type: "setIsUpdating", isUpdating: true });
-
-    // load badge or group for display
-    const display: Display = { title: "", description: "", image: "" };
-    if (session.type == "BADGE") {
-      const badge = await loadBadge(session.targetId);
-      if (badge) {
-        display.title = badge.name;
-        display.description = badge.description;
-        display.image = badge.thumbnail != "" ? badge.thumbnail : badge.image;
-      }
-    }
-
-    if (session.type == "GROUP") {
-      const group = await fsLoadGroup(session.targetId, "groups");
-      if (group) {
-        display.title = group.name;
-        display.description = group.description;
-        display.image = group.image;
-      }
-    }
-
-    dispatch({ type: "setDisplay", display: display });
-    dispatch({ type: "setIsUpdating", isUpdating: false });
-  };
-
-  const changePubkey = async (pubkey: string, pubkeySource: string) => {
-    if (state.sessionId) {
-      contextDebug(`changePubkey ${pubkey} ${pubkeySource}`);
-      const result = await changeSessionPubkey(
-        state.sessionId,
-        pubkey,
-        pubkeySource
-      );
-      return reload();
-    }
-    return false;
-  };
-
-  const createBadgeAwards = async (uid: string, publickey: string) => {
-    if (state.sessionId) {
-      if (state.session) state.session.pubkey = publickey;
-      await sessionCreateBadgeAwards(state.sessionId, uid, publickey);
-      return reload();
-    }
-    return false;
+  const updateSessionState = (
+    sessionState: SessionState,
+    functionName: string
+  ) => {
+    contextDebug(
+      `SessionState: ${state.sessionState} => ${sessionState} by ${functionName}`
+    );
+    dispatch({ type: "setSessionState", sessionState: sessionState });
   };
 
   const loadBadge = async (badgeId: string) => {
@@ -237,6 +165,9 @@ function SessionProvider(props: SessionProviderProps) {
     const items: ItemState[] = [];
     const awardIds: string[] = [];
 
+    contextDebug("getSignedEvents");
+    contextDebug(state.session);
+
     const session = state.session;
     if (!session) return [];
 
@@ -252,6 +183,8 @@ function SessionProvider(props: SessionProviderProps) {
       session.requiredGroups.forEach((group) => {
         items.push(group.itemState);
       });
+
+    contextDebug(items);
 
     for (let i = 0; i < items.length; i++) {
       const itemState = items[i];
@@ -279,10 +212,10 @@ function SessionProvider(props: SessionProviderProps) {
         dispatch({ type: "setSession", session: session });
         await updateFromSession(sessionId, session);
         contextDebug(`state after reloaded ${getSessionState()}`);
-        return true;
+        return session;
       }
     }
-    return false;
+    return null;
   };
 
   // When single badge
@@ -297,6 +230,248 @@ function SessionProvider(props: SessionProviderProps) {
     return autoOpen;
   };
 
+  /***
+   * update client session properies when loaded from database
+   */
+  const updateFromSession = async (sessionId: string, session: Session) => {
+    if (state.display == null || state.display.title == "") {
+      dispatch({ type: "setIsUpdating", isUpdating: true });
+    }
+
+    // load badge or group for display
+    const display: Display = { title: "", description: "", image: "" };
+    if (session.type == "BADGE") {
+      const badge = await loadBadge(session.targetId);
+      if (badge) {
+        display.title = badge.name;
+        display.description = badge.description;
+        display.image = badge.thumbnail != "" ? badge.thumbnail : badge.image;
+      }
+    }
+
+    if (session.type == "GROUP") {
+      const group = await fsLoadGroup(session.targetId, "groups");
+      if (group) {
+        display.title = group.name;
+        display.description = group.description;
+        display.image = group.image;
+      }
+    }
+
+    dispatch({ type: "setDisplay", display: display });
+    dispatch({ type: "setIsUpdating", isUpdating: false });
+  };
+
+  const startSession = async (naddr: string, params: CreateSessionParams) => {
+    if (state.sessionState != SessionState.start) {
+      throw Error("startSession called when not SessionState.start");
+    }
+    updateSessionState(SessionState.loading, "startSession");
+
+    contextDebug(`startSession called ${JSON.stringify(params)}`);
+    // createSession creates session in DB
+    const result = await createSession(params);
+    contextDebug(`createSession result ${JSON.stringify(result)}`);
+
+    if (result) {
+      const state = getSessionStateHelper(result.session);
+      if (state != SessionState.loaded) {
+        throw Error("startSession result not SessionState.loaded");
+      }
+      // update context with new session
+      dispatch({ type: "setSessionId", sessionId: result.sessionId });
+      dispatch({ type: "setSession", session: result.session });
+      updateFromSession(result.sessionId, result.session);
+      updateSessionState(SessionState.loaded, "startSession");
+      return result;
+    }
+    return undefined;
+  };
+
+  const resumeSession = async (sessionId: string) => {
+    if (state.sessionState != SessionState.start) {
+      throw Error("resumeSession called when not SessionState.start");
+    }
+    updateSessionState(SessionState.loading, "resumeSession");
+
+    contextDebug(`resumeSession called for sessionId ${sessionId}`);
+
+    const session = await getSession(sessionId);
+    if (session) {
+      dispatch({ type: "setSessionId", sessionId: sessionId });
+      dispatch({ type: "setSession", session: session });
+      updateFromSession(sessionId, session);
+      const newState = getSessionStateHelper(session);
+      updateSessionState(newState, "resumeSession");
+
+      return true;
+    }
+
+    return false;
+  };
+
+  const changePubkey = async (pubkey: string, pubkeySource: string) => {
+    const validStates = [
+      SessionState.loaded,
+      SessionState.filled,
+      SessionState.identified,
+    ];
+    if (!validStates.includes(state.sessionState)) {
+      throw Error(
+        `changePubkey called when session in invalid state ${state.sessionState}`
+      );
+    } else {
+      updateSessionState(SessionState.identifying, "changePubkey");
+    }
+
+    if (state.sessionId) {
+      contextDebug(`changePubkey ${pubkey} ${pubkeySource}`);
+      const result = await changeSessionPubkey(
+        state.sessionId,
+        pubkey,
+        pubkeySource
+      );
+      const session = await reload();
+      const newState = getSessionStateHelper(session);
+      const expectedStates = [
+        SessionState.loaded,
+        SessionState.filled,
+        SessionState.identified,
+        SessionState.awarded, // if previously awarded to pubkey
+      ];
+      if (!expectedStates.includes(newState)) {
+        throw Error(
+          `changePubkey result not in expected states. Expected: ${JSON.stringify(
+            expectedStates
+          )}, Current: ${newState}, session: ${JSON.stringify(session)}`
+        );
+      } else {
+        updateSessionState(newState, "changePubkey");
+      }
+    }
+    return false;
+  };
+
+  const createBadgeAwardEvents = async (uid: string, publickey: string) => {
+    const validStates = [SessionState.identified];
+    contextDebug(
+      `createBadgeAwardEvents called ${JSON.stringify({ uid, publickey })}`
+    );
+
+    if (!validStates.includes(state.sessionState)) {
+      throw Error(
+        `createBadgeAwardEvents called when session in invalid state ${state.sessionState}`
+      );
+    } else {
+      updateSessionState(SessionState.awarding, "createBadgeAwardEvents");
+    }
+
+    if (state.sessionId) {
+      if (state.session) state.session.pubkey = publickey;
+      await sessionCreateBadgeAwards(state.sessionId, uid, publickey);
+
+      // reload to get signed events
+      contextDebug("createBadgeAwards about to reload.");
+      const session = await reload();
+      const newState = getSessionStateHelper(session);
+      const expectedStates = [SessionState.awarded];
+      if (!expectedStates.includes(newState)) {
+        throw Error(
+          `createBadgeAwardEvents result not in expected states. Expected: ${JSON.stringify(
+            expectedStates
+          )}, Current: ${newState}, session: ${JSON.stringify(session)}`
+        );
+      } else {
+        updateSessionState(newState, "createBadgeAwardEvents");
+      }
+    }
+  };
+
+  const verifyEventsPublished = async (session: Session, relays: string[]) => {
+    const ids = await getSessionEventIds(session);
+    const areEventsPublished = await nostrContext.areEventsPublished(
+      ids,
+      relays
+    );
+
+    return areEventsPublished;
+  };
+
+  // publishes badge award events
+  // returns after attempted send to relays
+  const publishEvents = async () => {
+    const validStates = [SessionState.awarded];
+    if (!validStates.includes(state.sessionState)) {
+      throw Error(
+        `publishEvents called when session in invalid state ${state.sessionState}`
+      );
+    } else {
+      updateSessionState(SessionState.publishing, "publishEvents");
+    }
+
+    if (!state.session) {
+      throw Error("publisheEvent called with null session");
+    }
+
+    let relays = [] as string[];
+
+    // get relays associated with badge / group owner
+    if (state.session?.itemState.owner) {
+      const result = await getRelays(state.session?.itemState.owner);
+      relays = result.relays;
+      if (result.defaultRelays) {
+        relays = relays.concat(getDefaultRelays());
+      }
+    }
+
+    // commented out as events will never be found as they are new
+    // plus, enabling user to re-apply and update created date a "feature"
+    /*
+    isEventPublishedItems = await verifyEventsPublished(state.session, relays);
+    contextDebug(
+      `verifyEventsPublished result ${JSON.stringify(isEventPublishedItems)}`
+    );
+
+    let allPublished = true;
+    for (let item of isEventPublishedItems) {
+      if (!item.published) {
+        allPublished = false;
+        break;
+      }
+    }
+    if (allPublished) {
+      updateSessionState(SessionState.published, "publishEvents");
+      return isEventPublishedItems;
+    }
+    */
+
+    const ids = getSessionEventIds(state.session);
+    const isEventPublishedItems: IsEventPublishedItem[] = [];
+    for (let id in ids) {
+      isEventPublishedItems.push({ eventId: id, published: false });
+    }
+
+    // publish events
+    const events = await getSignedEvents();
+    contextDebug(`createBadgeAwards getting events ${events}`);
+
+    // publish only unpublished events
+    const promises: Promise<PublishedItem>[] = [];
+    for (let event of events) {
+      for (let item of isEventPublishedItems) {
+        if (item.eventId == event.id && !item.published) {
+          promises.push(nostrContext.publishAsync(event, relays));
+          item.published = true;
+        }
+      }
+    }
+
+    // wait for all publish events to return
+    const values = await Promise.all(promises);
+    updateSessionState(SessionState.published, "publishEvents");
+    return isEventPublishedItems;
+  };
+
   const contextValue = {
     state,
     dispatch,
@@ -304,7 +479,8 @@ function SessionProvider(props: SessionProviderProps) {
     startSession: startSession,
     resumeSession: resumeSession,
     changePubkey: changePubkey,
-    createBadgeAwards: createBadgeAwards,
+    createBadgeAwardEvents: createBadgeAwardEvents,
+    publishEvents: publishEvents,
     getSignedEvents: getSignedEvents,
     reload: reload,
     loadBadge: loadBadge,

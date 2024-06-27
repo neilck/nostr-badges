@@ -20,7 +20,7 @@ export const StartSessionButton = (props: {
 }) => {
   const { badgeId, naddr, isGroup } = props; // naddr...
   const sessionContext = useSessionContext();
-  const sessionState = sessionContext.getSessionState();
+  const sessionState = sessionContext.state.sessionState;
 
   const defaultLabel = isGroup ? "Join Group" : "Get Badge";
   const awardedLabel = isGroup ? "Join Group" : "Badge Awarded";
@@ -31,22 +31,22 @@ export const StartSessionButton = (props: {
   const [source, setSource] = useState<PubkeySourceType>("DIRECT");
   const [isLoading, setIsLoading] = useState(true);
   const [buttonLabel, setButtonLabel] = useState(defaultLabel);
-  const [disabled, setDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    setIsLoading(sessionState == SessionState.Initial);
+    setIsLoading(sessionState == SessionState.start);
 
     switch (sessionState) {
-      case SessionState.Initial:
-        setButtonLabel(defaultLabel);
-        setDisabled(false);
-        break;
-      case SessionState.InProgress:
+      case SessionState.start:
         setButtonLabel(defaultLabel);
         setDisabled(true);
         break;
-      case SessionState.ReadyToAward:
+      case SessionState.loaded:
+        setButtonLabel(defaultLabel);
+        setDisabled(true);
+        break;
+      case SessionState.filled:
         if (isGroup) {
           setButtonLabel("Join Group");
           setDisabled(false);

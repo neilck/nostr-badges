@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useNostrContext } from "@/context/NostrContext";
+import { PublishedItem, useNostrContext } from "@/context/NostrContext";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 
@@ -12,18 +12,16 @@ export const NostrSnackbar = () => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  const publishCallback = (
-    publishedCount: number,
-    relayCount: number,
-    error?: string | undefined
-  ) => {
+  const publishCallback = (publishedItem: PublishedItem) => {
     setError("");
     setMessage("");
 
     if (error) {
       setError(error);
     } else {
-      setMessage(`published to ${publishedCount}/${relayCount} relays`);
+      setMessage(
+        `published to ${publishedItem.publishedCount}/${publishedItem.relayCount} relays`
+      );
     }
 
     setOpen(true);

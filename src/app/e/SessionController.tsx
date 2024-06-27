@@ -9,6 +9,7 @@ import {
 } from "next/navigation";
 import { useSessionContext } from "@/context/SessionContext";
 import { SessionState } from "@/context/SessionHelper";
+import { Session } from "inspector";
 
 export const SessionController = (props: {
   badgeId?: string;
@@ -28,7 +29,7 @@ export const SessionController = (props: {
   const startUrl = `/e/${naddr}`;
   const [progressUrl, setProgressUrl] = useState(startUrl);
   const [acceptUrl, setAcceptUrl] = useState("");
-  const [awardedUrl, setAwardedUrl] = useState("");
+  const [publishedUrl, setPublishedUrl] = useState("");
 
   const effectRan = useRef(false);
 
@@ -50,21 +51,32 @@ export const SessionController = (props: {
   const init = async () => {
     let exists = false;
     let sessionId = sessionStorage.getItem(naddr);
-    if (sessionId) {
-      exists = await sessionContext.resumeSession(sessionId);
+
+    let needsLoad = true;
+    if (
+      sessionContext.state.sessionId == sessionId &&
+      sessionContext.state.sessionState != SessionState.start
+    ) {
+      needsLoad = false;
     }
 
-    if (!exists && pathname.startsWith(startUrl)) {
-      if (badgeId) {
-        const result = await sessionContext.startSession(naddr, {
-          type: isGroup ? "GROUP" : "BADGE",
-          docId: badgeId,
-          state: state,
-        });
-        if (result) {
-          // save session Id to sessionStorage
-          sessionStorage.setItem(naddr, result.sessionId);
-          sessionId = result.sessionId;
+    if (needsLoad) {
+      if (sessionId) {
+        exists = await sessionContext.resumeSession(sessionId);
+      }
+
+      if (!exists && pathname.startsWith(startUrl)) {
+        if (badgeId) {
+          const result = await sessionContext.startSession(naddr, {
+            type: isGroup ? "GROUP" : "BADGE",
+            docId: badgeId,
+            state: state,
+          });
+          if (result) {
+            // save session Id to sessionStorage
+            sessionStorage.setItem(naddr, result.sessionId);
+            sessionId = result.sessionId;
+          }
         }
       }
     }
@@ -72,26 +84,26 @@ export const SessionController = (props: {
     const sParams = new URLSearchParams();
     sParams.set("session", sessionId ?? "error");
     setAcceptUrl(`/e/${naddr}/accept?${sParams.toString()}`);
-    setAwardedUrl(`/e/${naddr}/awarded?${sParams.toString()}`);
+    setPublishedUrl(`/e/${naddr}/awarded?${sParams.toString()}`);
   };
 
   useEffect(() => {
-    const state = sessionContext.getSessionState();
+    const state = sessionContext.state.sessionState;
     switch (state) {
-      case SessionState.InProgress:
+      case SessionState.loaded:
         router.push(progressUrl);
         break;
-      case SessionState.ReadyToAward:
-      case SessionState.PubkeyVerified: {
+      case SessionState.filled:
+      case SessionState.identified: {
         if (!pathname.startsWith(acceptUrl)) {
           router.push(acceptUrl);
           break;
         }
       }
 
-      case SessionState.Awarded: {
-        if (!pathname.startsWith(awardedUrl)) {
-          router.push(awardedUrl);
+      case SessionState.published: {
+        if (!pathname.startsWith(publishedUrl)) {
+          router.push(publishedUrl);
         }
       }
     }

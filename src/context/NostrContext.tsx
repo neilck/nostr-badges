@@ -11,6 +11,7 @@ import {
 import NDK, {
   NDKUserProfile,
   NDKEvent,
+  NDKFilter,
   NostrEvent,
   NDKRelaySet,
   NDKRelay,
@@ -23,11 +24,16 @@ import { Profile } from "@/data/profileLib";
 import { getPrivateKey } from "@/data/keyPairLib";
 
 export type SignerType = "UNSET" | "LOADING" | "PRIVATE" | "NIP07";
-export type PublishCallback = (
-  publishedCount: number,
-  relayCount: number,
-  error?: string
-) => void;
+
+export type IsEventPublishedItem = { eventId: string; published: boolean };
+
+export type PublishedItem = {
+  publishedCount: number;
+  relayCount: number;
+  error?: string;
+};
+
+export type PublishCallback = (publishedItem: PublishedItem) => void;
 
 const contextDebug = debug("aka:nostrContext");
 const profileRelays = getProfileRelays();
@@ -67,36 +73,33 @@ const NostrContext = createContext<
         image: string;
         about: string;
       }) => Promise<void>;
-      publish: (
+      areEventsPublished: (
+        ids: string[],
+        relays: string[]
+      ) => Promise<IsEventPublishedItem[]>;
+      publishWithCallback: (
         event: NostrEvent,
         relays: string[],
-        callback?: PublishCallback
+        callback: PublishCallback
       ) => void;
+      publishAsync: (
+        event: NostrEvent,
+        replays: string[]
+      ) => Promise<PublishedItem>;
       setPublishCallback: (
-        callback:
-          | ((
-              publishedCount: number,
-              relayCount: number,
-              error?: string
-            ) => void)
-          | null
+        callback: ((publishedItem: PublishedItem) => void) | null
       ) => void;
     }
   | undefined
 >(undefined);
 
 function NostrProvider({ children }: NostrProviderProps) {
-  const callbackRef = useRef<
-    | ((publishedCount: number, relayCount: number, error?: string) => void)
-    | null
-  >(null);
+  const callbackRef = useRef<((publishedItem: PublishedItem) => void) | null>(
+    null
+  );
 
   const setPublishCallback = useCallback(
-    (
-      callback:
-        | ((publishedCount: number, relayCount: number, error?: string) => void)
-        | null
-    ) => {
+    (callback: ((publishedItem: PublishedItem) => void) | null) => {
       callbackRef.current = callback;
     },
     []
@@ -107,7 +110,7 @@ function NostrProvider({ children }: NostrProviderProps) {
   const init = async (profile: Profile) => {
     setSignerType("LOADING");
     if (profile.publickey == "") {
-      console.log("setSignerType(UNSET)");
+      contextDebug("setSignerType(UNSET)");
       setSignerType("UNSET");
       return;
     }
@@ -138,10 +141,10 @@ function NostrProvider({ children }: NostrProviderProps) {
   const fetchProfile = async (pubkey: string) => {
     const user = _ndk.getUser({ pubkey });
     const profile = await user.fetchProfile();
-    console.log(
+    contextDebug(
       `fetchProfile ${JSON.stringify(user)} ${JSON.stringify(profile)}`
     );
-    console.log(`relays: ${JSON.stringify(_ndk.explicitRelayUrls)}`);
+    contextDebug(`relays: ${JSON.stringify(_ndk.explicitRelayUrls)}`);
     return profile ? profile : undefined;
   };
 
@@ -176,120 +179,138 @@ function NostrProvider({ children }: NostrProviderProps) {
     }
   };
 
-  const publish = (
-    event: NostrEvent,
-    relays: string[],
-    callback?: PublishCallback
-  ) => {
+  const areEventsPublished = async (
+    ids: string[],
+    relays: string[]
+  ): Promise<IsEventPublishedItem[]> => {
     contextDebug(
-      `publish event called: ${JSON.stringify(event)} ${JSON.stringify(relays)}`
+      `areEventsPublished called with ${JSON.stringify({ ids, relays })}`
     );
+    const result = [] as IsEventPublishedItem[];
+    for (let id in ids) {
+      result.push({ eventId: id, published: false });
+    }
+    // for each event, check if published
+    const filter: NDKFilter = {
+      ids: ids,
+    };
 
+    const relaySet = NDKRelaySet.fromRelayUrls(relays, _ndk);
+    const events = await _ndk.fetchEvents(filter, undefined, relaySet);
+    contextDebug(`_ndk.fetchEvents returned ${JSON.stringify(events)}`);
+
+    for (let event of events) {
+      let found = false;
+      for (let isEventPublishedItem of result) {
+        if (isEventPublishedItem.eventId == event.id) {
+          found = true;
+          isEventPublishedItem.published = true;
+          break;
+        }
+      }
+
+      if (!found)
+        throw Error(
+          `areEventsPublished subscription returned unexpected event: ${JSON.stringify(
+            event
+          )}`
+        );
+    }
+
+    contextDebug(`areEventsPublished returning ${JSON.stringify(result)}`);
+    return result;
+  };
+
+  const publishLogic = async (
+    event: NostrEvent,
+    relays: string[]
+  ): Promise<PublishedItem> => {
     const relayCount = relays.length;
     let publishedCount = 0;
     let error = "";
 
-    const waitPublish = async (
-      event: NostrEvent,
-      relays: string[],
-      callback?: PublishCallback
-    ) => {
-      if (!event.sig || event.sig == "") {
-        if (callback) {
-          error = "event not signed";
-          callback(publishedCount, relayCount, error);
-        }
-        if (callbackRef.current) {
-          callbackRef.current(publishedCount, relayCount, error);
-        }
-        return;
+    if (!event.sig) {
+      return { publishedCount, relayCount, error: "event not signed" };
+    }
+
+    if (!event.kind || event.kind == -1) {
+      return { publishedCount, relayCount, error: "event kind not set" };
+    }
+
+    const relaySet = NDKRelaySet.fromRelayUrls(relays, _ndk);
+    const ndkEvent = new NDKEvent(_ndk, event);
+
+    if (signerType == "UNSET") {
+      return { publishedCount, relayCount, error: "no signer set" };
+    }
+
+    if (signerType == "LOADING") {
+      const endTime = Date.now() + 5000;
+      while (Date.now() < endTime && signerType === "LOADING") {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
+    }
 
-      if (!event.kind || event.kind == -1) {
-        if (callback) {
-          error = "event kind not set";
-          callback(publishedCount, relayCount, error);
-        }
-        if (callbackRef.current) {
-          callbackRef.current(publishedCount, relayCount, error);
-        }
-        return;
+    if (["PRIVATE", "NIP07"].includes(signerType)) {
+      try {
+        const result = await relaySet.publish(ndkEvent, 10000);
+        publishedCount = result.size;
+        contextDebug(
+          `publish eventId ${ndkEvent.id} result: ${JSON.stringify(result)}`
+        );
+      } catch (error) {
+        contextDebug(error);
+        const errorStr =
+          typeof error == "string" ? error : JSON.stringify(error);
+        contextDebug(`error on publish: ${errorStr}`);
+        return { publishedCount, relayCount, error: errorStr };
       }
+    } else {
+      return {
+        publishedCount,
+        relayCount,
+        error: "error occurred during publishing",
+      };
+    }
 
-      console.log(`waitPublish typeof callback ${typeof callback}`);
-      const relaySet = NDKRelaySet.fromRelayUrls(relays, _ndk);
+    return { publishedCount, relayCount, error: "" };
+  };
 
-      const ndkEvent = new NDKEvent(_ndk, event);
-      console.log(`signerType ${signerType}`);
-      if (signerType == "UNSET") {
-        if (callback) {
-          error = "no signer set";
-          callback(publishedCount, relayCount, error);
-        }
-        if (callbackRef.current) {
-          callbackRef.current(publishedCount, relayCount, error);
-        }
-        return;
+  const publishWithCallback = (
+    event: NostrEvent,
+    relays: string[],
+    callback: PublishCallback
+  ) => {
+    contextDebug(
+      `publish event called: ${JSON.stringify(event)} ${JSON.stringify(relays)}`
+    );
+    const relayCount = relays.length;
+
+    const handleResult = (publishedItem: PublishedItem) => {
+      if (callback) {
+        callback(publishedItem);
       }
-
-      if (signerType == "LOADING") {
-        const endTime = Date.now() + 5000;
-        while (Date.now() < endTime) {
-          if (signerType != "LOADING") {
-            break;
-          }
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-
-      if (signerType == "PRIVATE" || signerType == "NIP07") {
-        try {
-          const result = await relaySet.publish(ndkEvent, 10000);
-          publishedCount = result.size;
-        } catch (error) {
-          contextDebug(error);
-          const errorStr =
-            typeof error == "string" ? error : JSON.stringify(error);
-          contextDebug(`error on publish: ${errorStr}`);
-          if (callback) {
-            callback(publishedCount, relayCount, errorStr);
-          }
-          if (callbackRef.current) {
-            callbackRef.current(publishedCount, relayCount, errorStr);
-          }
-          return;
-        }
-
-        const mesg = `published to ${publishedCount}/${relayCount} relays`;
-        contextDebug(`callbackRef.current(${mesg})`);
-
-        if (callback) {
-          callback(publishedCount, relayCount);
-        }
-
-        if (callbackRef.current) {
-          callbackRef.current(publishedCount, relayCount);
-        }
-        return;
-      } else {
-        if (callback) {
-          callback(
-            publishedCount,
-            relayCount,
-            "error occured during publishing"
-          );
-        }
-        if (callbackRef.current) {
-          callbackRef.current(
-            publishedCount,
-            relayCount,
-            "error occured during publishing"
-          );
-        }
+      if (callbackRef.current) {
+        callbackRef.current(publishedItem);
       }
     };
 
-    waitPublish(event, relays, callback);
+    publishLogic(event, relays)
+      .then(handleResult)
+      .catch((error) =>
+        handleResult({
+          publishedCount: 0,
+          relayCount: relays.length,
+          error: error.toString(),
+        })
+      );
+  };
+
+  const publishAsync = async (event: NostrEvent, relays: string[]) => {
+    contextDebug(
+      `publish event called: ${JSON.stringify(event)} ${JSON.stringify(relays)}`
+    );
+    return await publishLogic(event, relays);
   };
 
   const value = {
@@ -297,7 +318,9 @@ function NostrProvider({ children }: NostrProviderProps) {
     setPublishCallback,
     fetchProfile,
     updateProfile,
-    publish,
+    areEventsPublished,
+    publishWithCallback,
+    publishAsync,
   };
   return (
     <NostrContext.Provider value={value}>{children}</NostrContext.Provider>

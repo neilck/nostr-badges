@@ -12,7 +12,11 @@ import {
 } from "@/data/eventLib";
 import { Group, getEmptyGroup } from "@/data/groupLib";
 import { useAccountContext } from "@/context/AccountContext";
-import { PublishCallback, useNostrContext } from "@/context/NostrContext";
+import {
+  PublishCallback,
+  PublishedItem,
+  useNostrContext,
+} from "@/context/NostrContext";
 import { useGroupContext } from "@/context/GroupContext";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -73,18 +77,14 @@ export default function PublishGroup({ params }: { params: { id: string } }) {
     }
   };
 
-  const publishCallback: PublishCallback = (
-    publishedCount: number,
-    relayCount: number,
-    error?: string
-  ) => {
+  const publishCallback: PublishCallback = (publishedItem: PublishedItem) => {
     setLabelDisabled("");
   };
 
   const onSaveClick = async () => {
     setLabelDisabled("publishing...");
     const relays = accountContext.getRelays();
-    nostrContext.publish(nostrEvent, relays, publishCallback);
+    nostrContext.publishWithCallback(nostrEvent, relays, publishCallback);
   };
 
   return (

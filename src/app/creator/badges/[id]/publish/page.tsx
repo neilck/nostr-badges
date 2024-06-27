@@ -12,7 +12,11 @@ import {
 } from "@/data/eventLib";
 
 import { useAccountContext } from "@/context/AccountContext";
-import { PublishCallback, useNostrContext } from "@/context/NostrContext";
+import {
+  PublishCallback,
+  PublishedItem,
+  useNostrContext,
+} from "@/context/NostrContext";
 import { useBadgeContext } from "@/context/BadgeContext";
 import { Badge, getEmptyBadge } from "@/data/badgeLib";
 
@@ -80,18 +84,14 @@ export default function PublishPage({ params }: { params: { id: string } }) {
     }
   };
 
-  const publishCallback: PublishCallback = (
-    publishedCount: number,
-    relayCount: number,
-    error?: string
-  ) => {
+  const publishCallback: PublishCallback = (publishedItem: PublishedItem) => {
     setLabelDisabled("");
   };
 
   const onSaveClick = async () => {
     setLabelDisabled("publishing...");
     const relays = accountContext.getRelays();
-    nostrContext.publish(nostrEvent, relays, publishCallback);
+    nostrContext.publishWithCallback(nostrEvent, relays, publishCallback);
   };
 
   return (
