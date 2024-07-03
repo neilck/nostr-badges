@@ -11,6 +11,7 @@ import Typography from "@mui/material/Typography";
 import { shortenDesc } from "@/app/utils/utils";
 
 type WidthOption = "normal" | "wide";
+type HeightOption = "normal" | "short";
 
 export type Item = {
   id: string;
@@ -18,14 +19,22 @@ export type Item = {
   description: string;
   image: string;
   widthOption?: WidthOption;
+  heightOption?: HeightOption;
   sx?: SxProps<Theme> | undefined;
 };
 
 export const ItemRowSmall = (item: Item) => {
-  const { id, name, description, image, sx, widthOption } = item;
+  const { id, name, description, image, sx, widthOption, heightOption } = item;
 
   const textWidth = widthOption && widthOption == "wide" ? "220px" : "180px";
-  const truncateLength = widthOption && widthOption == "wide" ? 70 : 50;
+  const height = heightOption && heightOption == "short" ? "44px" : "80px";
+  let truncateLength = 50;
+  if (heightOption == "short") {
+    truncateLength = widthOption && widthOption == "wide" ? 30 : 20;
+  } else {
+    truncateLength = widthOption && widthOption == "wide" ? 70 : 50;
+  }
+
   const shortDesc = shortenDesc(description, truncateLength);
 
   const defaultSx = {
@@ -39,17 +48,17 @@ export const ItemRowSmall = (item: Item) => {
   return (
     <Card variant="outlined" sx={{ ...defaultSx, ...sx }}>
       <Box sx={{ display: "flex" }}>
-        <Box sx={{ width: 80, height: 80 }}>
+        <Box sx={{ width: height, height: height }}>
           {image != "" && (
             <CardMedia
               component="img"
-              sx={{ width: 80, height: 80, objectFit: "contain" }}
+              sx={{ width: height, height: height, objectFit: "contain" }}
               image={image}
               alt="badge image"
             />
           )}
         </Box>
-        <Box sx={{ width: textWidth, ml: 2, maxHeight: 80, pb: 1 }}>
+        <Box sx={{ width: textWidth, ml: 2, maxHeight: height, pb: 1 }}>
           <Stack direction="column" justifyContent="left" alignItems="left">
             <div
               style={{
@@ -62,7 +71,7 @@ export const ItemRowSmall = (item: Item) => {
                 noWrap
                 variant="body1"
                 fontWeight={600}
-                sx={{ minWidth: 0, pt: 0.5 }}
+                sx={{ minWidth: 0, pt: heightOption == "short" ? 0 : 0.5 }}
               >
                 {name}
               </Typography>

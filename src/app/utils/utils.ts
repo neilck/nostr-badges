@@ -19,7 +19,7 @@ export const shortenDesc = (desc: string, maxLength: number) => {
   // else try last space before max
   const spaceIndex = truncated.lastIndexOf(" ");
   if (spaceIndex > minLength && spaceIndex < maxLength) {
-    return truncated.substring(0, spaceIndex) + "...";
+    return truncated.substring(0, spaceIndex + 1) + "...";
   }
 
   // otherwise return truncated string
