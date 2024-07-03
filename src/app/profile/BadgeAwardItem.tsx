@@ -1,3 +1,4 @@
+import * as nip19 from "@/nostr-tools/nip19";
 import { Badge, DataField } from "@/data/badgeLib";
 import { BadgeAward } from "@/data/badgeAwardLib";
 
@@ -27,6 +28,8 @@ export const BadgeAwardItem = ({
   // @ts-ignore
   const formattedDate = badgeAward.created.toDate().toLocaleDateString();
   const link = `${process.env.NEXT_PUBLIC_AKA_GET}/njump/${badge.event}`;
+  const npub = nip19.npubEncode(badge.publickey);
+  const issuerLink = `${process.env.NEXT_PUBLIC_NJUMP_HOST}${npub}`;
   let data: { label: string; value: string; description: string }[] = [];
 
   const textWidth = "296px"; // 220px + 44px + padding from ItemRowSmall wide and short
@@ -80,12 +83,16 @@ export const BadgeAwardItem = ({
                         verticalAlign: "top",
                       }}
                     >
-                      {item.label}:
+                      <Typography variant="body2" whiteSpace="pre-wrap">
+                        {item.label}:
+                      </Typography>
                     </TableCell>
                     <TableCell
                       sx={{ border: "none", padding: "0px", pl: "8px" }}
                     >
-                      {item.value}
+                      <Typography variant="body2" whiteSpace="pre-wrap">
+                        {item.value}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -95,10 +102,19 @@ export const BadgeAwardItem = ({
         </Box>
       )}
 
-      <Box pl={1} pt={0.5} maxWidth="300px">
-        <Typography variant="subtitle2" fontWeight="semibold">
+      <Box pl="10px" pb="4px" maxWidth="300px">
+        <Typography variant="body2" sx={{ display: "inline" }}>
           awarded {formattedDate} by
         </Typography>
+        <Link href={issuerLink} underline="none">
+          <Typography
+            variant="body2"
+            fontWeight="600"
+            sx={{ display: "inline" }}
+          >
+            {" " + badge.issuerName}
+          </Typography>
+        </Link>
       </Box>
     </Box>
   );

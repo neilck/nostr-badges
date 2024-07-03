@@ -10,7 +10,7 @@ import {
   getNewItemId,
   loadSharedItems,
 } from "./firestoreLib";
-import { ConfigParams } from "./badgeConfigLib";
+import { loadProfile } from "./profileLib";
 import { generate } from "short-uuid";
 import { getFirestore, doc, updateDoc } from "firebase/firestore/lite";
 
@@ -20,6 +20,7 @@ export type DataField = { name: string; label?: string; description?: string };
 export type Badge = {
   uid: string;
   publickey: string;
+  issuerName: string;
   created_at: number;
   name: string;
   description: string;
@@ -36,6 +37,7 @@ export type Badge = {
 const emptyBadge: Badge = {
   uid: "",
   publickey: "",
+  issuerName: "",
   created_at: 0,
   name: "",
   description: "",
@@ -65,10 +67,14 @@ export const loadBadges = async (
     true
   );
 
+  const profile = await loadProfile(publickey);
   const badges: Record<string, Badge> = {};
 
   Object.keys(loadedItems).forEach((key) => {
     let badge = getEmptyBadge();
+    if (profile) {
+      badge.issuerName = profile.name ?? "";
+    }
     let loadedBadge: object = loadedItems[key];
     badges[key] = { ...badge, ...loadedBadge };
   });
@@ -79,11 +85,20 @@ export const loadSharedBadges = async (): Promise<Record<string, Badge>> => {
   const colPath = "badges";
   const loadedItems = await loadSharedItems<Badge>(colPath);
   const badges: Record<string, Badge> = {};
-  Object.keys(loadedItems).forEach((key) => {
+  const keys = Object.keys(loadedItems);
+  for (let key in keys) {
     let badge = getEmptyBadge();
     let loadedBadge: object = loadedItems[key];
     badges[key] = { ...badge, ...loadedBadge };
-  });
+    const publickey = badges[key].publickey;
+    if (publickey != "") {
+      const profile = await loadProfile(publickey);
+      if (profile) {
+        badges[key].issuerName = profile.name ?? "";
+      }
+    }
+  }
+
   return badges;
 };
 
@@ -94,6 +109,12 @@ export const loadBadge = async (
   let badge = getEmptyBadge();
   const loadedBadge = await loadItem<Badge>(id, colPath);
   badge = { ...badge, ...loadedBadge };
+  if (badge.publickey != "") {
+    const profile = await loadProfile(badge.publickey);
+    if (profile) {
+      badge.issuerName = profile.name ?? "";
+    }
+  }
   return badge;
 };
 
