@@ -86,7 +86,8 @@ export const loadSharedBadges = async (): Promise<Record<string, Badge>> => {
   const loadedItems = await loadSharedItems<Badge>(colPath);
   const badges: Record<string, Badge> = {};
   const keys = Object.keys(loadedItems);
-  for (let key in keys) {
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
     let badge = getEmptyBadge();
     let loadedBadge: object = loadedItems[key];
     badges[key] = { ...badge, ...loadedBadge };
