@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
+import * as nip19 from "@/nostr-tools/nip19";
 import CardActionArea from "@mui/material/CardActionArea";
 import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
@@ -18,6 +21,8 @@ export function renderBadge(
   handler: OnBadgeSelectedHandler
 ) {
   const image = badge.thumbnail != "" ? badge.thumbnail : badge.image;
+  const npub = nip19.npubEncode(badge.publickey);
+  const issuerLink = `${process.env.NEXT_PUBLIC_NJUMP_HOST}${npub}`;
 
   return (
     <CardActionArea
@@ -32,6 +37,20 @@ export function renderBadge(
         image={image}
         widthOption="wide"
       />
+      <Box>
+        <Typography variant="body2" sx={{ display: "inline" }}>
+          Issued by
+        </Typography>
+        <Link href={issuerLink} underline="none">
+          <Typography
+            variant="body2"
+            fontWeight="600"
+            sx={{ display: "inline" }}
+          >
+            {" " + badge.issuerName}
+          </Typography>
+        </Link>
+      </Box>
     </CardActionArea>
   );
 }
