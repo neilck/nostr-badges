@@ -5,8 +5,9 @@ import { NostrEvent } from "@/data/ndk-lite";
 import { BadgeView } from "@/app/components/BadgeView";
 import { parseEventTags } from "../../utils/parseEvent";
 import { BadgesList, RecordItem } from "@/app/components/BadgesList";
-import { getEventByAddress } from "@/data/serverActions";
+import { getProfile, getEventByAddress } from "@/data/serverActions";
 import { ReactNode } from "react";
+import { getEmptyProfile } from "@/data/profileLib";
 
 export const ViewBadgeEvent = async (props: {
   id: string;
@@ -21,7 +22,9 @@ export const ViewBadgeEvent = async (props: {
   let description = "";
   let image = "";
   let thumb = "";
+  let profile = getEmptyProfile();
 
+  const pubkey = e.pubkey;
   const badgeTags: string[][] = [];
   const promises: Promise<any>[] = [];
   const badges: Record<string, RecordItem> = {};
@@ -31,6 +34,12 @@ export const ViewBadgeEvent = async (props: {
   if (recordTags["description"]) description = recordTags["description"][0];
   if (recordTags["image"]) image = recordTags["image"][0];
   if (recordTags["thumb"]) thumb = recordTags["thumb"][0];
+
+  promises.push(
+    getProfile(pubkey).then((data) => {
+      profile = { ...profile, ...data.profile };
+    })
+  );
 
   e.tags.forEach((tag) => {
     if (tag.length > 1 && tag[0] == "a") {
@@ -65,6 +74,7 @@ export const ViewBadgeEvent = async (props: {
   });
 
   await Promise.all(promises);
+  console.log(`profile ${JSON.stringify(profile)}`);
 
   return (
     <Stack
@@ -78,7 +88,13 @@ export const ViewBadgeEvent = async (props: {
       pb={3}
     >
       <Typography variant="h5">{isGroup ? "GROUP" : "BADGE"}</Typography>
-      <BadgeView name={name} description={description} image={image} />
+      <BadgeView
+        name={name}
+        description={description}
+        image={image}
+        pubkey={pubkey}
+        issuerName={profile.name ?? ""}
+      />
       {isGroup && (
         <Typography variant="body1" fontWeight={600}>
           Eligibility requirements

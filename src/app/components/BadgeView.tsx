@@ -1,4 +1,6 @@
+import * as nip19 from "@/nostr-tools/nip19";
 import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Image from "next/image";
@@ -7,9 +9,16 @@ export const BadgeView = (props: {
   name: string;
   description: string;
   image: string;
+  pubkey?: string;
+  issuerName?: string;
 }) => {
-  const { name, description, image } = props;
+  const { name, description, image, pubkey, issuerName } = props;
   const isImageUrl = image != "";
+  let issuerLink = "";
+  if (pubkey && issuerName) {
+    const npub = nip19.npubEncode(pubkey);
+    issuerLink = `${process.env.NEXT_PUBLIC_NJUMP_HOST}${npub}`;
+  }
 
   const hasSVGExt = (name: string) => {
     const parts = name.split(".");
@@ -69,6 +78,22 @@ export const BadgeView = (props: {
             {description}
           </Typography>
         </Box>
+        {issuerLink != "" && (
+          <Box>
+            <Typography variant="body2" sx={{ display: "inline" }}>
+              Issued by
+            </Typography>
+            <Link href={issuerLink} underline="none">
+              <Typography
+                variant="body2"
+                fontWeight="600"
+                sx={{ display: "inline" }}
+              >
+                {" " + issuerName}
+              </Typography>
+            </Link>
+          </Box>
+        )}
       </Stack>
     </Box>
   );
