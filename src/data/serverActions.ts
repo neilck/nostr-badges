@@ -4,6 +4,7 @@ import { NostrEvent } from "@/data/ndk-lite";
 import { Badge } from "./badgeLib";
 import { Event } from "./eventLib";
 import { Session } from "./sessionLib";
+import { Profile } from "./profileLib";
 
 export type CreateSessionParams = {
   type: "BADGE" | "GROUP" | "OFFER";
@@ -118,6 +119,26 @@ const getAkaApiPostHeader = () => {
     "Content-Type": "application/json",
     "Authorization": authorization,
   };
+};
+
+// returns Profile as profile
+export const getProfile = async (
+  pubkey: string
+): Promise<{ profile: Profile }> => {
+  const authorization = `Bearer ${process.env.AKA_API_TOKEN}`;
+
+  const url = `https://getprofile-k5ca2jsy4q-uc.a.run.app/aka-profiles/us-central1/getProfile?pubkey=${pubkey}`;
+  const res = await fetch(url, {
+    headers: { authorization },
+    next: { tags: [pubkey] },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data: " + pubkey);
+  }
+  return res.json();
 };
 
 export async function createBadgeSession(
