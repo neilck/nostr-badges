@@ -109,7 +109,7 @@ export default function EditProfilePage() {
   return (
     <CommonLayout
       developerMode={false}
-      bgColor={theme.palette.background.paper}
+      bgColor={theme.palette.background.default}
     >
       <Stack width="400px" minWidth="300px" pt={4} spacing={2}>
         <Section id="profile" edit={true} onEdit={handleOnEdit}>
