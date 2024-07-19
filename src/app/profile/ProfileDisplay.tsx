@@ -1,14 +1,11 @@
 "use client";
 
-import { SxProps, Theme } from "@mui/material";
 import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
 import Collapse from "@mui/material/Collapse";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -58,65 +55,54 @@ export const ProfileDisplay = ({
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "center",
+          columnGap: "10px",
         }}
       >
-        <Box
-          id="avatarAndName"
+        <Avatar
+          src={image}
           sx={{
-            minWidth: secMinWidth,
-            maxWidth: secMaxWidth,
+            width: 160,
+            height: 160,
+            mt: 0.5,
+          }}
+        ></Avatar>
+
+        <Box
+          sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            justifyContent: "center",
+            alignItems: "left",
+            maxWidth: "400px",
+            pb: 1,
+            pl: 2,
+            pr: 2,
           }}
         >
-          <Avatar
-            src={image}
-            sx={{
-              width: 120,
-              height: 120,
-              mt: 0.5,
-            }}
-          ></Avatar>
-
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-
-              pb: 1,
-              pl: 2,
-              pr: 2,
-            }}
-          >
-            <Typography
-              noWrap
-              variant="body1"
-              fontWeight={600}
-              sx={{ minWidth: 0, pt: 2 }}
-            >
-              {displayName != "" ? displayName : name}
-            </Typography>
-
-            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
-              {displayName != "" ? name : ""}
-            </Typography>
-          </Box>
-        </Box>
-        <Box
-          id="textDetails"
-          sx={{ minWidth: secMinWidth, maxWidth: secMaxWidth }}
-        >
-          <Typography pt={1}>About me:</Typography>
           <Typography
-            variant="body1"
+            noWrap
+            variant="h5"
+            fontWeight={600}
+            sx={{ minWidth: 0, pt: 2 }}
+          >
+            {displayName != "" ? displayName : name}
+          </Typography>
+
+          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+            {displayName != "" ? name : ""}
+          </Typography>
+          <Typography
+            variant="body2"
             sx={{ whiteSpace: "pre-wrap", lineHeight: "1.2em", pt: 1 }}
           >
             {about}
           </Typography>
+        </Box>
 
+        <Box
+          id="textDetails"
+          sx={{ minWidth: secMinWidth, maxWidth: secMaxWidth }}
+        >
           {extra && (
             <Box id="showMore">
               <Button

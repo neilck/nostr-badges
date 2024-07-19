@@ -46,23 +46,28 @@ export default function ProfilePage() {
         </Stack>
       )}
       {!loading && (
-        <Stack maxWidth="800px" minWidth="300px" pt={4} spacing={2}>
-          <Box p={1}>
-            <Typography variant="h6" pb={1}>
-              Profile
-            </Typography>
-            <Section id="profile" onEdit={handleEdit}>
+        <>
+          <Box sx={{ width: "100%", bgcolor: "white" }}>
+            <Section id="profile" border={false} onEdit={handleEdit}>
               <ProfileDisplay profile={profile} extra={true} />
             </Section>
           </Box>
-          <Box p={1}>
-            <Typography variant="h6" pb={1}>
-              Badges
-            </Typography>
+          <Stack
+            width="100%"
+            maxWidth="800px"
+            minWidth="300px"
+            pt={1}
+            spacing={2}
+          >
+            <Box p={1}>
+              <Typography variant="h6" pb={1}>
+                Badges
+              </Typography>
 
-            <BadgesDisplay uid={profile.uid} pubkey={profile.publickey} />
-          </Box>
-        </Stack>
+              <BadgesDisplay uid={profile.uid} pubkey={profile.publickey} />
+            </Box>
+          </Stack>
+        </>
       )}
     </CommonLayout>
   );

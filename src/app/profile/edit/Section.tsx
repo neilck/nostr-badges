@@ -7,10 +7,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 export const Section = (props: {
   id: string;
   children: React.ReactNode;
+  border?: boolean;
   edit?: boolean;
   onEdit?: (id: string) => void;
 }) => {
-  const { id, children, onEdit } = props;
+  const { id, children, border, onEdit } = props;
   const edit = props.edit == undefined ? false : props.edit;
 
   return (
@@ -18,7 +19,7 @@ export const Section = (props: {
       {/* Box container */}
       <Box
         sx={{
-          border: 1,
+          border: border || border == undefined ? 1 : 0,
           backgroundColor: theme.palette.background.paper,
           borderColor: theme.palette.grey[400],
           borderRadius: 2,

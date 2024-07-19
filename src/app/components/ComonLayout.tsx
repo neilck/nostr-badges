@@ -48,6 +48,8 @@ export const CommonLayout = ({
             flexGrow: 0,
             flexShrink: 1,
             bgcolor: theme.palette.common.white,
+            border: 1,
+            borderColor: theme.palette.grey[300],
           }}
         >
           <Box
