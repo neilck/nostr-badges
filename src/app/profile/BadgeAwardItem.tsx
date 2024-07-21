@@ -71,34 +71,30 @@ export const BadgeAwardItem = ({
         <Box
           sx={{ width: textWidth, pl: "10px", pr: "4px", pt: "4px", pb: "4px" }}
         >
-          <TableContainer>
-            <Table size="small">
-              <TableBody sx={{ border: "none" }}>
-                {data.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell
-                      sx={{
-                        border: "none",
-                        padding: "0px",
-                        verticalAlign: "top",
-                      }}
-                    >
-                      <Typography variant="body2" whiteSpace="pre-wrap">
-                        {item.label}:
-                      </Typography>
-                    </TableCell>
-                    <TableCell
-                      sx={{ border: "none", padding: "0px", pl: "8px" }}
-                    >
-                      <Typography variant="body2" whiteSpace="pre-wrap">
-                        {item.value}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Table size="small">
+            <TableBody sx={{ border: "none" }}>
+              {data.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell
+                    sx={{
+                      border: "none",
+                      padding: "0px",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    <Typography variant="body2" whiteSpace="pre-wrap">
+                      {item.label}:
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ border: "none", padding: "0px", pl: "8px" }}>
+                    <Typography variant="body2" whiteSpace="pre-wrap">
+                      {item.value}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </Box>
       )}
 
