@@ -8,6 +8,7 @@ import {
   deleteItem,
   addItem,
   loadPubkeyItems,
+  serverTimestamp,
 } from "./firestoreLib";
 
 export enum BadgeAwardType {
@@ -24,6 +25,19 @@ export type BadgeAward = {
   type: BadgeAwardType;
   event: string;
   data?: object;
+};
+
+export const getEmptyBadgeAward = (): BadgeAward => {
+  return {
+    created: serverTimestamp(),
+    uid: "",
+    badge: "",
+    awardedTo: "",
+    publickey: "",
+    type: BadgeAwardType.Badge,
+    event: "",
+    data: {},
+  };
 };
 
 // loads badge awards by publisher

@@ -1,51 +1,56 @@
-export enum SocialsType {
-  youtube = "youtube",
-  twitter = "twitter",
-}
-
-export enum SocialsState {
-  verified = "verified",
-  available = "add..",
-  comingsoon = "coming soon...",
-}
-
-import { Typography } from "@mui/material";
+import React from "react";
 import Box from "@mui/material/Box";
-export const SocialsButton = ({
+import Typography from "@mui/material/Typography";
+import { Socials } from "@/data/akaBadgeLib";
+
+const SocialsName: { [key in Socials]: string } = {
+  [Socials.YouTube]: "YouTube",
+  [Socials.Twitter]: "coming soon...",
+  [Socials.Facebook]: "coming soon...",
+  [Socials.Instagram]: "coming soon...",
+};
+
+interface SocialsButtonProps {
+  type: Socials; // Object containing data
+  onClick?: () => void;
+}
+
+export const SocialsButton: React.FC<SocialsButtonProps> = ({
   type,
-  state,
-}: {
-  type: SocialsType;
-  state: SocialsState;
+  onClick,
 }) => {
   const imageSrc = `/socials/${type}.svg`;
-  let hoverOpacity = 1;
-  switch (state) {
-    case SocialsState.verified:
-      hoverOpacity = 1;
-      break;
-    case SocialsState.available:
-      hoverOpacity = 0.75;
-      break;
-    case SocialsState.comingsoon:
-      hoverOpacity = 0.5;
-  }
+  let hoverOpacity = onClick ? 1 : 0.75;
+  let label = "";
 
   return (
     <Box
-      component="img"
-      src={imageSrc}
-      alt={type}
       sx={{
-        width: "80px",
-        height: "80px",
-        opacity: state == SocialsState.verified ? 1 : 0.5,
-        pointerEvents: "auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        opacity: 0.75,
+        pointerEvents: onClick ? "auto" : "none",
         transition: "opacity 0.3s",
         "&:hover": {
           opacity: hoverOpacity,
         },
       }}
-    />
+      onClick={onClick}
+    >
+      <Box
+        component="img"
+        src={imageSrc}
+        alt={type}
+        sx={{
+          border: 0,
+          width: "80px",
+          height: "80px",
+        }}
+      />
+      <Typography variant="subtitle2" fontWeight={600} lineHeight={1.5}>
+        {SocialsName[type]}
+      </Typography>
+    </Box>
   );
 };

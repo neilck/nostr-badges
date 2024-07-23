@@ -60,6 +60,8 @@ export type AddResult = {
   attestation?: object;
 };
 
+export { serverTimestamp };
+
 // must match uid
 export const loadItems = async <Type>(
   uid: string,
